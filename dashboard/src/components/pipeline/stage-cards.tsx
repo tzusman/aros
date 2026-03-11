@@ -18,12 +18,12 @@ export function StageCards({ counts, selectedStage, onSelect }: StageCardsProps)
 
   return (
     <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Pipeline stages">
-      {cards.map((card) => (
+      {cards.map(({ key, ...rest }) => (
         <StageCard
-          key={card.key}
-          {...card}
-          isSelected={selectedStage === card.key}
-          onClick={() => onSelect(card.key)}
+          key={key}
+          {...rest}
+          isSelected={selectedStage === key}
+          onClick={() => onSelect(key)}
         />
       ))}
     </div>
