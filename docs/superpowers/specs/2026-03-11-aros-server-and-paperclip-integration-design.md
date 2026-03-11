@@ -11,6 +11,8 @@ Build the AROS backend server and MCP service so that AI agents (orchestrated by
 
 **End-to-end flow:** Paperclip CEO agent creates images → submits via AROS MCP → objective + subjective + human review pipeline → dashboard shows deliverables → human requests revisions → agent revises → human approves → Paperclip issue marked done.
 
+**Deviation from PRD:** The original PRD specified reusing `@modelcontextprotocol/server-filesystem`'s 14-tool interface (e.g. `write_file` to `inbox/`, `read_text_file` on `status.json`). This design replaces that with 10 purpose-built MCP tools (`create_review`, `add_file`, `submit_for_review`, etc.). Purpose-built tools are more discoverable by AI agents, enforce validation via Zod schemas at the protocol level, produce cleaner agent prompts, and eliminate the brittle convention of overloading filesystem paths to encode review pipeline semantics.
+
 ---
 
 ## 2. Package Structure
@@ -111,6 +113,33 @@ $ npx aros
 └── .aros.json                  # Project config (port, etc.)
 ```
 
+**`policies/default.json`:**
+```json
+{
+  "name": "default",
+  "stages": ["objective", "subjective", "human"],
+  "max_revisions": 3,
+  "objective": {
+    "checks": [
+      { "name": "file_size", "max_mb": 10, "severity": "blocking" },
+      { "name": "format_check", "allowed": ["image/*", "text/*", "application/pdf"], "severity": "blocking" }
+    ],
+    "fail_threshold": 1
+  },
+  "subjective": {
+    "criteria": [
+      { "name": "relevance", "description": "How well does the deliverable match the brief?", "weight": 3 },
+      { "name": "quality", "description": "Overall production quality", "weight": 2 },
+      { "name": "clarity", "description": "Is the message clear and effective?", "weight": 1 }
+    ],
+    "pass_threshold": 6.0
+  },
+  "human": {
+    "required": true
+  }
+}
+```
+
 **`.aros.json`:**
 ```json
 {
@@ -152,13 +181,13 @@ The MCP process reads/writes the same filesystem directory as the HTTP server. B
   policy: z.string().default("default").describe("Review policy name"),
   source_agent: z.string().describe("ID of the agent submitting"),
   content_type: z.string().default("text/markdown").describe("Primary MIME type"),
-  folder_strategy: z.enum(["all_pass", "select", "rank"]).optional()
+  folder_strategy: z.enum(["all_pass", "select", "rank", "categorize"]).optional()
     .describe("For multi-file: how files aggregate into a decision"),
   notification: z.object({
     driver: z.string().describe("Notification driver name, e.g. 'paperclip'"),
     target: z.record(z.unknown()).describe("Driver-specific config"),
     events: z.array(z.string()).describe("Events to notify on")
-  }).optional().describe("Callback config for pipeline decisions")
+  }).optional().describe("Callback config for pipeline decisions — validated immediately via driver.validateTarget()")
 }
 
 // Output
@@ -209,7 +238,7 @@ Annotations: `destructiveHint: false`, `idempotentHint: false`
 
 // Output
 {
-  stage: string,          // "objective" | "subjective" | "human" | "approved" | "rejected" | "revision_requested"
+  stage: string,          // "draft" | "objective" | "subjective" | "human" | "approved" | "rejected" | "revision_requested"
   score: number | null,
   entered_stage_at: string,
   revision_number: number,
@@ -392,7 +421,7 @@ Makes a Claude API call to evaluate the deliverable against policy criteria.
 - If not set, stage is skipped with a warning logged
 - Model configurable via `.aros.json` (default: `claude-sonnet-4-20250514`)
 
-Result stored in `subjective_results.json`. If weighted score is below policy's `pass_threshold`, goes to `revision_requested`.
+Result stored in `subjective_results.json`. If the stage is skipped (no API key), `subjective_results.json` is written with `{ "skipped": true, "reason": "ANTHROPIC_API_KEY not set" }` so the dashboard can distinguish "skipped" from "hasn't run yet". If weighted score is below policy's `pass_threshold`, goes to `revision_requested`.
 
 ### 5.4 Human Stage
 
@@ -502,7 +531,9 @@ All state lives on disk. No database.
 }
 ```
 
-**Review ID format:** `d-{YYYYMMDD}-{NNN}` (date-based, incrementing counter per day).
+**Review ID format:** `d-{YYYYMMDD}-{NNN}` (date-based, incrementing counter per day). The counter is derived by scanning existing `review/` directories for the current date prefix and incrementing. No separate counter file.
+
+**Concurrency note:** The filesystem is the shared state mechanism between the MCP process and the HTTP server. MVP assumes low contention (single reviewer, one agent at a time). Status transitions should read `status.json`, verify the current stage is still valid (optimistic check), then write — to prevent the rare case where an MCP revision and a dashboard decision race.
 
 ---
 
@@ -538,7 +569,7 @@ Uses `chokidar` to watch the `review/` directory for filesystem changes. Emits:
 
 ### 7.3 File Serving
 
-`GET /api/deliverables/:id/files/:filename` serves files from `review/{id}/content/{filename}` with:
+`GET /api/deliverables/:id/files/:filename` serves files from `review/{id}/content/{filename}` (also checks `approved/{id}/content/` and `rejected/{id}/content/` for terminal-state deliverables) with:
 - Correct `Content-Type` header from MIME type
 - `Cache-Control: no-cache` (content can change on revision)
 - For images: serves binary directly (browser renders natively)
@@ -558,12 +589,15 @@ The dashboard's `ImageCard` uses this URL to render real images:
 ```typescript
 interface NotificationDriver {
   name: string;
+  /** Validates target config at submission time — fail fast on misconfiguration. */
+  validateTarget(target: Record<string, unknown>): { valid: boolean; error?: string };
+  /** Sends a notification. Returns result for logging/retry. */
   send(
     event: "approved" | "revision_requested" | "rejected",
-    deliverable: { review_id: string; title: string },
+    deliverable: { review_id: string; title: string; revision_number: number },
     feedback: Feedback | null,
     target: Record<string, unknown>
-  ): Promise<void>;
+  ): Promise<{ success: boolean; error?: string }>;
 }
 ```
 
@@ -585,7 +619,7 @@ POST {api_url}/api/companies/{company_id}/issues/{issue_id}/comments
 POST {api_url}/api/companies/{company_id}/issues/{issue_id}/comments
 { "content": "## Approved\n\nDeliverable approved by human reviewer." }
 
-PATCH {api_url}/api/issues/{issue_id}
+PATCH {api_url}/api/companies/{company_id}/issues/{issue_id}
 { "status": "done" }
 ```
 
@@ -594,7 +628,7 @@ PATCH {api_url}/api/issues/{issue_id}
 POST {api_url}/api/companies/{company_id}/issues/{issue_id}/comments
 { "content": "## Rejected\n\n{summary}\n\n### Issues\n{formatted issues}" }
 
-PATCH {api_url}/api/issues/{issue_id}
+PATCH {api_url}/api/companies/{company_id}/issues/{issue_id}
 { "status": "blocked" }
 ```
 
@@ -605,9 +639,12 @@ PATCH {api_url}/api/issues/{issue_id}
 Minimal changes to the existing dashboard:
 
 1. **Remove mock data fallback** — when `VITE_AROS_API_URL` is set, use real API only
-2. **Image rendering** — `ImageCard` and `SingleImageView` use `/api/deliverables/:id/files/:filename` URLs instead of `preview_url` field. The `DeliverableFile` type gets a computed `url` from the API base + review_id + filename.
-3. **SSE reconnect** — already implemented, just needs real server
-4. **Decision bar** — already calls `POST /api/deliverables/:id/decision`, works as-is
+2. **API URL convention** — Express mounts all routes under `/api/` (e.g. `/api/deliverables`). The dashboard's `VITE_AROS_API_URL` should be set to `http://localhost:4100/api` so that `fetchJson("/deliverables")` resolves correctly. In production (served by Express), use a relative path or proxy.
+3. **Image rendering** — `ImageCard` and `SingleImageView` use file URLs from the API. The server populates `preview_url` in the `GET /api/deliverables/:id` response as `${baseUrl}/deliverables/${id}/files/${filename}` for each file in the files array. This preserves the existing `DeliverableFile.preview_url` field the components already use.
+4. **Update `Stage` type** — Remove `"inbox"` and `"auto_approved"` from the `Stage` union. Add `"draft"`. Final type: `"draft" | "objective" | "subjective" | "human" | "approved" | "rejected" | "revision_requested"`.
+5. **SSE event format** — SSE events are sent as `data:` messages with a JSON payload containing a `type` field (e.g. `{ "type": "deliverable:submitted", "data": {...} }`). This matches the existing SSE client pattern at `sse.ts:52`.
+6. **SSE reconnect** — already implemented, just needs real server
+7. **Decision bar** — already calls `POST /deliverables/:id/decision`, works as-is
 
 The dashboard is **served by the Express server** in production (static files from `dashboard/dist/`). During development, Vite dev server proxies API calls to Express.
 
@@ -691,13 +728,83 @@ POST http://localhost:3100/api/companies/{companyId}/issues
 | File watching | chokidar |
 | AI review | Anthropic SDK (@anthropic-ai/sdk) |
 | Dashboard | Vite + React 19 + Tailwind (already built) |
-| Build | esbuild (CLI + server bundling) |
+| Build | esbuild (CLI + server → single-file bundles for fast `npx` cold start) |
 | Monorepo | pnpm workspaces |
 | Runtime | Node.js >= 20 |
 
 ---
 
-## 12. What's NOT in Scope
+## 12. Shared TypeScript Types (`packages/types`)
+
+Shared interfaces imported by both the server and MCP packages:
+
+```typescript
+type Stage = "draft" | "objective" | "subjective" | "human"
+           | "approved" | "rejected" | "revision_requested";
+
+type FolderStrategy = "all_pass" | "select" | "rank" | "categorize";
+
+interface DeliverableMeta {
+  title: string;
+  brief: string;
+  policy: string;
+  source_agent: string;
+  content_type: string;
+  folder_strategy?: FolderStrategy;
+  notification?: NotificationConfig;
+}
+
+interface DeliverableStatus {
+  stage: Stage;
+  score: number | null;
+  revision_number: number;
+  entered_stage_at: string;
+  submitted_at: string;
+  rejecting_stage: Stage | null;
+}
+
+interface DeliverableFile {
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  preview_url?: string;   // Computed by server in API responses
+}
+
+interface Feedback {
+  decision: "revision_requested" | "rejected";
+  summary: string;
+  issues: FeedbackIssue[];
+  reviewer: string;
+  timestamp: string;
+}
+
+interface FeedbackIssue {
+  file: string | null;
+  category: string;
+  severity: "critical" | "major" | "minor";
+  description: string;
+  suggestion: string;
+}
+
+interface NotificationConfig {
+  driver: string;
+  target: Record<string, unknown>;
+  events: string[];
+}
+
+interface PolicyConfig {
+  name: string;
+  stages: Stage[];
+  max_revisions: number;
+  objective?: ObjectiveConfig;
+  subjective?: SubjectiveConfig;
+  human?: { required: boolean };
+}
+```
+
+---
+
+## 13. What's NOT in Scope
 
 - Authentication / multi-user (single reviewer for MVP)
 - External database (filesystem only)
