@@ -152,6 +152,8 @@ After modules are installed, the AROS project directory gains:
 
 ### 6.3 Criterion Manifest
 
+Criteria are data-only — no entrypoint, no dependencies. The manifest contains only the evaluation definition:
+
 ```json
 {
   "name": "tone-alignment",
@@ -161,12 +163,7 @@ After modules are installed, the AROS project directory gains:
   "applicableTo": ["text/*"],
   "defaultWeight": 2,
   "scale": 10,
-  "promptGuidance": "Compare the brief's stated tone (formal, casual, technical, empathetic) against the actual content. Score 10 = perfect match, 1 = completely wrong register. Evaluate formality level, emotional register, and voice consistency throughout.",
-  "dependencies": {
-    "binaries": [],
-    "env": [],
-    "npm": []
-  }
+  "promptGuidance": "Compare the brief's stated tone (formal, casual, technical, empathetic) against the actual content. Score 10 = perfect match, 1 = completely wrong register. Evaluate formality level, emotional register, and voice consistency throughout."
 }
 ```
 
@@ -183,6 +180,7 @@ After modules are installed, the AROS project directory gains:
     "criteria": ["tone-alignment", "coherence", "originality", "audience-fit"]
   },
   "policy": {
+    "name": "blog-post",
     "stages": ["objective", "subjective", "human"],
     "max_revisions": 3,
     "objective": {
@@ -211,6 +209,20 @@ After modules are installed, the AROS project directory gains:
 
 The `requires` field enables transitive dependency resolution: `aros module add blog-post` fetches the policy and all checks + criteria it references.
 
+**Note on `PolicySubjectiveCriterion.description`:** The existing `PolicySubjectiveCriterion` type requires a `description` field. In module-based policies, `description` is omitted from the policy JSON because it comes from the criterion module's manifest. The `PolicySubjectiveCriterion` type is updated to make `description` optional:
+
+```typescript
+// Updated in packages/types/src/index.ts
+export interface PolicySubjectiveCriterion {
+  name: string;
+  description?: string;  // optional when using module criteria (loaded from criterion manifest)
+  weight: number;
+  scale: number;
+}
+```
+
+When the pipeline engine builds the subjective prompt, it resolves `description` by checking the policy field first, then falling back to the criteria library. This allows operator policies to override a criterion's description for a specific use case.
+
 ## 7. Check Module Interface
 
 ### 7.1 Runtime Interface
@@ -234,6 +246,7 @@ export interface FileEntry {
   sizeBytes: number;
 }
 
+// What check modules return
 export interface CheckResult {
   name: string;
   file: string | null;
@@ -242,6 +255,35 @@ export interface CheckResult {
   suggestions?: string[];
 }
 ```
+
+### 7.1.1 Extended ObjectiveCheck Type
+
+The existing `ObjectiveCheck` type in `@aros/types` is extended to include the new fields. This is the type stored in `objective_results.json` and consumed by the dashboard:
+
+```typescript
+// Updated ObjectiveCheck in packages/types/src/index.ts
+export interface ObjectiveCheck {
+  name: string;
+  passed: boolean;
+  severity: "blocking" | "warning";
+  details: string;
+  file: string | null;          // NEW: which file this result applies to (null = whole deliverable)
+  suggestions?: string[];       // NEW: actionable suggestions from the check module
+}
+```
+
+**Mapping from CheckResult to ObjectiveCheck:** The pipeline engine merges check module output with policy-level severity. For each `CheckResult` returned by a module, the engine produces an `ObjectiveCheck` by copying all fields and adding `severity` from the policy's per-check config:
+
+```typescript
+// In pipeline engine's runObjective():
+const checkResults = await mod.execute(ctx);
+const objectiveResults = checkResults.map(r => ({
+  ...r,
+  severity: policyCheck.severity,  // from policy.objective.checks[].severity
+}));
+```
+
+This keeps severity as a policy concern (the same check module can be "blocking" in one policy and "warning" in another) while preserving the extended fields for the dashboard.
 
 ### 7.2 Built-in Check Example (word-count)
 
@@ -320,9 +362,34 @@ export default {
 
 ### 7.4 Module Loader
 
+### 7.4.1 TypeScript Execution Strategy
+
+Check modules are authored as `.ts` files in source repos. They are **compiled to JavaScript during `aros module sync`** (and during `aros module add`). The compilation step uses `esbuild` (already a project dependency) to bundle each `check.ts` into a self-contained `check.js` file in the local `.aros/modules/` directory.
+
+```typescript
+// cli/src/compile.ts
+import { buildSync } from "esbuild";
+
+export function compileCheckModule(modulePath: string): void {
+  const entrypoint = join(modulePath, "check.ts");
+  if (!existsSync(entrypoint)) return; // criteria modules have no code
+  buildSync({
+    entryPoints: [entrypoint],
+    outfile: join(modulePath, "check.js"),
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    target: "node20",
+    external: ["node:*"],  // don't bundle Node.js built-ins
+  });
+}
+```
+
+This runs during `aros module add` and `aros module sync`. The compiled `.js` files live alongside the `.ts` source in `.aros/modules/` (both are gitignored). The runtime loader imports only the compiled `.js`:
+
 ```typescript
 export async function loadCheck(moduleName: string, modulesDir: string): Promise<CheckModule> {
-  const entrypoint = join(modulesDir, "checks", moduleName, "check.ts");
+  const entrypoint = join(modulesDir, "checks", moduleName, "check.js");
   const mod = await import(pathToFileURL(entrypoint).href);
   return mod.default;
 }
@@ -337,6 +404,8 @@ export async function loadAllChecks(modulesDir: string): Promise<Map<string, Che
   return checks;
 }
 ```
+
+This approach means: no runtime TypeScript loader required, no `tsx`/`ts-node` dependency, consistent with the project's existing esbuild toolchain, and compilation errors surface at install time rather than runtime.
 
 ## 8. Subjective Review System
 
@@ -426,19 +495,37 @@ Return a JSON object with this exact structure:
 
 ### 8.3 Content Type Filtering
 
-Criteria with `applicableTo: ["image/*"]` are excluded when reviewing text files, and vice versa. The prompt builder checks each criterion's `applicableTo` against the files being reviewed and only includes matching criteria.
+Criteria with `applicableTo: ["image/*"]` are excluded when reviewing text files, and vice versa. The prompt builder checks each criterion's `applicableTo` against the files being reviewed using the same MIME glob matching as objective checks (Section 9.3). Only criteria with at least one matching file are included in the prompt.
 
-For folder deliverables with mixed content (images + text), the subjective stage runs separate Claude calls: one with image files + image-applicable criteria, one with text files + text-applicable criteria. Scores are collected and combined at the folder level.
+For folder deliverables with mixed content (images + text), the subjective stage runs separate Claude calls: one with image files + image-applicable criteria, one with text files + text-applicable criteria.
+
+**Score combination for mixed-content folders:** Scores from separate calls are concatenated into a single `SubjectiveCriterion[]` array. The weighted score is computed across all criteria regardless of which call produced them. A criterion with `applicableTo: ["*/*"]` runs in the text call only (to avoid duplicate scoring). If a criterion matches both text and image types specifically (e.g., `applicableTo: ["text/*", "image/*"]`), it runs in the first applicable call.
 
 ### 8.4 Response Parser and Score Computation
 
 ```typescript
+/**
+ * Extract JSON from Claude's response. Handles two formats:
+ * 1. Plain JSON: response is a raw JSON object
+ * 2. Markdown code block: response contains ```json ... ```
+ * Tries JSON.parse first, then extracts from code fences.
+ */
+export function extractJSON(text: string): any {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+    if (match) return JSON.parse(match[1].trim());
+    throw new Error("Could not extract JSON from response");
+  }
+}
+
 export function parseSubjectiveResponse(
   response: AnthropicResponse,
   policyCriteria: PolicySubjectiveCriterion[]
 ): SubjectiveCriterion[] {
   const text = response.content[0].text;
-  const json = extractJSON(text); // handles plain JSON and markdown code blocks
+  const json = extractJSON(text);
   return json.scores.map((s: any) => {
     const pc = policyCriteria.find(c => c.name === s.name);
     return {
@@ -451,6 +538,13 @@ export function parseSubjectiveResponse(
   });
 }
 
+/**
+ * Compute a normalized weighted score on a 0-10 scale.
+ * Each criterion's score is normalized by its scale (score/scale * 10)
+ * before weighting. This means a score of 4/5 and 8/10 both contribute
+ * equally (both are 8.0 normalized). The pass_threshold in policies
+ * is always on this 0-10 normalized scale.
+ */
 export function computeWeightedScore(scores: SubjectiveCriterion[]): number {
   const totalWeight = scores.reduce((sum, s) => sum + s.weight, 0);
   if (totalWeight === 0) return 0;
@@ -507,7 +601,16 @@ async runPipeline(id: string): Promise<void> {
 
 ### 9.3 Objective Stage
 
-Iterates policy checks through the module registry. For each check, loads the module, filters files by the module's `supportedTypes`, runs the check with the policy's per-check config, and collects results. If blocking failures meet or exceed `fail_threshold`, the deliverable enters `revision_requested` with structured feedback.
+Iterates policy checks through the module registry. For each check:
+
+1. Load the check module by name from the registry.
+2. Read the module's manifest to get `supportedTypes`.
+3. Filter the deliverable's files against `supportedTypes` using MIME glob matching: `text/*` matches `text/markdown`, `text/plain`, etc. `image/*` matches `image/png`, `image/jpeg`, etc. `*/*` matches everything. Exact types like `text/markdown` match only that type.
+4. If no files match, the check is **skipped entirely** — no result is produced. This means a `word-count` check configured for `text/*` produces no output when reviewing an image-only deliverable.
+5. Run the check with matching files and the policy's per-check config.
+6. Map each `CheckResult` to an `ObjectiveCheck` by adding `severity` from the policy config (see Section 7.1.1).
+
+**`fail_threshold` semantics:** `fail_threshold: N` means the deliverable enters `revision_requested` when `N` or more blocking checks fail. A value of `1` means zero tolerance — any single blocking failure halts the pipeline. A value of `2` allows one blocking failure to pass through. Warning-severity results are recorded but never count toward the threshold.
 
 ### 9.4 Subjective Stage
 
@@ -519,9 +622,15 @@ Operator policies in `policies/` take precedence over module policies in `.aros/
 
 ```typescript
 private resolvePolicy(policyName: string): PolicyConfig {
-  const operatorPolicy = this.storage.readPolicy(policyName);
-  if (operatorPolicy) return operatorPolicy;
+  // 1. Check operator's policies/ dir first (uses try/catch because
+  //    Storage.readPolicy() throws on missing files)
+  try {
+    return this.storage.readPolicy(policyName);
+  } catch {
+    // Not in operator policies, fall through
+  }
 
+  // 2. Fall back to module policies
   const modulePolicyPath = join(this.storage.projectDir, ".aros", "modules",
     "policies", policyName, "policy.json");
   if (existsSync(modulePolicyPath)) {
@@ -555,7 +664,7 @@ private resolvePolicy(policyName: string): PolicyConfig {
 }
 ```
 
-The official repo is the default source added on `aros init`.
+The official repo is the default source. `aros init` is updated to create `.aros/registry.json` with the official source and an empty `.aros/lock.json` (`{ "version": 1, "locked": {} }`). This happens alongside the existing initialization of `review/`, `approved/`, `rejected/`, `policies/`, and `.aros.json`.
 
 ### 10.2 Lockfile
 
@@ -628,14 +737,18 @@ Same pattern as `node_modules/` vs `package-lock.json`.
 
 `aros module add blog-post`:
 
-1. Search configured sources for `policies/blog-post`
+1. Search configured sources **in `registry.json` array order**. First source containing `policies/blog-post` wins. The `--source` flag overrides this and targets a specific source.
 2. Read manifest, find `requires: { checks: [...], criteria: [...] }`
-3. For each dependency: already installed at same or newer SHA? Skip. Otherwise fetch.
+3. For each dependency:
+   - Already installed from any source? **Skip.** An existing module satisfies the dependency regardless of which source it came from. Source conflicts are not errors — if `checks/grammar` is installed from "company" and the policy requires it from "official," the existing install satisfies the requirement.
+   - Not installed? Search sources (same array-order priority) and fetch.
+   - Not found in any source? **Error.** Report which modules are missing and from which policy they're required. The policy is still installed but flagged as having unmet module dependencies.
 4. Write all new modules to `.aros/modules/`
 5. Update `.aros/lock.json`
-6. Run dependency check for external tools/APIs
-7. For each missing required dependency, prompt to install
-8. Report status
+6. Compile any check modules with TypeScript entrypoints (Section 7.4.1)
+7. Run dependency check for external tools/APIs
+8. For each missing required dependency, prompt to install
+9. Report status
 
 ## 12. Dependency Validation and Install
 
@@ -687,7 +800,9 @@ Checking dependencies...
 
 ### 13.1 Update Command
 
-`aros module update` checks all sources for newer commits on the pinned paths. Shows available updates with version changes and a summary of what changed. Operator confirms per module or uses `--all --yes` for CI.
+`aros module update` checks all sources for newer commits on the pinned paths. "Newer" means **the HEAD of the source branch has a different SHA than the locked SHA for that module's path**. The version field in the manifest is informational and displayed to the operator, but the SHA is what determines whether an update is available. This means code-only changes without a version bump are still detected as updates.
+
+Shows available updates with version changes and a summary of what changed. Operator confirms per module or uses `--all --yes` for CI.
 
 ### 13.2 Policy Updates with New Dependencies
 
@@ -695,9 +810,30 @@ If an updated policy adds a new check or criterion to its `requires` field, the 
 
 ### 13.3 Rollback
 
-`aros module rollback <name>` reads the git history of `.aros/lock.json` to find the previous SHA for that module and restores it.
+`aros module rollback <name>` restores a module to its previous version. It works by:
+
+1. Reading the current `.aros/lock.json` and finding the module's entry.
+2. Using `git log -p -- .aros/lock.json` to find the most recent commit where that module's SHA was different.
+3. Extracting the previous SHA from that commit's version of the lockfile.
+4. Re-fetching the module at the old SHA from its source.
+5. Updating the lockfile with the restored SHA.
+
+**Constraints:**
+- Requires the project to be a git repo with `.aros/lock.json` committed. If not a git repo, rollback is unavailable and the command exits with an error suggesting manual version pinning.
+- Rollback goes back exactly one step (the most recent previous SHA). For deeper history, the operator uses `git log -- .aros/lock.json` to find the desired SHA and runs `aros module add <name> --sha <sha>`.
+- Rollback also re-compiles the module if it has a TypeScript entrypoint.
 
 ## 14. Relationship to Existing Code
+
+### 14.0 Manifest Validation
+
+When `aros module add` fetches a module from a remote source, it validates the manifest before installing:
+
+1. **Schema validation:** Each manifest type (check, criterion, policy) has a Zod schema. Invalid manifests produce an error with the specific validation failure. The module is not installed.
+2. **Required fields:** `name`, `type`, and `version` are required on all manifests. Checks require `supportedTypes` and `entrypoint`. Criteria require `applicableTo`, `scale`, and `promptGuidance`. Policies require `requires` and `policy`.
+3. **Entrypoint exists:** For check modules, the declared `entrypoint` file must exist in the fetched directory.
+
+This prevents malformed community modules from crashing the loader at runtime.
 
 ### 14.1 What Changes
 
