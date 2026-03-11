@@ -1,0 +1,12 @@
+{
+  "name": "profanity",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Scans text for prohibited words",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "words": { "type": "array", "items": { "type": "string" }, "default": [] }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}
