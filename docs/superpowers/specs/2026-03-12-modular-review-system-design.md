@@ -209,6 +209,8 @@ Criteria are data-only — no entrypoint, no dependencies. The manifest contains
 
 The `requires` field enables transitive dependency resolution: `aros module add blog-post` fetches the policy and all checks + criteria it references.
 
+**Note on duplicate `name` fields:** The outer manifest `name` (line 2) and inner `policy.name` (line 12) must match. Manifest validation (Section 14.0) rejects policy manifests where these diverge. The outer `name` is the module identity used by the lockfile and CLI. The inner `policy.name` is what gets written to `policies/` and referenced by deliverables. They are the same value.
+
 **Note on `PolicySubjectiveCriterion.description`:** The existing `PolicySubjectiveCriterion` type requires a `description` field. In module-based policies, `description` is omitted from the policy JSON because it comes from the criterion module's manifest. The `PolicySubjectiveCriterion` type is updated to make `description` optional:
 
 ```typescript
@@ -557,6 +559,8 @@ export function computeWeightedScore(scores: SubjectiveCriterion[]): number {
 
 ### 9.1 Engine Initialization
 
+**Note:** `Storage.projectDir` is currently `private` in the existing codebase. It must be changed to `public readonly` (it is already set in the constructor and never reassigned) so the pipeline engine and module system can access it for path resolution.
+
 ```typescript
 export class PipelineEngine {
   private checkModules: Map<string, CheckModule>;
@@ -832,6 +836,7 @@ When `aros module add` fetches a module from a remote source, it validates the m
 1. **Schema validation:** Each manifest type (check, criterion, policy) has a Zod schema. Invalid manifests produce an error with the specific validation failure. The module is not installed.
 2. **Required fields:** `name`, `type`, and `version` are required on all manifests. Checks require `supportedTypes` and `entrypoint`. Criteria require `applicableTo`, `scale`, and `promptGuidance`. Policies require `requires` and `policy`.
 3. **Entrypoint exists:** For check modules, the declared `entrypoint` file must exist in the fetched directory.
+4. **Policy name consistency:** For policy modules, the outer manifest `name` must match the inner `policy.name`. Mismatches are rejected.
 
 This prevents malformed community modules from crashing the loader at runtime.
 
