@@ -54,6 +54,7 @@ export interface RevisionEntry {
 export interface DeliverableFile {
   filename: string;
   content_type: string;
+  preview_url?: string;
   objective_results: ObjectiveCheck[] | null;
   subjective_results: SubjectiveCriterion[] | null;
   score: number | null;

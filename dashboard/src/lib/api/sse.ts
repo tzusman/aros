@@ -1,4 +1,5 @@
 import type { SSEEventType, ConnectionStatus } from "./types";
+import { simulateMockSSE } from "./mock-data";
 
 type SSECallback = (event: SSEEventType, data: Record<string, unknown>) => void;
 type StatusCallback = (status: ConnectionStatus) => void;
@@ -14,6 +15,7 @@ export class SSEManager {
   private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
+  private mockCleanup: (() => void) | null = null;
 
   constructor(onEvent: SSECallback, onStatus: StatusCallback) {
     this.onEvent = onEvent;
@@ -24,8 +26,11 @@ export class SSEManager {
 
   connect() {
     if (this.disposed || !API_URL) {
-      // Mock mode — simulate connected
+      // Mock mode — simulate connected and fire mock events
       this.onStatus("connected");
+      this.mockCleanup = simulateMockSSE((type, data) => {
+        this.onEvent(type as SSEEventType, data);
+      });
       return;
     }
 
@@ -100,6 +105,10 @@ export class SSEManager {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
+    }
+    if (this.mockCleanup) {
+      this.mockCleanup();
+      this.mockCleanup = null;
     }
   }
 }

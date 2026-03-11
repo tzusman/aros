@@ -19,10 +19,18 @@ export function ImageCard({ file, isInspecting, onClick }: ImageCardProps) {
           : "ring-1 ring-border hover:ring-text-muted"
       )}
     >
-      <div className="aspect-video bg-gradient-to-br from-surface to-border flex items-center justify-center">
-        <span className="text-lg font-bold text-text-muted">
-          {file.filename.replace(/\.[^.]+$/, "").toUpperCase()}
-        </span>
+      <div className="aspect-video bg-gradient-to-br from-surface to-border flex items-center justify-center overflow-hidden">
+        {file.preview_url ? (
+          <img
+            src={file.preview_url}
+            alt={file.filename}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-lg font-bold text-text-muted">
+            {file.filename.replace(/\.[^.]+$/, "").toUpperCase()}
+          </span>
+        )}
       </div>
       <div className="p-2.5">
         <div className="flex justify-between items-center mb-0.5">

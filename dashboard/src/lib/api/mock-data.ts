@@ -104,6 +104,20 @@ const summaries: DeliverableSummary[] = [
     is_folder: false,
     file_count: null,
   },
+  {
+    id: "d-20260311-007",
+    title: "PaperclipAI Q2 Launch Campaign",
+    source_agent: "ceo-agent",
+    policy: "ad-creative-review",
+    content_type: "image/svg+xml",
+    stage: "subjective",
+    score: null,
+    entered_stage_at: "2026-03-11T09:00:00Z",
+    submitted_at: "2026-03-11T08:45:00Z",
+    revision_number: 1,
+    is_folder: true,
+    file_count: 3,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -490,6 +504,160 @@ Returns a single user by ID.`,
     ],
     folder_strategy: "all_pass",
   },
+
+  "d-20260311-007": {
+    ...summaries[6],
+    content: "[Folder deliverable — individual files listed below]",
+    brief:
+      "Create three ad creatives for PaperclipAI's Q2 2026 launch campaign. Include a hero image showcasing the brand identity, a social media variant with key stats, and an enterprise banner for LinkedIn. Dark backgrounds, modern tech aesthetic. Target dimensions 1080x1080px.",
+    objective_results: [
+      {
+        name: "image_dimensions",
+        passed: true,
+        severity: "blocking",
+        details: "All 3 images are 1080x1080px as required.",
+      },
+      {
+        name: "file_size",
+        passed: true,
+        severity: "warning",
+        details: "All files under 2MB limit. Largest: 48KB.",
+      },
+      {
+        name: "format_check",
+        passed: true,
+        severity: "blocking",
+        details: "All files are valid SVG format.",
+      },
+      {
+        name: "brand_colors",
+        passed: true,
+        severity: "warning",
+        details: "All colors within approved PaperclipAI palette.",
+      },
+    ],
+    subjective_results: [
+      {
+        name: "Visual Appeal",
+        score: 8.5,
+        weight: 0.35,
+        scale: 10,
+        rationale:
+          "Strong visual hierarchy across all three variants. The hero image effectively communicates the brand identity with the large paperclip icon. The social media variant has compelling stats presentation.",
+      },
+      {
+        name: "Message Clarity",
+        score: 7.8,
+        weight: 0.3,
+        scale: 10,
+        rationale:
+          "Taglines are clear and punchy. 'Hold Everything Together' works well for the hero. The enterprise banner effectively communicates credibility with SOC 2 and uptime stats.",
+      },
+      {
+        name: "Brand Consistency",
+        score: 8.2,
+        weight: 0.35,
+        scale: 10,
+        rationale:
+          "Consistent dark theme across all variants. Color palettes complement each other well. Typography is uniform. The paperclip motif ties everything together.",
+      },
+    ],
+    feedback: null,
+    history: [],
+    files: [
+      {
+        filename: "paperclip-hero.svg",
+        content_type: "image/svg+xml",
+        preview_url: "/mock-images/paperclip-hero.svg",
+        objective_results: [
+          {
+            name: "image_dimensions",
+            passed: true,
+            severity: "blocking",
+            details: "1080x1080px.",
+          },
+          {
+            name: "brand_colors",
+            passed: true,
+            severity: "warning",
+            details: "Colors within approved palette (#e94560 primary, #1a1a2e background).",
+          },
+        ],
+        subjective_results: [
+          {
+            name: "Visual Appeal",
+            score: 8.8,
+            weight: 0.35,
+            scale: 10,
+            rationale: "Bold paperclip icon with gradient creates strong brand recognition. Dark background with subtle circles adds depth.",
+          },
+        ],
+        score: 8.8,
+        status: "passed",
+      },
+      {
+        filename: "paperclip-social.svg",
+        content_type: "image/svg+xml",
+        preview_url: "/mock-images/paperclip-social.svg",
+        objective_results: [
+          {
+            name: "image_dimensions",
+            passed: true,
+            severity: "blocking",
+            details: "1080x1080px.",
+          },
+          {
+            name: "brand_colors",
+            passed: true,
+            severity: "warning",
+            details: "Colors within approved palette (#f953c6 accent).",
+          },
+        ],
+        subjective_results: [
+          {
+            name: "Visual Appeal",
+            score: 8.2,
+            weight: 0.35,
+            scale: 10,
+            rationale: "The 10x stat is attention-grabbing. Feature list is clean. Grid pattern adds subtle texture.",
+          },
+        ],
+        score: 8.2,
+        status: "passed",
+      },
+      {
+        filename: "paperclip-banner.svg",
+        content_type: "image/svg+xml",
+        preview_url: "/mock-images/paperclip-banner.svg",
+        objective_results: [
+          {
+            name: "image_dimensions",
+            passed: true,
+            severity: "blocking",
+            details: "1080x1080px.",
+          },
+          {
+            name: "brand_colors",
+            passed: true,
+            severity: "warning",
+            details: "Colors within approved palette (#ffd200 gold accent).",
+          },
+        ],
+        subjective_results: [
+          {
+            name: "Visual Appeal",
+            score: 8.0,
+            weight: 0.35,
+            scale: 10,
+            rationale: "Professional enterprise feel. Gold accent conveys premium positioning. Stats boxes are well-balanced.",
+          },
+        ],
+        score: 8.0,
+        status: "passed",
+      },
+    ],
+    folder_strategy: "all_pass",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -810,6 +978,44 @@ const policies: Record<string, Policy> = {
 let mutableSummaries = [...summaries];
 
 // ---------------------------------------------------------------------------
+// Mock SSE simulation — moves PaperclipAI deliverable to human review
+// ---------------------------------------------------------------------------
+
+type MockSSECallback = (type: string, data: Record<string, unknown>) => void;
+
+export function simulateMockSSE(onEvent: MockSSECallback) {
+  // After 3 seconds, the PaperclipAI deliverable completes subjective review
+  // and enters human review stage in real-time
+  const timer = setTimeout(() => {
+    const paperclip = mutableSummaries.find((d) => d.id === "d-20260311-007");
+    if (paperclip && paperclip.stage === "subjective") {
+      paperclip.stage = "human";
+      paperclip.score = 8.2;
+      paperclip.entered_stage_at = new Date().toISOString();
+
+      onEvent("deliverable:stage_changed", {
+        id: paperclip.id,
+        title: paperclip.title,
+        source_agent: paperclip.source_agent,
+        policy: paperclip.policy,
+        content_type: paperclip.content_type,
+        stage: "human",
+        score: 8.2,
+        entered_stage_at: paperclip.entered_stage_at,
+        submitted_at: paperclip.submitted_at,
+        revision_number: paperclip.revision_number,
+        is_folder: paperclip.is_folder,
+        file_count: paperclip.file_count,
+        old_stage: "subjective",
+        new_stage: "human",
+      });
+    }
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}
+
+// ---------------------------------------------------------------------------
 // Mock API implementation
 // ---------------------------------------------------------------------------
 
@@ -823,10 +1029,15 @@ export const mockApi = {
 
   getDeliverable(id: string): Promise<Deliverable> {
     const full = fullDeliverables[id];
-    if (full) return delay({ ...full });
+    const summary = mutableSummaries.find((d) => d.id === id);
+
+    if (full) {
+      // Merge current mutable summary state (stage may have changed via SSE sim)
+      const merged = summary ? { ...full, ...summary } : { ...full };
+      return delay(merged);
+    }
 
     // For deliverables without full data, synthesize a minimal Deliverable
-    const summary = mutableSummaries.find((d) => d.id === id);
     if (!summary) {
       return delay(null as unknown as Deliverable).then(() => {
         throw new Error(`Deliverable ${id} not found`);
@@ -853,12 +1064,26 @@ export const mockApi = {
   },
 
   getPipelineCounts(): Promise<PipelineCounts> {
+    // Dynamically compute counts from current state
+    const human = mutableSummaries.filter((d) => d.stage === "human").length;
+    const inProgress = mutableSummaries.filter(
+      (d) => d.stage === "objective" || d.stage === "subjective"
+    ).length;
+    const revisions = mutableSummaries.filter(
+      (d) => d.stage === "revision_requested"
+    ).length;
+    const approved = mutableSummaries.filter(
+      (d) => d.stage === "approved" || d.stage === "auto_approved"
+    ).length;
+    const rejected = mutableSummaries.filter(
+      (d) => d.stage === "rejected"
+    ).length;
     return delay({
-      in_progress: 2, // objective + subjective
-      pending_human: 2, // two items in human stage
-      awaiting_revisions: 1,
-      approved_72h: 1,
-      rejected_72h: 0,
+      in_progress: inProgress,
+      pending_human: human,
+      awaiting_revisions: revisions,
+      approved_72h: approved,
+      rejected_72h: rejected,
     });
   },
 

@@ -55,11 +55,19 @@ export function SingleImageView({
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-2xl aspect-video bg-gradient-to-br from-surface to-border rounded-xl flex items-center justify-center shadow-lg">
-          <span className="text-3xl font-bold text-text-muted">
-            {file?.filename.replace(/\.[^.]+$/, "").toUpperCase()}
-          </span>
-        </div>
+        {file?.preview_url ? (
+          <img
+            src={file.preview_url}
+            alt={file.filename}
+            className="max-w-full max-h-full rounded-xl shadow-lg object-contain"
+          />
+        ) : (
+          <div className="w-full max-w-2xl aspect-video bg-gradient-to-br from-surface to-border rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-3xl font-bold text-text-muted">
+              {file?.filename.replace(/\.[^.]+$/, "").toUpperCase()}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

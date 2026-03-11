@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#141e30"/>
+      <stop offset="100%" style="stop-color:#243b55"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f7971e"/>
+      <stop offset="100%" style="stop-color:#ffd200"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg3)"/>
+  <!-- Abstract shapes -->
+  <rect x="60" y="60" width="960" height="960" rx="40" fill="none" stroke="#ffd200" stroke-width="1" opacity="0.08"/>
+  <rect x="100" y="100" width="880" height="880" rx="30" fill="none" stroke="#ffd200" stroke-width="1" opacity="0.05"/>
+  <!-- Large paperclip -->
+  <g transform="translate(100, 160) scale(1.8)">
+    <path d="M150 80 C150 36, 186 0, 230 0 L230 0 C274 0, 310 36, 310 80 L310 420 C310 486, 256 540, 190 540 L190 540 C124 540, 70 486, 70 420 L70 160 C70 116, 106 80, 150 80 L150 80 Z" fill="none" stroke="url(#gold)" stroke-width="16" stroke-linecap="round" opacity="0.15"/>
+  </g>
+  <!-- Content -->
+  <text x="540" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="600" fill="#ffd200" text-anchor="middle" letter-spacing="8">INTRODUCING</text>
+  <text x="540" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="88" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-3">PaperclipAI</text>
+  <text x="540" y="410" font-family="system-ui, -apple-system, sans-serif" font-size="88" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-3">Enterprise</text>
+  <!-- Feature boxes -->
+  <g transform="translate(120, 480)">
+    <rect width="250" height="120" rx="16" fill="#ffffff" opacity="0.05"/>
+    <text x="125" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#ffd200" text-anchor="middle">99.9%</text>
+    <text x="125" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a0b0c0" text-anchor="middle" letter-spacing="2">UPTIME SLA</text>
+  </g>
+  <g transform="translate(415, 480)">
+    <rect width="250" height="120" rx="16" fill="#ffffff" opacity="0.05"/>
+    <text x="125" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#ffd200" text-anchor="middle">SOC 2</text>
+    <text x="125" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a0b0c0" text-anchor="middle" letter-spacing="2">CERTIFIED</text>
+  </g>
+  <g transform="translate(710, 480)">
+    <rect width="250" height="120" rx="16" fill="#ffffff" opacity="0.05"/>
+    <text x="125" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#ffd200" text-anchor="middle">500K+</text>
+    <text x="125" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a0b0c0" text-anchor="middle" letter-spacing="2">DOCUMENTS/DAY</text>
+  </g>
+  <!-- Quote -->
+  <text x="540" y="710" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-style="italic" fill="#c0c8d8" text-anchor="middle">"The smartest way to organize your business"</text>
+  <text x="540" y="750" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#8090a0" text-anchor="middle">— TechCrunch Review</text>
+  <!-- CTA -->
+  <rect x="340" y="820" width="400" height="60" rx="30" fill="url(#gold)"/>
+  <text x="540" y="858" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="#141e30" text-anchor="middle" letter-spacing="1">Schedule a Demo</text>
+  <!-- Footer -->
+  <text x="540" y="970" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#506070" text-anchor="middle" letter-spacing="3">paperclipai.com/enterprise</text>
+</svg>
