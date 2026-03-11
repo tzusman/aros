@@ -645,6 +645,12 @@ Minimal changes to the existing dashboard:
 5. **SSE event format** — SSE events are sent as `data:` messages with a JSON payload containing a `type` field (e.g. `{ "type": "deliverable:submitted", "data": {...} }`). This matches the existing SSE client pattern at `sse.ts:52`.
 6. **SSE reconnect** — already implemented, just needs real server
 7. **Decision bar** — already calls `POST /deliverables/:id/decision`, works as-is
+8. **Dashboard type migration** — The dashboard's `src/lib/api/types.ts` should be updated to import from or align with `packages/types`. Key changes:
+   - `Stage`: remove `"inbox"`, `"auto_approved"`; add `"draft"` (item 4 above)
+   - `FeedbackIssue`: keep `location` field (matches dashboard usage); add `file: string | null` field
+   - `Feedback`: keep `stage` field (useful for dashboard display of which stage produced feedback)
+   - `DeliverableFile`: keep existing per-file fields (`objective_results`, `subjective_results`, `score`, `status`) — these are populated by the server when returning per-file results for folder deliverables
+   - `Policy`/`PolicyConfig`: the dashboard's rich `Policy` type (with `evaluation_model`, `PolicyHumanConfig`, `revision_handling`, etc.) is simplified for MVP. The server returns `PolicyConfig` shape from Section 12. Dashboard components that reference removed fields (`evaluation_model`, `assignment_strategy`, `sla_hours`, `consensus_rule`, `revision_handling`, `default_notifications`, `raw_json`) should be simplified or conditionally render when fields are absent.
 
 The dashboard is **served by the Express server** in production (static files from `dashboard/dist/`). During development, Vite dev server proxies API calls to Express.
 
@@ -767,10 +773,15 @@ interface DeliverableFile {
   filename: string;
   content_type: string;
   size_bytes: number;
-  preview_url?: string;   // Computed by server in API responses
+  preview_url?: string;              // Computed by server in API responses
+  objective_results: ObjectiveCheck[] | null;  // Per-file check results
+  subjective_results: SubjectiveCriterion[] | null;
+  score: number | null;              // Per-file weighted score
+  status: "passed" | "failed" | "revision_requested" | null;
 }
 
 interface Feedback {
+  stage: string;                     // Which stage produced this feedback
   decision: "revision_requested" | "rejected";
   summary: string;
   issues: FeedbackIssue[];
@@ -779,7 +790,8 @@ interface Feedback {
 }
 
 interface FeedbackIssue {
-  file: string | null;
+  file: string | null;               // Filename, or null for single-file deliverables
+  location: string;                  // Specific location within the file (line, region, etc.)
   category: string;
   severity: "critical" | "major" | "minor";
   description: string;
@@ -792,12 +804,46 @@ interface NotificationConfig {
   events: string[];
 }
 
+interface ObjectiveCheck {
+  name: string;
+  passed: boolean;
+  severity: "blocking" | "warning";
+  details: string;
+}
+
+interface SubjectiveCriterion {
+  name: string;
+  score: number;
+  weight: number;
+  scale: number;
+  rationale: string;
+}
+
+interface PolicyObjectiveCheck {
+  type?: string;
+  config: Record<string, unknown>;
+  severity: "blocking" | "warning";
+}
+
+interface PolicySubjectiveCriterion {
+  name: string;
+  description: string;
+  weight: number;
+  scale: number;
+}
+
 interface PolicyConfig {
   name: string;
   stages: Stage[];
   max_revisions: number;
-  objective?: ObjectiveConfig;
-  subjective?: SubjectiveConfig;
+  objective?: {
+    checks: PolicyObjectiveCheck[];
+    fail_threshold: number;
+  };
+  subjective?: {
+    criteria: PolicySubjectiveCriterion[];
+    pass_threshold: number;
+  };
   human?: { required: boolean };
 }
 ```
