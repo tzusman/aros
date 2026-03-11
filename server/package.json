@@ -6,13 +6,34 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./storage.js": { "types": "./dist/storage.d.ts", "default": "./dist/storage.js" },
-    "./pipeline/engine.js": { "types": "./dist/pipeline/engine.d.ts", "default": "./dist/pipeline/engine.js" },
-    "./pipeline/objective.js": { "types": "./dist/pipeline/objective.d.ts", "default": "./dist/pipeline/objective.js" },
-    "./notifications/driver.js": { "types": "./dist/notifications/driver.d.ts", "default": "./dist/notifications/driver.js" },
-    "./notifications/paperclip.js": { "types": "./dist/notifications/paperclip.d.ts", "default": "./dist/notifications/paperclip.js" },
-    "./errors.js": { "types": "./dist/errors.d.ts", "default": "./dist/errors.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./storage.js": {
+      "types": "./dist/storage.d.ts",
+      "default": "./dist/storage.js"
+    },
+    "./pipeline/engine.js": {
+      "types": "./dist/pipeline/engine.d.ts",
+      "default": "./dist/pipeline/engine.js"
+    },
+    "./pipeline/objective.js": {
+      "types": "./dist/pipeline/objective.d.ts",
+      "default": "./dist/pipeline/objective.js"
+    },
+    "./notifications/driver.js": {
+      "types": "./dist/notifications/driver.d.ts",
+      "default": "./dist/notifications/driver.js"
+    },
+    "./notifications/paperclip.js": {
+      "types": "./dist/notifications/paperclip.d.ts",
+      "default": "./dist/notifications/paperclip.js"
+    },
+    "./errors.js": {
+      "types": "./dist/errors.d.ts",
+      "default": "./dist/errors.js"
+    }
   },
   "scripts": {
     "build": "tsc",
@@ -23,15 +44,16 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@aros/types": "workspace:*",
-    "express": "^5.1.0",
-    "chokidar": "^4.0.0",
-    "mime-types": "^2.1.35",
     "@anthropic-ai/sdk": "^0.52.0",
+    "@aros/types": "workspace:*",
+    "chokidar": "^4.0.0",
+    "express": "^5.1.0",
+    "mime-types": "^2.1.35",
     "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/express-serve-static-core": "^5.1.1",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^22.0.0",
     "typescript": "^5.9.3",
