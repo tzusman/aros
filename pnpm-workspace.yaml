@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+  - server
+  - mcp
+  - cli
+  - dashboard
