@@ -480,7 +480,7 @@ export class Storage {
     // Attach preview URLs if base URL provided
     if (apiBaseUrl) {
       for (const f of files) {
-        f.preview_url = `${apiBaseUrl}/api/reviews/${id}/files/${encodeURIComponent(f.filename)}`;
+        f.preview_url = `${apiBaseUrl}/api/deliverables/${id}/files/${encodeURIComponent(f.filename)}`;
       }
     }
 

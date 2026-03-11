@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import * as path from "path";
 import { Storage } from "../storage.js";
 import { runObjectiveChecks } from "./objective.js";
@@ -24,13 +23,16 @@ export class PipelineEngine {
    */
   async submit(id: string): Promise<{ stage: string; message: string }> {
     const meta = await this.storage.readMeta(id);
+    const status = await this.storage.readStatus(id);
+
+    if (status.stage !== "draft") {
+      throw new Error(`Cannot submit: deliverable ${id} is in stage "${status.stage}", expected "draft"`);
+    }
+
     const policy = await this.storage.readPolicy(meta.policy);
 
-    // Update status to show we're processing
-    await this.storage.updateStatus(id, {
-      stage: "draft",
-      entered_stage_at: new Date().toISOString(),
-    });
+    // Emit submitted SSE
+    this.emit("deliverable:submitted", { id, title: meta.title });
 
     // Emit submitted SSE
     this.emit("deliverable:submitted", { id, title: meta.title });
@@ -79,13 +81,13 @@ export class PipelineEngine {
         entered_stage_at: now,
         rejecting_stage: null,
       });
-      await this.storage.moveToTerminal(id, "rejected");
       this.emit("deliverable:decided", {
         id,
         title: meta.title,
         decision: "rejected",
       });
       await this.notify(id, "rejected");
+      await this.storage.moveToTerminal(id, "rejected");
     } else if (payload.decision === "revision_requested") {
       // Write feedback if reason provided
       if (payload.reason) {
@@ -139,13 +141,13 @@ export class PipelineEngine {
         entered_stage_at: now,
         rejecting_stage: null,
       });
-      await this.storage.moveToTerminal(id, "rejected");
       this.emit("deliverable:decided", {
         id,
         title: meta.title,
         decision: "rejected",
         reason: "max_revisions_exceeded",
       });
+      await this.storage.moveToTerminal(id, "rejected");
       return {
         stage: "rejected",
         message: `Auto-rejected: max revisions (${policy.max_revisions}) exceeded`,

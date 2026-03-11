@@ -8,7 +8,17 @@ export function registerListPolicies(server: McpServer, storage: Storage): void 
     {},
     async () => {
       try {
-        const policies = await storage.listPolicies();
+        const names = await storage.listPolicies();
+        const policies = await Promise.all(
+          names.map(async (name) => {
+            const config = await storage.readPolicy(name);
+            return {
+              name: config.name,
+              stages: config.stages,
+              max_revisions: config.max_revisions,
+            };
+          })
+        );
         return {
           content: [
             {

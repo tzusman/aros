@@ -107,6 +107,13 @@ export interface PolicySubjectiveCriterion {
     weight: number;
     scale: number;
 }
+export interface PolicyHumanConfig {
+    assignment_strategy: string;
+    required_reviewers: number;
+    consensus_rule: string;
+    sla_hours: number;
+    show_ai_reviews: boolean;
+}
 export interface PolicyConfig {
     name: string;
     stages: Stage[];
@@ -122,6 +129,37 @@ export interface PolicyConfig {
     human?: {
         required: boolean;
     };
+}
+export interface PolicySummary {
+    name: string;
+    stages: string[];
+    max_revisions: number;
+}
+export interface Policy extends PolicySummary {
+    objective?: {
+        checks: PolicyObjectiveCheck[];
+        fail_threshold: number;
+    };
+    subjective?: {
+        evaluation_model?: string;
+        criteria: PolicySubjectiveCriterion[];
+        pass_threshold: number;
+        require_rationale?: boolean;
+    };
+    human?: {
+        required: boolean;
+    } | PolicyHumanConfig;
+    revision_handling?: {
+        mode: "auto_revise" | "hybrid" | "manual";
+        max_auto_revisions?: number;
+        escalate_after_auto_fail?: boolean;
+    };
+    default_notifications?: Array<{
+        driver: string;
+        target: Record<string, unknown>;
+        events: string[];
+    }>;
+    raw_json?: string;
 }
 export interface PipelineCounts {
     in_progress: number;
