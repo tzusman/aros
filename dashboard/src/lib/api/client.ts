@@ -30,12 +30,12 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string
-  ) {
+  status: number;
+
+  constructor(status: number, message: string) {
     super(message);
     this.name = "ApiError";
+    this.status = status;
   }
 }
 
