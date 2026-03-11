@@ -1,8 +1,11 @@
+#!/usr/bin/env node
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import pc from "picocolors";
+import * as prompts from "@clack/prompts";
 import { Storage } from "@aros/server";
 import { initProject } from "./init.js";
 import { serve } from "./serve.js";
@@ -12,9 +15,30 @@ const VERSION = "0.1.0";
 /** Path to the bundled MCP server entry point (sibling file in dist/) */
 const mcpEntryPath = fileURLToPath(new URL("./mcp-entry.js", import.meta.url));
 
-function configureMcp(projectDir: string): void {
-  const mcpConfigPath = path.join(projectDir, ".mcp.json");
+function hasClaudeCli(): boolean {
+  try {
+    execSync("claude --version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
+function configureMcp(projectDir: string): void {
+  if (hasClaudeCli()) {
+    try {
+      execSync(
+        `claude mcp add -s project aros -- node ${mcpEntryPath} --project ${projectDir}`,
+        { cwd: projectDir, stdio: "ignore" }
+      );
+      return;
+    } catch {
+      // Fall back to manual .mcp.json if CLI fails
+    }
+  }
+
+  // Fallback: write .mcp.json directly
+  const mcpConfigPath = path.join(projectDir, ".mcp.json");
   const arosServer = {
     command: "node",
     args: [mcpEntryPath, "--project", projectDir],
@@ -34,6 +58,36 @@ function configureMcp(projectDir: string): void {
   config.mcpServers = servers;
 
   fs.writeFileSync(mcpConfigPath, JSON.stringify(config, null, 2) + "\n");
+}
+
+function whitelistMcpTools(projectDir: string): void {
+  const settingsDir = path.join(projectDir, ".claude");
+  const settingsPath = path.join(settingsDir, "settings.json");
+
+  let settings: Record<string, unknown> = {};
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    } catch {
+      // Start fresh if corrupted
+    }
+  }
+
+  const permissions = (settings.permissions as Record<string, unknown>) ?? {};
+  const allow = (permissions.allow as string[]) ?? [];
+
+  const rule = "mcp__aros__*";
+  if (!allow.includes(rule)) {
+    allow.push(rule);
+  }
+
+  permissions.allow = allow;
+  settings.permissions = permissions;
+
+  if (!fs.existsSync(settingsDir)) {
+    fs.mkdirSync(settingsDir, { recursive: true });
+  }
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
 }
 
 const CLAUDE_MD_SECTION = `
@@ -60,22 +114,79 @@ function configureClaudeMd(projectDir: string): void {
   fs.writeFileSync(claudeMdPath, content);
 }
 
-function printBanner(port: number, projectDir: string, startMs: number, firstRun: boolean): void {
+interface FirstRunResult {
+  configured: boolean;
+  whitelisted: boolean;
+}
+
+async function firstRunSetup(projectDir: string): Promise<FirstRunResult> {
+  const result: FirstRunResult = { configured: false, whitelisted: false };
+
+  console.log();
+  console.log(
+    `  ${pc.cyan(pc.bold("First-time setup"))} ${pc.dim("for")} ${pc.bold(path.basename(projectDir))}`
+  );
+  console.log();
+
+  const setupMcp = await prompts.confirm({
+    message: "Register AROS MCP tools with Claude Code?",
+    initialValue: true,
+  });
+
+  if (prompts.isCancel(setupMcp)) return result;
+
+  if (setupMcp) {
+    configureMcp(projectDir);
+    configureClaudeMd(projectDir);
+    result.configured = true;
+
+    const whitelist = await prompts.confirm({
+      message: "Auto-approve AROS tool calls? (skip permission prompts)",
+      initialValue: true,
+    });
+
+    if (!prompts.isCancel(whitelist) && whitelist) {
+      whitelistMcpTools(projectDir);
+      result.whitelisted = true;
+    }
+  }
+
+  return result;
+}
+
+function printBanner(
+  port: number,
+  projectDir: string,
+  startMs: number,
+  firstRun: FirstRunResult | null
+): void {
   const elapsed = Math.round(performance.now() - startMs);
-  const url = `http://localhost:${port}/`;
 
   console.log();
   console.log(
     `  ${pc.green(pc.bold("AROS"))} ${pc.green(`v${VERSION}`)}  ${pc.dim(`ready in ${pc.bold(String(elapsed))} ms`)}`
   );
   console.log();
-  console.log(`  ${pc.green("➜")}  ${pc.bold("Local")}:    ${pc.cyan(`http://localhost:${pc.bold(String(port))}/`)}`);
-  console.log(`  ${pc.green("➜")}  ${pc.bold("Project")}:  ${pc.dim(projectDir)}`);
+  console.log(
+    `  ${pc.green("➜")}  ${pc.bold("Local")}:    ${pc.cyan(`http://localhost:${pc.bold(String(port))}/`)}`
+  );
+  console.log(
+    `  ${pc.green("➜")}  ${pc.bold("Project")}:  ${pc.dim(projectDir)}`
+  );
 
-  if (firstRun) {
+  if (firstRun?.configured) {
     console.log();
-    console.log(`  ${pc.green("✔")}  Configured ${pc.bold(".mcp.json")} ${pc.dim("— Claude Code will auto-discover AROS tools")}`);
-    console.log(`  ${pc.green("✔")}  Updated ${pc.bold("CLAUDE.md")} ${pc.dim("— agents will know how to submit reviews")}`);
+    console.log(
+      `  ${pc.green("✔")}  Registered MCP tools ${pc.dim("— Claude Code will auto-discover AROS")}`
+    );
+    console.log(
+      `  ${pc.green("✔")}  Updated ${pc.bold("CLAUDE.md")} ${pc.dim("— agents will know how to submit reviews")}`
+    );
+    if (firstRun.whitelisted) {
+      console.log(
+        `  ${pc.green("✔")}  Whitelisted tool calls ${pc.dim("— no permission prompts for AROS")}`
+      );
+    }
   }
 
   console.log();
@@ -116,17 +227,21 @@ program
     }
 
     const storage = new Storage(projectDir);
-    if (!(await storage.isInitialized())) {
+    const wasInitialized = await storage.isInitialized();
+
+    if (!wasInitialized) {
       await storage.init();
     }
 
-    // Configure MCP and CLAUDE.md for Claude Code on first run
-    let firstRun = false;
+    // First-run setup: ask about MCP + whitelisting
+    let firstRun: FirstRunResult | null = null;
     const mcpConfigPath = path.join(projectDir, ".mcp.json");
-    if (!fs.existsSync(mcpConfigPath)) {
-      configureMcp(projectDir);
-      configureClaudeMd(projectDir);
-      firstRun = true;
+    const hasClaudeSettings = fs.existsSync(
+      path.join(projectDir, ".claude", "settings.json")
+    );
+
+    if (!fs.existsSync(mcpConfigPath) && !hasClaudeSettings) {
+      firstRun = await firstRunSetup(projectDir);
     }
 
     await serve(projectDir, (port) => {
