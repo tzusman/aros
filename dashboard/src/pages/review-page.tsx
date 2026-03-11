@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useApp } from "@/context/app-context";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
 import { usePanelState } from "@/lib/hooks/use-panel-state";
@@ -7,6 +7,8 @@ import { ContentHeader } from "@/components/review/content-header";
 import { ContentArea } from "@/components/review/content-area";
 import { ContextPanel } from "@/components/review/context-panel";
 import { DecisionBar } from "@/components/review/decision-bar";
+import { ImageGrid } from "@/components/folder/image-grid";
+import { FileTabs } from "@/components/folder/file-tabs";
 
 const TAB_MAP: Record<string, string> = {
   "1": "brief",
@@ -20,6 +22,7 @@ export function ReviewPage() {
   const queue = usePanelState("queue", true);
   const context = usePanelState("context", true);
   const [contextTab, setContextTab] = useState("brief");
+  const [inspectedFile, setInspectedFile] = useState<string | null>(null);
 
   const keyMap = useMemo(
     () => ({
@@ -51,6 +54,14 @@ export function ReviewPage() {
 
   const deliverable = state.selectedDeliverable;
 
+  const isImageFolder =
+    deliverable?.is_folder &&
+    deliverable?.files?.some((f) => f.content_type.startsWith("image/"));
+
+  useEffect(() => {
+    setInspectedFile(null);
+  }, [state.selectedId]);
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-1 min-h-0">
@@ -60,7 +71,26 @@ export function ReviewPage() {
           {deliverable ? (
             <>
               <ContentHeader deliverable={deliverable} />
-              <ContentArea deliverable={deliverable} />
+              {deliverable.is_folder && deliverable.files ? (
+                isImageFolder ? (
+                  <ImageGrid
+                    files={deliverable.files}
+                    onInspect={setInspectedFile}
+                    inspectedFile={inspectedFile}
+                  />
+                ) : (
+                  <>
+                    <FileTabs
+                      files={deliverable.files}
+                      activeFile={inspectedFile}
+                      onSelect={setInspectedFile}
+                    />
+                    <ContentArea deliverable={deliverable} />
+                  </>
+                )
+              ) : (
+                <ContentArea deliverable={deliverable} />
+              )}
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
