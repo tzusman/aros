@@ -7,6 +7,7 @@ import { Storage } from "@aros/server";
 import { initProject } from "./init.js";
 import { serve } from "./serve.js";
 import { registryCommands } from "./registry-cmd.js";
+import { moduleCommands } from "./module-cmd.js";
 
 const require = createRequire(import.meta.url);
 
@@ -125,5 +126,6 @@ program
   });
 
 registryCommands(program);
+moduleCommands(program);
 
 program.parse();
