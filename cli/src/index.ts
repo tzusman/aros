@@ -6,6 +6,7 @@ import { Command } from "commander";
 import { Storage } from "@aros/server";
 import { initProject } from "./init.js";
 import { serve } from "./serve.js";
+import { registryCommands } from "./registry-cmd.js";
 
 const require = createRequire(import.meta.url);
 
@@ -122,5 +123,7 @@ program
     });
     child.on("exit", (code) => process.exit(code ?? 0));
   });
+
+registryCommands(program);
 
 program.parse();

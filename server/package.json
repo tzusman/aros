@@ -11,7 +11,17 @@
     "./pipeline/engine.js": { "types": "./dist/pipeline/engine.d.ts", "default": "./dist/pipeline/engine.js" },
     "./pipeline/objective.js": { "types": "./dist/pipeline/objective.d.ts", "default": "./dist/pipeline/objective.js" },
     "./notifications/driver.js": { "types": "./dist/notifications/driver.d.ts", "default": "./dist/notifications/driver.js" },
-    "./notifications/paperclip.js": { "types": "./dist/notifications/paperclip.d.ts", "default": "./dist/notifications/paperclip.js" }
+    "./notifications/paperclip.js": { "types": "./dist/notifications/paperclip.d.ts", "default": "./dist/notifications/paperclip.js" },
+    "./modules/registry.js": { "types": "./dist/modules/registry.d.ts", "default": "./dist/modules/registry.js" },
+    "./modules/add.js": { "types": "./dist/modules/add.d.ts", "default": "./dist/modules/add.js" },
+    "./modules/compile.js": { "types": "./dist/modules/compile.d.ts", "default": "./dist/modules/compile.js" },
+    "./modules/git-fetch.js": { "types": "./dist/modules/git-fetch.d.ts", "default": "./dist/modules/git-fetch.js" },
+    "./modules/schemas.js": { "types": "./dist/modules/schemas.d.ts", "default": "./dist/modules/schemas.js" },
+    "./modules/check-loader.js": { "types": "./dist/modules/check-loader.d.ts", "default": "./dist/modules/check-loader.js" },
+    "./modules/criteria-loader.js": { "types": "./dist/modules/criteria-loader.d.ts", "default": "./dist/modules/criteria-loader.js" },
+    "./modules/mime-match.js": { "types": "./dist/modules/mime-match.d.ts", "default": "./dist/modules/mime-match.js" },
+    "./modules/subjective/prompt-builder.js": { "types": "./dist/modules/subjective/prompt-builder.d.ts", "default": "./dist/modules/subjective/prompt-builder.js" },
+    "./modules/subjective/response-parser.js": { "types": "./dist/modules/subjective/response-parser.d.ts", "default": "./dist/modules/subjective/response-parser.js" }
   },
   "scripts": {
     "build": "tsc",
