@@ -99,45 +99,52 @@ else
 fi
 
 # --- Test: Project directory structure was created ---
-if [[ -f "$AROS_DIR/.aros.json" ]]; then
-  echo "  .aros.json config created"
+if [[ -d "$AROS_DIR/.aros" ]]; then
+  echo "  .aros/ directory created"
 else
-  echo "FAIL: .aros.json not found in project dir"
+  echo "FAIL: .aros/ directory not found in project dir"
   exit 1
 fi
 
-if [[ -d "$AROS_DIR/review" ]]; then
-  echo "  review/ directory created"
+if [[ -f "$AROS_DIR/.aros/config.json" ]]; then
+  echo "  .aros/config.json created"
 else
-  echo "FAIL: review/ directory not found in project dir"
+  echo "FAIL: .aros/config.json not found"
   exit 1
 fi
 
-if [[ -d "$AROS_DIR/approved" ]]; then
-  echo "  approved/ directory created"
+if [[ -d "$AROS_DIR/.aros/review" ]]; then
+  echo "  .aros/review/ directory created"
 else
-  echo "FAIL: approved/ directory not found in project dir"
+  echo "FAIL: .aros/review/ directory not found"
   exit 1
 fi
 
-if [[ -d "$AROS_DIR/rejected" ]]; then
-  echo "  rejected/ directory created"
+if [[ -d "$AROS_DIR/.aros/approved" ]]; then
+  echo "  .aros/approved/ directory created"
 else
-  echo "FAIL: rejected/ directory not found in project dir"
+  echo "FAIL: .aros/approved/ directory not found"
   exit 1
 fi
 
-if [[ -d "$AROS_DIR/policies" ]]; then
-  echo "  policies/ directory created"
+if [[ -d "$AROS_DIR/.aros/rejected" ]]; then
+  echo "  .aros/rejected/ directory created"
 else
-  echo "FAIL: policies/ directory not found in project dir"
+  echo "FAIL: .aros/rejected/ directory not found"
   exit 1
 fi
 
-if [[ -f "$AROS_DIR/policies/default.json" ]]; then
-  echo "  policies/default.json created"
+if [[ -d "$AROS_DIR/.aros/policies" ]]; then
+  echo "  .aros/policies/ directory created"
 else
-  echo "FAIL: policies/default.json not found in project dir"
+  echo "FAIL: .aros/policies/ directory not found"
+  exit 1
+fi
+
+if [[ -f "$AROS_DIR/.aros/policies/default.json" ]]; then
+  echo "  .aros/policies/default.json created"
+else
+  echo "FAIL: .aros/policies/default.json not found"
   exit 1
 fi
 

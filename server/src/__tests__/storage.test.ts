@@ -21,15 +21,15 @@ afterEach(() => {
 describe("init()", () => {
   it("creates required directories", async () => {
     await storage.init();
-    expect(fs.existsSync(path.join(tmpDir, "review"))).toBe(true);
-    expect(fs.existsSync(path.join(tmpDir, "approved"))).toBe(true);
-    expect(fs.existsSync(path.join(tmpDir, "rejected"))).toBe(true);
-    expect(fs.existsSync(path.join(tmpDir, "policies"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "review"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "approved"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "rejected"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "policies"))).toBe(true);
   });
 
-  it("writes .aros.json config", async () => {
+  it("writes .aros/config.json", async () => {
     await storage.init();
-    const configPath = path.join(tmpDir, ".aros.json");
+    const configPath = path.join(tmpDir, ".aros", "config.json");
     expect(fs.existsSync(configPath)).toBe(true);
     const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
     expect(config.version).toBe(1);
@@ -39,7 +39,7 @@ describe("init()", () => {
 
   it("writes default.json policy", async () => {
     await storage.init();
-    const policyPath = path.join(tmpDir, "policies", "default.json");
+    const policyPath = path.join(tmpDir, ".aros", "policies", "default.json");
     expect(fs.existsSync(policyPath)).toBe(true);
     const policy = JSON.parse(fs.readFileSync(policyPath, "utf-8"));
     expect(policy.name).toBe("default");
@@ -119,7 +119,7 @@ describe("nextReviewId()", () => {
   it("creates the review directory to reserve the ID", async () => {
     await storage.init();
     const id = await storage.nextReviewId();
-    expect(fs.existsSync(path.join(tmpDir, "review", id))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "review", id))).toBe(true);
   });
 });
 
@@ -136,7 +136,7 @@ describe("createReview()", () => {
       content_type: "text/plain",
     };
     const id = await storage.createReview(meta);
-    const metaPath = path.join(tmpDir, "review", id, "meta.json");
+    const metaPath = path.join(tmpDir, ".aros", "review", id, "meta.json");
     expect(fs.existsSync(metaPath)).toBe(true);
     const written = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
     expect(written.title).toBe("Test deliverable");
@@ -152,7 +152,7 @@ describe("createReview()", () => {
       source_agent: "a",
       content_type: "text/plain",
     });
-    const statusPath = path.join(tmpDir, "review", id, "status.json");
+    const statusPath = path.join(tmpDir, ".aros", "review", id, "status.json");
     expect(fs.existsSync(statusPath)).toBe(true);
     const status = JSON.parse(fs.readFileSync(statusPath, "utf-8"));
     expect(status.stage).toBe("draft");
@@ -187,7 +187,7 @@ describe("addFile() and listFiles() and readFile()", () => {
       content_type: "text/plain",
     });
     await storage.addFile(id, "hello.txt", "Hello world", "text/plain", "utf-8");
-    const filePath = path.join(tmpDir, "review", id, "content", "hello.txt");
+    const filePath = path.join(tmpDir, ".aros", "review", id, "content", "hello.txt");
     expect(fs.existsSync(filePath)).toBe(true);
     expect(fs.readFileSync(filePath, "utf-8")).toBe("Hello world");
   });
@@ -204,7 +204,7 @@ describe("addFile() and listFiles() and readFile()", () => {
     const originalBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
     const b64 = originalBytes.toString("base64");
     await storage.addFile(id, "img.png", b64, "image/png", "base64");
-    const filePath = path.join(tmpDir, "review", id, "content", "img.png");
+    const filePath = path.join(tmpDir, ".aros", "review", id, "content", "img.png");
     expect(fs.existsSync(filePath)).toBe(true);
     const written = fs.readFileSync(filePath);
     expect(written).toEqual(originalBytes);
@@ -342,10 +342,10 @@ describe("saveHistory()", () => {
     await storage.addFile(id, "file2.txt", "content2", "text/plain", "utf-8");
     await storage.saveHistory(id, 1);
     expect(
-      fs.existsSync(path.join(tmpDir, "review", id, "history", "v1", "file1.txt"))
+      fs.existsSync(path.join(tmpDir, ".aros", "review", id, "history", "v1", "file1.txt"))
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(tmpDir, "review", id, "history", "v1", "file2.txt"))
+      fs.existsSync(path.join(tmpDir, ".aros", "review", id, "history", "v1", "file2.txt"))
     ).toBe(true);
   });
 
@@ -363,11 +363,11 @@ describe("saveHistory()", () => {
     await storage.addFile(id, "f.txt", "v2", "text/plain", "utf-8");
     await storage.saveHistory(id, 2);
     const v1Content = fs.readFileSync(
-      path.join(tmpDir, "review", id, "history", "v1", "f.txt"),
+      path.join(tmpDir, ".aros", "review", id, "history", "v1", "f.txt"),
       "utf-8"
     );
     const v2Content = fs.readFileSync(
-      path.join(tmpDir, "review", id, "history", "v2", "f.txt"),
+      path.join(tmpDir, ".aros", "review", id, "history", "v2", "f.txt"),
       "utf-8"
     );
     expect(v1Content).toBe("v1");
@@ -388,10 +388,10 @@ describe("saveFileToHistory()", () => {
     await storage.addFile(id, "single.txt", "only me", "text/plain", "utf-8");
     await storage.saveFileToHistory(id, "single.txt", 1);
     expect(
-      fs.existsSync(path.join(tmpDir, "review", id, "history", "v1", "single.txt"))
+      fs.existsSync(path.join(tmpDir, ".aros", "review", id, "history", "v1", "single.txt"))
     ).toBe(true);
     const written = fs.readFileSync(
-      path.join(tmpDir, "review", id, "history", "v1", "single.txt"),
+      path.join(tmpDir, ".aros", "review", id, "history", "v1", "single.txt"),
       "utf-8"
     );
     expect(written).toBe("only me");
@@ -412,9 +412,9 @@ describe("moveToTerminal()", () => {
     });
     await storage.addFile(id, "output.txt", "done", "text/plain", "utf-8");
     await storage.moveToTerminal(id, "approved");
-    const approvedMeta = path.join(tmpDir, "approved", id, "meta.json");
+    const approvedMeta = path.join(tmpDir, ".aros", "approved", id, "meta.json");
     expect(fs.existsSync(approvedMeta)).toBe(true);
-    const approvedFile = path.join(tmpDir, "approved", id, "content", "output.txt");
+    const approvedFile = path.join(tmpDir, ".aros", "approved", id, "content", "output.txt");
     expect(fs.existsSync(approvedFile)).toBe(true);
   });
 
@@ -429,7 +429,7 @@ describe("moveToTerminal()", () => {
     });
     await storage.moveToTerminal(id, "rejected");
     expect(
-      fs.existsSync(path.join(tmpDir, "rejected", id, "meta.json"))
+      fs.existsSync(path.join(tmpDir, ".aros", "rejected", id, "meta.json"))
     ).toBe(true);
   });
 });
@@ -541,7 +541,7 @@ describe("readPolicy() and listPolicies()", () => {
 
   it("listPolicies() returns empty array when no policies", async () => {
     // No init, empty policies dir created manually
-    fs.mkdirSync(path.join(tmpDir, "policies"));
+    fs.mkdirSync(path.join(tmpDir, ".aros", "policies"), { recursive: true });
     const names = await storage.listPolicies();
     expect(names).toEqual([]);
   });
@@ -559,7 +559,7 @@ describe("writePolicy() and deletePolicy()", () => {
       human: { required: true },
     };
     await storage.writePolicy("strict", customPolicy as any);
-    const policyPath = path.join(tmpDir, "policies", "strict.json");
+    const policyPath = path.join(tmpDir, ".aros", "policies", "strict.json");
     expect(fs.existsSync(policyPath)).toBe(true);
     const written = JSON.parse(fs.readFileSync(policyPath, "utf-8"));
     expect(written.name).toBe("strict");
@@ -569,7 +569,7 @@ describe("writePolicy() and deletePolicy()", () => {
   it("deletePolicy() removes the policy file", async () => {
     await storage.init();
     await storage.writePolicy("temp", { name: "temp" } as any);
-    const policyPath = path.join(tmpDir, "policies", "temp.json");
+    const policyPath = path.join(tmpDir, ".aros", "policies", "temp.json");
     expect(fs.existsSync(policyPath)).toBe(true);
     await storage.deletePolicy("temp");
     expect(fs.existsSync(policyPath)).toBe(false);
@@ -720,7 +720,7 @@ describe("getFilePath()", () => {
     await storage.addFile(id, "y.txt", "y", "text/plain", "utf-8");
     await storage.moveToTerminal(id, "approved");
     // Remove from review to force approved path
-    fs.rmSync(path.join(tmpDir, "review", id, "content", "y.txt"));
+    fs.rmSync(path.join(tmpDir, ".aros", "review", id, "content", "y.txt"));
     const p = await storage.getFilePath(id, "y.txt");
     expect(p).not.toBeNull();
     expect(p).toContain("approved");

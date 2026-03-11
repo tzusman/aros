@@ -100,9 +100,8 @@ export function createServer(options: ServerOptions) {
       resolvedPort = options.port ?? 4100;
     }
 
-    // Start file watcher
-    const { projectDir: dir } = options;
-    sse.startWatching(dir);
+    // Start file watcher on .aros/ directory
+    sse.startWatching(path.join(options.projectDir, ".aros"));
 
     return new Promise((resolve) => {
       server = app.listen(resolvedPort, () => {

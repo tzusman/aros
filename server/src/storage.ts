@@ -89,10 +89,15 @@ export class Storage {
     this.projectDir = projectDir;
   }
 
+  /** All AROS data lives under .aros/ in the project root */
+  private get arosDir(): string {
+    return path.join(this.projectDir, ".aros");
+  }
+
   // ---- Helpers ----
 
   private reviewDir(id: string): string {
-    return path.join(this.projectDir, "review", id);
+    return path.join(this.arosDir, "review", id);
   }
 
   private readJson<T>(filePath: string): T {
@@ -133,28 +138,29 @@ export class Storage {
   // ---- Initialization ----
 
   async init(): Promise<void> {
-    this.mkdirp(path.join(this.projectDir, "review"));
-    this.mkdirp(path.join(this.projectDir, "approved"));
-    this.mkdirp(path.join(this.projectDir, "rejected"));
-    this.mkdirp(path.join(this.projectDir, "policies"));
+    this.mkdirp(this.arosDir);
+    this.mkdirp(path.join(this.arosDir, "review"));
+    this.mkdirp(path.join(this.arosDir, "approved"));
+    this.mkdirp(path.join(this.arosDir, "rejected"));
+    this.mkdirp(path.join(this.arosDir, "policies"));
 
-    const configPath = path.join(this.projectDir, ".aros.json");
+    const configPath = path.join(this.arosDir, "config.json");
     if (!fs.existsSync(configPath)) {
       this.writeJson(configPath, DEFAULT_CONFIG);
     }
 
-    const defaultPolicyPath = path.join(this.projectDir, "policies", "default.json");
+    const defaultPolicyPath = path.join(this.arosDir, "policies", "default.json");
     if (!fs.existsSync(defaultPolicyPath)) {
       this.writeJson(defaultPolicyPath, DEFAULT_POLICY);
     }
   }
 
   async isInitialized(): Promise<boolean> {
-    return fs.existsSync(path.join(this.projectDir, ".aros.json"));
+    return fs.existsSync(path.join(this.arosDir, "config.json"));
   }
 
   async getConfig(): Promise<ArosConfig> {
-    const configPath = path.join(this.projectDir, ".aros.json");
+    const configPath = path.join(this.arosDir, "config.json");
     return this.readJson<ArosConfig>(configPath);
   }
 
@@ -163,7 +169,7 @@ export class Storage {
   async nextReviewId(): Promise<string> {
     const today = this.todayString();
     const prefix = `d-${today}-`;
-    const reviewRoot = path.join(this.projectDir, "review");
+    const reviewRoot = path.join(this.arosDir, "review");
 
     this.mkdirp(reviewRoot);
 
@@ -282,9 +288,9 @@ export class Storage {
 
   async getFilePath(id: string, filename: string): Promise<string | null> {
     const candidates = [
-      path.join(this.projectDir, "review", id, "content", filename),
-      path.join(this.projectDir, "approved", id, "content", filename),
-      path.join(this.projectDir, "rejected", id, "content", filename),
+      path.join(this.arosDir, "review", id, "content", filename),
+      path.join(this.arosDir, "approved", id, "content", filename),
+      path.join(this.arosDir, "rejected", id, "content", filename),
     ];
     for (const p of candidates) {
       if (fs.existsSync(p)) {
@@ -297,9 +303,9 @@ export class Storage {
   async listFiles(id: string): Promise<DeliverableFile[]> {
     // Check review, approved, rejected dirs for content
     const bases = [
-      path.join(this.projectDir, "review", id, "content"),
-      path.join(this.projectDir, "approved", id, "content"),
-      path.join(this.projectDir, "rejected", id, "content"),
+      path.join(this.arosDir, "review", id, "content"),
+      path.join(this.arosDir, "approved", id, "content"),
+      path.join(this.arosDir, "rejected", id, "content"),
     ];
 
     let contentDir: string | null = null;
@@ -403,14 +409,14 @@ export class Storage {
 
   async moveToTerminal(id: string, bucket: "approved" | "rejected"): Promise<void> {
     const src = this.reviewDir(id);
-    const dest = path.join(this.projectDir, bucket, id);
+    const dest = path.join(this.arosDir, bucket, id);
     this.copyDirRecursive(src, dest);
   }
 
   // ---- List reviews ----
 
   async listReviews(filter?: ListReviewsFilter): Promise<DeliverableSummary[]> {
-    const reviewRoot = path.join(this.projectDir, "review");
+    const reviewRoot = path.join(this.arosDir, "review");
     if (!fs.existsSync(reviewRoot)) return [];
 
     const entries = fs.readdirSync(reviewRoot, { withFileTypes: true });
@@ -531,7 +537,7 @@ export class Storage {
   // ---- Policies ----
 
   async listPolicies(): Promise<string[]> {
-    const policiesDir = path.join(this.projectDir, "policies");
+    const policiesDir = path.join(this.arosDir, "policies");
     if (!fs.existsSync(policiesDir)) return [];
     const entries = fs.readdirSync(policiesDir);
     return entries
@@ -540,18 +546,18 @@ export class Storage {
   }
 
   async readPolicy(name: string): Promise<PolicyConfig> {
-    const p = path.join(this.projectDir, "policies", `${name}.json`);
+    const p = path.join(this.arosDir, "policies", `${name}.json`);
     return this.readJson<PolicyConfig>(p);
   }
 
   async writePolicy(name: string, policy: PolicyConfig): Promise<void> {
-    const policiesDir = path.join(this.projectDir, "policies");
+    const policiesDir = path.join(this.arosDir, "policies");
     this.mkdirp(policiesDir);
     this.writeJson(path.join(policiesDir, `${name}.json`), policy);
   }
 
   async deletePolicy(name: string): Promise<void> {
-    const p = path.join(this.projectDir, "policies", `${name}.json`);
+    const p = path.join(this.arosDir, "policies", `${name}.json`);
     if (fs.existsSync(p)) {
       fs.unlinkSync(p);
     }

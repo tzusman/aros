@@ -198,7 +198,7 @@ describe('decide("approved")', () => {
     expect(status.stage).toBe("approved");
 
     // Check content was copied to approved/
-    const approvedContentPath = path.join(tmpDir, "approved", id, "content", "output.txt");
+    const approvedContentPath = path.join(tmpDir, ".aros", "approved", id, "content", "output.txt");
     expect(fs.existsSync(approvedContentPath)).toBe(true);
   });
 
@@ -274,7 +274,7 @@ describe('decide("rejected")', () => {
     expect(status.stage).toBe("rejected");
 
     // Check content was copied to rejected/
-    const rejectedMetaPath = path.join(tmpDir, "rejected", id, "meta.json");
+    const rejectedMetaPath = path.join(tmpDir, ".aros", "rejected", id, "meta.json");
     expect(fs.existsSync(rejectedMetaPath)).toBe(true);
   });
 
