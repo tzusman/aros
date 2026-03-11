@@ -1,6 +1,10 @@
 {
+  "name": "aros",
   "private": true,
   "type": "module",
+  "bin": {
+    "aros": "cli/dist/index.js"
+  },
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
