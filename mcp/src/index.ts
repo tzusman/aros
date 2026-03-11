@@ -26,11 +26,11 @@ storage.isInitialized().then((initialized) => {
   const engine = new PipelineEngine(storage);
 
   const server = new McpServer({ name: "aros", version: "0.1.0" });
-  registerAllTools(server, storage, engine);
-
-  const transport = new StdioServerTransport();
-  server.connect(transport).catch((err: unknown) => {
-    console.error("[AROS MCP] Failed:", err);
-    process.exit(1);
+  registerAllTools(server, storage, engine).then(() => {
+    const transport = new StdioServerTransport();
+    server.connect(transport).catch((err: unknown) => {
+      console.error("[AROS MCP] Failed:", err);
+      process.exit(1);
+    });
   });
 });

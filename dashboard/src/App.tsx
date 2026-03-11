@@ -13,6 +13,7 @@ function AppRoutes() {
       <Route element={<Layout connectionStatus={state.connectionStatus} />}>
         <Route path="/" element={<Navigate to="/review" replace />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/reviews/:id" element={<ReviewPage />} />
         <Route path="/pipeline" element={<PipelinePage />} />
         <Route path="/policies" element={<PoliciesPage />} />
       </Route>

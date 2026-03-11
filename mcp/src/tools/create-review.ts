@@ -2,11 +2,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { Storage } from "@aros/server/storage.js";
 import { getDriver } from "@aros/server/notifications/driver.js";
+import type { ReviewUrlFn } from "./index.js";
 
-export function registerCreateReview(server: McpServer, storage: Storage): void {
+export function registerCreateReview(server: McpServer, storage: Storage, reviewUrl: ReviewUrlFn): void {
   server.tool(
     "create_review",
-    "Create a new review for a deliverable. Returns a review_id to use with subsequent tools.",
+    "Create a new review draft. Returns a review_id for use with add_file and submit_for_review. Prefer submit_deliverable instead — it combines create, add files, and submit in one call.",
     {
       title: z.string().describe("Title of the deliverable"),
       brief: z.string().describe("Brief description or requirements for the deliverable"),
@@ -76,12 +77,13 @@ export function registerCreateReview(server: McpServer, storage: Storage): void 
         };
 
         const review_id = await storage.createReview(meta);
+        const url = await reviewUrl(review_id);
 
         return {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify({ review_id }),
+              text: JSON.stringify({ review_id, review_url: url }),
             },
           ],
         };

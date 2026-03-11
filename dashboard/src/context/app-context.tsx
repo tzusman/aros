@@ -109,6 +109,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
           break;
         }
+
+        case "fs:changed": {
+          // Filesystem changed (e.g. MCP created/updated a review) — refresh everything
+          refreshCounts();
+          api.listDeliverables("human").then((queue) => {
+            dispatch({ type: "SET_QUEUE", queue });
+          }).catch(() => {});
+          if (selectedIdRef.current) {
+            api.getDeliverable(selectedIdRef.current).then((deliverable) => {
+              dispatch({ type: "SET_SELECTED_DETAIL", deliverable });
+            }).catch(() => {});
+          }
+          break;
+        }
       }
     };
 

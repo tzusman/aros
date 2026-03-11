@@ -29,11 +29,13 @@ export class SSEBroadcaster {
       ignoreInitial: true,
       depth: 3,
     });
-    this.watcher.on("change", (filePath: string) => {
-      if (filePath.endsWith("status.json")) {
+    const onFileEvent = (filePath: string) => {
+      if (filePath.endsWith("status.json") || filePath.endsWith("meta.json")) {
         this.emit("fs:changed", { path: filePath });
       }
-    });
+    };
+    this.watcher.on("change", onFileEvent);
+    this.watcher.on("add", onFileEvent);
   }
 
   stop(): void {

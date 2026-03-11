@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useApp } from "@/context/app-context";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
 import { usePanelState } from "@/lib/hooks/use-panel-state";
@@ -18,7 +19,15 @@ const TAB_MAP: Record<string, string> = {
 };
 
 export function ReviewPage() {
+  const { id: routeId } = useParams<{ id: string }>();
   const { state, selectDeliverable } = useApp();
+
+  // Auto-select deliverable from URL param
+  useEffect(() => {
+    if (routeId && routeId !== state.selectedId) {
+      selectDeliverable(routeId);
+    }
+  }, [routeId]);
   const queue = usePanelState("queue", true);
   const context = usePanelState("context", true);
   const [contextTab, setContextTab] = useState("brief");

@@ -34,9 +34,6 @@ export class PipelineEngine {
     // Emit submitted SSE
     this.emit("deliverable:submitted", { id, title: meta.title });
 
-    // Emit submitted SSE
-    this.emit("deliverable:submitted", { id, title: meta.title });
-
     // Advance pipeline from first stage
     return this.advancePipeline(id, policy, 0);
   }
@@ -51,6 +48,17 @@ export class PipelineEngine {
     const now = new Date().toISOString();
 
     if (payload.decision === "approved") {
+      if (payload.reason) {
+        const feedback: Feedback = {
+          stage: "human",
+          decision: "approved",
+          summary: payload.reason,
+          issues: [],
+          reviewer: "human",
+          timestamp: now,
+        };
+        await this.storage.writeFeedback(id, feedback);
+      }
       await this.storage.updateStatus(id, {
         stage: "approved",
         entered_stage_at: now,

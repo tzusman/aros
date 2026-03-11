@@ -93,24 +93,28 @@ export function createServer(options: ServerOptions) {
   // Server lifecycle
   let server: ReturnType<typeof app.listen> | null = null;
 
-  const start = async (): Promise<void> => {
+  const start = async (portOverride?: number): Promise<void> => {
     await storage.init();
 
-    // Read config for port (prefer config, then options.port, then default)
-    try {
-      const config = await storage.getConfig();
-      resolvedPort = options.port ?? config.port ?? 4100;
-    } catch {
-      resolvedPort = options.port ?? 4100;
+    // Read config for port (prefer override, then options.port, then config, then default)
+    if (portOverride != null) {
+      resolvedPort = portOverride;
+    } else {
+      try {
+        const config = await storage.getConfig();
+        resolvedPort = options.port ?? config.port ?? 4100;
+      } catch {
+        resolvedPort = options.port ?? 4100;
+      }
     }
 
     // Start file watcher on .aros/ directory
     sse.startWatching(path.join(options.projectDir, ".aros"));
 
-    return new Promise((resolve) => {
-      server = app.listen(resolvedPort, () => {
-        resolve();
-      });
+    return new Promise((resolve, reject) => {
+      server = app.listen(resolvedPort);
+      server.on("listening", () => resolve());
+      server.on("error", reject);
     });
   };
 

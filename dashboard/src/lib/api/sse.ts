@@ -1,10 +1,9 @@
 import type { SSEEventType, ConnectionStatus } from "./types";
-import { simulateMockSSE } from "./mock-data";
 
 type SSECallback = (event: SSEEventType, data: Record<string, unknown>) => void;
 type StatusCallback = (status: ConnectionStatus) => void;
 
-const API_URL = import.meta.env.VITE_AROS_API_URL || "";
+const API_URL = import.meta.env.VITE_AROS_API_URL || "/api";
 
 export class SSEManager {
   private eventSource: EventSource | null = null;
@@ -15,8 +14,6 @@ export class SSEManager {
   private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
-  private mockCleanup: (() => void) | null = null;
-
   constructor(onEvent: SSECallback, onStatus: StatusCallback) {
     this.onEvent = onEvent;
     this.onStatus = onStatus;
@@ -25,14 +22,7 @@ export class SSEManager {
   private hasConnected = false;
 
   connect() {
-    if (this.disposed || !API_URL) {
-      // Mock mode — simulate connected and fire mock events
-      this.onStatus("connected");
-      this.mockCleanup = simulateMockSSE((type, data) => {
-        this.onEvent(type as SSEEventType, data);
-      });
-      return;
-    }
+    if (this.disposed) return;
 
     this.onStatus(this.hasConnected ? "reconnecting" : "disconnected");
     const es = new EventSource(`${API_URL}/events`);
@@ -105,10 +95,6 @@ export class SSEManager {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
-    }
-    if (this.mockCleanup) {
-      this.mockCleanup();
-      this.mockCleanup = null;
     }
   }
 }

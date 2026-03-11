@@ -11,20 +11,37 @@ import { registerReadFile } from "./read-file.js";
 import { registerSubmitRevision } from "./submit-revision.js";
 import { registerCompleteRevision } from "./complete-revision.js";
 import { registerListPolicies } from "./list-policies.js";
+import { registerSubmitDeliverable } from "./submit-deliverable.js";
 
-export function registerAllTools(
+export type ReviewUrlFn = (id: string) => Promise<string>;
+
+async function createReviewUrlFn(storage: Storage): Promise<ReviewUrlFn> {
+  let port = 4100;
+  try {
+    const config = await storage.getConfig();
+    port = config.port ?? 4100;
+  } catch {
+    // default
+  }
+  return (id: string) => Promise.resolve(`http://localhost:${port}/reviews/${id}`);
+}
+
+export async function registerAllTools(
   server: McpServer,
   storage: Storage,
   engine: PipelineEngine
-): void {
-  registerCreateReview(server, storage);
+): Promise<void> {
+  const reviewUrl = await createReviewUrlFn(storage);
+
+  registerCreateReview(server, storage, reviewUrl);
   registerAddFile(server, storage);
-  registerSubmitForReview(server, engine);
-  registerCheckStatus(server, storage);
+  registerSubmitForReview(server, engine, reviewUrl);
+  registerCheckStatus(server, storage, reviewUrl);
   registerGetFeedback(server, storage);
   registerListMyReviews(server, storage);
   registerReadFile(server, storage);
   registerSubmitRevision(server, storage);
-  registerCompleteRevision(server, engine);
+  registerCompleteRevision(server, engine, reviewUrl);
   registerListPolicies(server, storage);
+  registerSubmitDeliverable(server, storage, engine, reviewUrl);
 }

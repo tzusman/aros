@@ -74,7 +74,7 @@ export interface FeedbackIssue {
 
 export interface Feedback {
   stage: string;
-  decision: "revision_requested" | "rejected";
+  decision: "approved" | "revision_requested" | "rejected";
   summary: string;
   issues: FeedbackIssue[];
   reviewer: string;

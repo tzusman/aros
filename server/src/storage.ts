@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import mime from "mime-types";
 import type {
   DeliverableMeta,
   DeliverableStatus,
@@ -147,6 +148,27 @@ export class Storage {
     if (!fs.existsSync(defaultPolicyPath)) {
       this.writeJson(defaultPolicyPath, DEFAULT_POLICY);
     }
+
+    this.ensureGitignore();
+  }
+
+  private ensureGitignore(): void {
+    const entries = [".aros/", ".mcp.json"];
+    const gitignorePath = path.join(this.projectDir, ".gitignore");
+
+    let content = "";
+    if (fs.existsSync(gitignorePath)) {
+      content = fs.readFileSync(gitignorePath, "utf-8");
+    }
+
+    const lines = content.split("\n");
+    const missing = entries.filter((e) => !lines.includes(e));
+    if (missing.length === 0) return;
+
+    const additions = missing.join("\n");
+    const separator = content.length > 0 && !content.endsWith("\n") ? "\n" : "";
+    const header = content.length === 0 || content.trim().length === 0 ? "" : "\n# AROS\n";
+    fs.writeFileSync(gitignorePath, content + separator + header + additions + "\n");
   }
 
   async isInitialized(): Promise<boolean> {
@@ -254,6 +276,25 @@ export class Storage {
     }
   }
 
+  async addFileFromPath(
+    id: string,
+    sourcePath: string,
+    filename?: string
+  ): Promise<{ filename: string; size_bytes: number }> {
+    if (!fs.existsSync(sourcePath)) {
+      throw new Error(`Source file not found: ${sourcePath}`);
+    }
+
+    const resolvedFilename = filename ?? path.basename(sourcePath);
+    const contentDir = path.join(this.reviewDir(id), "content");
+    this.mkdirp(contentDir);
+    const destPath = path.join(contentDir, resolvedFilename);
+
+    fs.copyFileSync(sourcePath, destPath);
+    const stat = fs.statSync(destPath);
+    return { filename: resolvedFilename, size_bytes: stat.size };
+  }
+
   async readFile(
     id: string,
     filename: string
@@ -322,7 +363,7 @@ export class Storage {
       const stat = fs.statSync(path.join(contentDir, entry.name));
       files.push({
         filename: entry.name,
-        content_type: "",
+        content_type: mime.lookup(entry.name) || "application/octet-stream",
         size_bytes: stat.size,
         objective_results: null,
         subjective_results: null,

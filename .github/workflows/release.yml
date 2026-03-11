@@ -55,7 +55,7 @@ jobs:
       - run: pnpm build
 
       - name: Publish CLI to npm
-        run: pnpm --filter aros publish --no-git-checks --access public
+        run: pnpm --filter @tzusman/aros publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

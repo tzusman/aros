@@ -165,7 +165,8 @@ export type SSEEventType =
   | "deliverable:submitted"
   | "deliverable:stage_changed"
   | "deliverable:decided"
-  | "deliverable:revised";
+  | "deliverable:revised"
+  | "fs:changed";
 
 export interface SSEEvent {
   type: SSEEventType;
