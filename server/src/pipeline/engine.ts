@@ -3,9 +3,17 @@ import { Storage } from "../storage.js";
 import { runObjectiveChecks } from "./objective.js";
 import { runSubjectiveReview } from "./subjective.js";
 import { getDriver } from "../notifications/driver.js";
+import { loadAllChecks, loadCheckManifest } from "../modules/check-loader.js";
+import { loadCriteriaLibrary } from "../modules/criteria-loader.js";
+import { matchMime } from "../modules/mime-match.js";
+import { buildSubjectivePrompt } from "../modules/subjective/prompt-builder.js";
+import { parseSubjectiveResponse, computeWeightedScore } from "../modules/subjective/response-parser.js";
 import type {
+  CheckModule,
+  CriterionDef,
   DecisionPayload,
   Feedback,
+  FileEntry,
   Stage,
   PolicyConfig,
 } from "@aros/types";
@@ -13,7 +21,16 @@ import type {
 export type SSEEmitFn = (event: string, data: Record<string, unknown>) => void;
 
 export class PipelineEngine {
+  private checkModules: Map<string, CheckModule> = new Map();
+  private criteriaLibrary: Map<string, CriterionDef> = new Map();
+
   constructor(private storage: Storage, private emitSSE?: SSEEmitFn) {}
+
+  async initModules(): Promise<void> {
+    const modulesDir = path.join(this.storage.projectDir, ".aros", "modules");
+    this.checkModules = await loadAllChecks(modulesDir);
+    this.criteriaLibrary = loadCriteriaLibrary(modulesDir);
+  }
 
   // ---- Public API ----
 
@@ -280,6 +297,18 @@ export class PipelineEngine {
       return null;
     }
 
+    // Use module-based checks if modules are loaded
+    if (this.checkModules.size > 0) {
+      const passed = await this.runObjectiveWithModules(id, policy);
+      if (!passed) {
+        return {
+          stage: "revision_requested",
+          message: "Objective checks failed",
+        };
+      }
+      return null;
+    }
+
     // Gather files
     const files = await this.storage.listFiles(id);
     const fileInputs = await Promise.all(
@@ -355,6 +384,86 @@ export class PipelineEngine {
 
     // All checks passed — continue
     return null;
+  }
+
+  private async runObjectiveWithModules(id: string, policy: PolicyConfig): Promise<boolean> {
+    const files = await this.storage.listFiles(id);
+    const brief = (await this.storage.readMeta(id)).brief;
+    const modulesDir = path.join(this.storage.projectDir, ".aros", "modules");
+    const results: import("@aros/types").ObjectiveCheck[] = [];
+
+    for (const policyCheck of policy.objective?.checks ?? []) {
+      const mod = this.checkModules.get(policyCheck.name);
+      if (!mod) {
+        results.push({
+          name: policyCheck.name,
+          passed: false,
+          severity: policyCheck.severity,
+          details: `Module not installed: ${policyCheck.name}`,
+          file: null,
+        });
+        continue;
+      }
+
+      const manifest = loadCheckManifest(modulesDir, policyCheck.name);
+      const fileEntries: FileEntry[] = [];
+      for (const f of files) {
+        const ct = f.content_type || detectContentType(f.filename);
+        if (manifest.supportedTypes.some((p: string) => matchMime(ct, p))) {
+          const data = await this.storage.readFile(id, f.filename);
+          fileEntries.push({
+            filename: f.filename,
+            content: data.content,
+            contentType: ct,
+            sizeBytes: f.size_bytes,
+          });
+        }
+      }
+      if (fileEntries.length === 0) continue;
+
+      const checkResults = await mod.execute({
+        files: fileEntries,
+        config: policyCheck.config ?? {},
+        brief,
+        projectDir: this.storage.projectDir,
+      });
+
+      for (const r of checkResults) {
+        results.push({ ...r, severity: policyCheck.severity });
+      }
+    }
+
+    await this.storage.writeObjectiveResults(id, results);
+
+    const blockingFailures = results.filter((r) => !r.passed && r.severity === "blocking");
+    const threshold = policy.objective?.fail_threshold ?? 1;
+    if (blockingFailures.length >= threshold) {
+      const allFailures = results.filter((r) => !r.passed);
+      const feedback: Feedback = {
+        stage: "objective",
+        decision: "revision_requested",
+        summary: `Objective checks failed: ${blockingFailures.length} blocking failure(s).`,
+        issues: allFailures.map((r) => ({
+          file: r.file ?? null,
+          location: "",
+          category: r.name,
+          severity: r.severity === "blocking" ? ("critical" as const) : ("minor" as const),
+          description: r.details,
+          suggestion: r.suggestions?.[0] ?? "",
+        })),
+        reviewer: "objective-pipeline",
+        timestamp: new Date().toISOString(),
+      };
+      await this.storage.writeFeedback(id, feedback);
+      await this.storage.updateStatus(id, {
+        stage: "revision_requested",
+        rejecting_stage: "objective",
+        entered_stage_at: new Date().toISOString(),
+      });
+      this.emit("deliverable:stage_changed", { id, to_stage: "revision_requested" });
+      return false;
+    }
+    return true;
   }
 
   private async runSubjectiveStage(

@@ -465,3 +465,64 @@ describe("completeRevision() error handling", () => {
     await expect(engine.completeRevision(id)).rejects.toThrow();
   });
 });
+
+// ---- Module-based objective checks ----
+
+describe("module-based objective checks", () => {
+  it("runs check modules loaded from .aros/modules", async () => {
+    // Set up a simple check module in .aros/modules
+    const checksDir = path.join(tmpDir, ".aros", "modules", "checks", "test-check");
+    fs.mkdirSync(checksDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(checksDir, "manifest.json"),
+      JSON.stringify({
+        name: "test-check",
+        type: "check",
+        version: "1.0.0",
+        description: "Test",
+        supportedTypes: ["text/*"],
+        configSchema: {},
+        dependencies: { binaries: [], env: [], npm: [] },
+        entrypoint: "check.ts",
+      })
+    );
+    fs.writeFileSync(
+      path.join(checksDir, "check.js"),
+      'export default { execute: async (ctx) => ctx.files.map(f => ({ name: "test-check", file: f.filename, passed: f.content.length > 0, details: "checked" })) };'
+    );
+
+    // Create policy that uses the module
+    await storage.writePolicy("modular", {
+      name: "modular",
+      stages: ["objective"],
+      max_revisions: 1,
+      objective: {
+        checks: [{ name: "test-check", config: {}, severity: "blocking" }],
+        fail_threshold: 1,
+      },
+    });
+
+    // Submit deliverable
+    const id = await storage.createReview({
+      title: "T",
+      brief: "B",
+      policy: "modular",
+      source_agent: "a",
+      content_type: "text/plain",
+    });
+    await storage.addFile(id, "test.txt", "hello", "text/plain", "utf-8");
+
+    await engine.initModules();
+
+    // Run the pipeline — this should use the test-check module
+    await engine.submit(id);
+
+    // Verify objective results were written using the module
+    const results = await storage.readObjectiveResults(id);
+    expect(results).not.toBeNull();
+    expect(results).toHaveLength(1);
+    expect(results![0].name).toBe("test-check");
+    expect(results![0].passed).toBe(true);
+    expect(results![0].file).toBe("test.txt");
+  });
+});
