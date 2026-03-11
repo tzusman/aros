@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/components/shell/layout";
+import { AppProvider, useApp } from "@/context/app-context";
 
 function ReviewPage() {
   return <div className="p-4 text-text-primary">Review Workspace</div>;
@@ -13,19 +14,26 @@ function PoliciesPage() {
   return <div className="p-4 text-text-primary">Policies Manager</div>;
 }
 
+function AppRoutes() {
+  const { state } = useApp();
+  return (
+    <Routes>
+      <Route element={<Layout connectionStatus={state.connectionStatus} />}>
+        <Route path="/" element={<Navigate to="/review" replace />} />
+        <Route path="/review" element={<ReviewPage />} />
+        <Route path="/pipeline" element={<PipelinePage />} />
+        <Route path="/policies" element={<PoliciesPage />} />
+      </Route>
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          element={<Layout connectionStatus="connected" />}
-        >
-          <Route path="/" element={<Navigate to="/review" replace />} />
-          <Route path="/review" element={<ReviewPage />} />
-          <Route path="/pipeline" element={<PipelinePage />} />
-          <Route path="/policies" element={<PoliciesPage />} />
-        </Route>
-      </Routes>
+      <AppProvider>
+        <AppRoutes />
+      </AppProvider>
     </BrowserRouter>
   );
 }
