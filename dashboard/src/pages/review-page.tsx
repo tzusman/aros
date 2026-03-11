@@ -65,7 +65,7 @@ export function ReviewPage() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-1 min-h-0">
-        <QueueSidebar isOpen={queue.isOpen} />
+        <QueueSidebar isOpen={queue.isOpen} onClose={queue.toggle} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {deliverable ? (

@@ -14,7 +14,7 @@ export function Layout({ connectionStatus, onRetry }: LayoutProps) {
       <TopBar connectionStatus={connectionStatus} onRetry={onRetry} />
       <div className="flex flex-1 min-h-0">
         <IconRail />
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 pb-14 md:pb-0">
           <Outlet />
         </main>
       </div>
