@@ -26,7 +26,8 @@
     "chokidar": "^4.0.0",
     "mime-types": "^2.1.35",
     "@anthropic-ai/sdk": "^0.52.0",
-    "zod": "^3.25.0"
+    "zod": "^3.25.0",
+    "esbuild": "^0.25.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
