@@ -6,6 +6,8 @@ export interface ObjectiveCheck {
     passed: boolean;
     severity: "blocking" | "warning";
     details: string;
+    file?: string | null;
+    suggestions?: string[];
 }
 export interface SubjectiveCriterion {
     name: string;
@@ -103,7 +105,7 @@ export interface PolicyObjectiveCheck {
 }
 export interface PolicySubjectiveCriterion {
     name: string;
-    description: string;
+    description?: string;
     weight: number;
     scale: number;
 }
@@ -170,4 +172,34 @@ export interface PipelineCounts {
 }
 export type SSEEventType = "deliverable:submitted" | "deliverable:stage_changed" | "deliverable:decided" | "deliverable:revised";
 export type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
+export interface FileEntry {
+    filename: string;
+    content: string | Buffer;
+    contentType: string;
+    sizeBytes: number;
+}
+export interface CheckContext {
+    files: FileEntry[];
+    config: Record<string, unknown>;
+    brief: string;
+    projectDir: string;
+}
+export interface CheckResult {
+    name: string;
+    file: string | null;
+    passed: boolean;
+    details: string;
+    suggestions?: string[];
+}
+export interface CheckModule {
+    execute(ctx: CheckContext): Promise<CheckResult[]>;
+}
+export interface CriterionDef {
+    name: string;
+    description: string;
+    applicableTo: string[];
+    defaultWeight: number;
+    scale: number;
+    promptGuidance: string;
+}
 //# sourceMappingURL=index.d.ts.map
