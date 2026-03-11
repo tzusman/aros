@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
@@ -7,7 +6,6 @@ import { Command } from "commander";
 import pc from "picocolors";
 import * as prompts from "@clack/prompts";
 import { Storage } from "@aros/server";
-import { initProject } from "./init.js";
 import { serve } from "./serve.js";
 
 const VERSION = "0.1.0";
@@ -206,25 +204,7 @@ program
     const startMs = performance.now();
     let projectDir: string;
 
-    if (projectArg) {
-      projectDir = path.resolve(projectArg);
-    } else {
-      // Check if current dir or ./aros is initialized
-      const candidates = [process.cwd(), path.resolve("./aros")];
-      let existing: string | undefined;
-      for (const d of candidates) {
-        const s = new Storage(d);
-        if (await s.isInitialized()) {
-          existing = d;
-          break;
-        }
-      }
-      if (existing) {
-        projectDir = existing;
-      } else {
-        projectDir = await initProject();
-      }
-    }
+    projectDir = path.resolve(projectArg ?? process.cwd());
 
     const storage = new Storage(projectDir);
     const wasInitialized = await storage.isInitialized();
