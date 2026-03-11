@@ -1,6 +1,7 @@
 {
   "name": "aros",
   "version": "0.1.0",
+  "type": "module",
   "bin": { "aros": "./dist/index.js" },
   "scripts": {
     "build": "tsc",
