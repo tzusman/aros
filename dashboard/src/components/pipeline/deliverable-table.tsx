@@ -10,18 +10,17 @@ type SortKey = "title" | "stage" | "policy" | "source_agent" | "entered_stage_at
 type SortDir = "asc" | "desc";
 
 const stageStyles: Record<string, { bg: string; text: string }> = {
+  draft: { bg: "bg-text-muted/15", text: "text-text-muted" },
   objective: { bg: "bg-stage-objective/15", text: "text-stage-objective" },
   subjective: { bg: "bg-stage-subjective/15", text: "text-stage-subjective" },
   human: { bg: "bg-stage-human/15", text: "text-stage-human" },
   revision_requested: { bg: "bg-stage-revising/15", text: "text-stage-revising" },
   approved: { bg: "bg-stage-approved/15", text: "text-stage-approved" },
-  auto_approved: { bg: "bg-stage-approved/15", text: "text-stage-approved" },
   rejected: { bg: "bg-stage-rejected/15", text: "text-stage-rejected" },
 };
 
 const stageLabels: Record<string, string> = {
   revision_requested: "Revising",
-  auto_approved: "Auto-approved",
 };
 
 function StagePill({ stage }: { stage: Stage }) {

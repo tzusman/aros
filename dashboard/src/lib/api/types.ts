@@ -1,13 +1,12 @@
 // --- Deliverable ---
 
 export type Stage =
-  | "inbox"
+  | "draft"
   | "objective"
   | "subjective"
   | "human"
   | "revision_requested"
   | "approved"
-  | "auto_approved"
   | "rejected";
 
 export type Decision = "approved" | "revision_requested" | "rejected";
@@ -33,6 +32,7 @@ export interface FeedbackIssue {
   location: string;
   severity: "critical" | "major" | "minor";
   suggestion: string;
+  file: string | null;
 }
 
 export interface Feedback {
@@ -54,6 +54,7 @@ export interface RevisionEntry {
 export interface DeliverableFile {
   filename: string;
   content_type: string;
+  size_bytes: number;
   preview_url?: string;
   objective_results: ObjectiveCheck[] | null;
   subjective_results: SubjectiveCriterion[] | null;
@@ -134,28 +135,28 @@ export interface PolicySummary {
 }
 
 export interface Policy extends PolicySummary {
-  objective: {
+  objective?: {
     checks: PolicyObjectiveCheck[];
     fail_threshold: number;
   };
-  subjective: {
-    evaluation_model: string;
+  subjective?: {
+    evaluation_model?: string;
     criteria: PolicySubjectiveCriterion[];
     pass_threshold: number;
-    require_rationale: boolean;
+    require_rationale?: boolean;
   };
-  human: PolicyHumanConfig;
-  revision_handling: {
+  human?: { required: boolean } | PolicyHumanConfig;
+  revision_handling?: {
     mode: "auto_revise" | "hybrid" | "manual";
     max_auto_revisions?: number;
     escalate_after_auto_fail?: boolean;
   };
-  default_notifications: Array<{
+  default_notifications?: Array<{
     driver: string;
     target: Record<string, unknown>;
     events: string[];
   }>;
-  raw_json: string;
+  raw_json?: string;
 }
 
 // --- SSE Events ---

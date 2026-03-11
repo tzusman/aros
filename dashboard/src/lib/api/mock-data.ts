@@ -345,6 +345,7 @@ Returns a single user by ID.`,
           severity: "major",
           suggestion:
             "Add ## Update User and ## Delete User sections with the same level of detail.",
+          file: null,
         },
       ],
       reviewer: "aros-subjective",
@@ -369,6 +370,7 @@ Returns a single user by ID.`,
               severity: "major",
               suggestion:
                 "Add sections for Update User and Delete User.",
+              file: null,
             },
           ],
           reviewer: "aros-subjective",
@@ -420,6 +422,7 @@ Returns a single user by ID.`,
       {
         filename: "spring-ad-variant-1.png",
         content_type: "image/png",
+        size_bytes: 1048576,
         objective_results: [
           {
             name: "image_dimensions",
@@ -441,6 +444,7 @@ Returns a single user by ID.`,
       {
         filename: "spring-ad-variant-2.png",
         content_type: "image/png",
+        size_bytes: 1153434,
         objective_results: [
           {
             name: "image_dimensions",
@@ -462,6 +466,7 @@ Returns a single user by ID.`,
       {
         filename: "spring-ad-variant-3.png",
         content_type: "image/png",
+        size_bytes: 1468006,
         objective_results: [
           {
             name: "image_dimensions",
@@ -483,6 +488,7 @@ Returns a single user by ID.`,
       {
         filename: "spring-ad-variant-4.png",
         content_type: "image/png",
+        size_bytes: 987654,
         objective_results: [
           {
             name: "image_dimensions",
@@ -568,6 +574,7 @@ Returns a single user by ID.`,
       {
         filename: "paperclip-hero.svg",
         content_type: "image/svg+xml",
+        size_bytes: 49152,
         preview_url: "/mock-images/paperclip-hero.svg",
         objective_results: [
           {
@@ -598,6 +605,7 @@ Returns a single user by ID.`,
       {
         filename: "paperclip-social.svg",
         content_type: "image/svg+xml",
+        size_bytes: 38912,
         preview_url: "/mock-images/paperclip-social.svg",
         objective_results: [
           {
@@ -628,6 +636,7 @@ Returns a single user by ID.`,
       {
         filename: "paperclip-banner.svg",
         content_type: "image/svg+xml",
+        size_bytes: 42000,
         preview_url: "/mock-images/paperclip-banner.svg",
         objective_results: [
           {
@@ -1073,7 +1082,7 @@ export const mockApi = {
       (d) => d.stage === "revision_requested"
     ).length;
     const approved = mutableSummaries.filter(
-      (d) => d.stage === "approved" || d.stage === "auto_approved"
+      (d) => d.stage === "approved"
     ).length;
     const rejected = mutableSummaries.filter(
       (d) => d.stage === "rejected"

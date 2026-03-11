@@ -1,23 +1,35 @@
-import type { Policy } from "@/lib/api/types";
+import type { Policy, PolicyHumanConfig } from "@/lib/api/types";
 
 export function PipelineFlow({ policy }: { policy: Policy }) {
-  const stages = [
-    {
-      label: "1. Objective",
+  const stages: { label: string; color: string; detail: string }[] = [];
+
+  if (policy.objective) {
+    stages.push({
+      label: `${stages.length + 1}. Objective`,
       color: "text-stage-objective",
       detail: `${policy.objective.checks.length} checks`,
-    },
-    {
-      label: "2. Subjective",
+    });
+  }
+
+  if (policy.subjective) {
+    stages.push({
+      label: `${stages.length + 1}. Subjective`,
       color: "text-stage-subjective",
       detail: `${policy.subjective.criteria.length} criteria · threshold ${policy.subjective.pass_threshold}`,
-    },
-    {
-      label: "3. Human",
+    });
+  }
+
+  if (policy.human) {
+    const isRich = "assignment_strategy" in policy.human;
+    const human = policy.human as PolicyHumanConfig;
+    stages.push({
+      label: `${stages.length + 1}. Human`,
       color: "text-stage-human",
-      detail: `${policy.human.required_reviewers} reviewer · ${policy.human.sla_hours}h SLA`,
-    },
-  ];
+      detail: isRich
+        ? `${human.required_reviewers} reviewer · ${human.sla_hours}h SLA`
+        : "Required",
+    });
+  }
 
   return (
     <div className="flex items-center gap-0">
