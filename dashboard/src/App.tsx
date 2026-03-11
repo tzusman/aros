@@ -3,11 +3,8 @@ import { Layout } from "@/components/shell/layout";
 import { AppProvider, useApp } from "@/context/app-context";
 import { ReviewPage } from "@/pages/review-page";
 import { PipelinePage } from "@/pages/pipeline-page";
+import { PoliciesPage } from "@/pages/policies-page";
 import { Toaster } from "@/components/ui/sonner";
-
-function PoliciesPage() {
-  return <div className="p-4 text-text-primary">Policies Manager</div>;
-}
 
 function AppRoutes() {
   const { state } = useApp();
