@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/components/shell/layout";
 import { AppProvider, useApp } from "@/context/app-context";
-
-function ReviewPage() {
-  return <div className="p-4 text-text-primary">Review Workspace</div>;
-}
+import { ReviewPage } from "@/pages/review-page";
+import { Toaster } from "@/components/ui/sonner";
 
 function PipelinePage() {
   return <div className="p-4 text-text-primary">Pipeline Monitor</div>;
@@ -33,6 +31,7 @@ export default function App() {
     <BrowserRouter>
       <AppProvider>
         <AppRoutes />
+        <Toaster />
       </AppProvider>
     </BrowserRouter>
   );
