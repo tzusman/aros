@@ -9,6 +9,7 @@ import { deliverableRoutes } from "./routes/deliverables.js";
 import { fileRoutes } from "./routes/files.js";
 import { pipelineRoutes } from "./routes/pipeline.js";
 import { policyRoutes } from "./routes/policies.js";
+import { errorHandler } from "./errors.js";
 
 export interface ServerOptions {
   projectDir: string;
@@ -80,11 +81,14 @@ export function createServer(options: ServerOptions) {
   // 8. Serve dashboard static files if dashboardDir provided
   if (dashboardDir) {
     app.use(express.static(dashboardDir));
-    // Fallback for SPA routing
-    app.get("*", (_req, res) => {
+    // Fallback for SPA routing (Express 5 requires named param)
+    app.get("/{*splat}", (_req, res) => {
       res.sendFile(path.join(dashboardDir, "index.html"));
     });
   }
+
+  // 9. Central error handler (must be last middleware)
+  app.use(errorHandler);
 
   // Server lifecycle
   let server: ReturnType<typeof app.listen> | null = null;
@@ -140,3 +144,4 @@ export function createServer(options: ServerOptions) {
 // Re-export key classes
 export { Storage } from "./storage.js";
 export { PipelineEngine } from "./pipeline/engine.js";
+export { HttpError, badRequest, notFound, conflict, unprocessable, errorHandler } from "./errors.js";

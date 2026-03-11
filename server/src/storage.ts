@@ -12,6 +12,7 @@ import type {
   PolicyConfig,
   Stage,
   RevisionEntry,
+  ListReviewsFilter,
 } from "@aros/types";
 
 // ---- Config types ----
@@ -72,13 +73,6 @@ const DEFAULT_POLICY: PolicyConfig = {
   },
   human: { required: true },
 };
-
-// ---- List filter ----
-
-export interface ListReviewsFilter {
-  stage?: Stage;
-  source_agent?: string;
-}
 
 // ---- Storage class ----
 

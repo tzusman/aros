@@ -1,16 +1,48 @@
-// ---- Enums & Unions ----
+// ---- Constants (as const arrays + derived union types) ----
 
-export type Stage =
-  | "draft"
-  | "objective"
-  | "subjective"
-  | "human"
-  | "approved"
-  | "rejected"
-  | "revision_requested";
+export {
+  STAGES,
+  FOLDER_STRATEGIES,
+  DECISIONS,
+  SEVERITIES,
+  FEEDBACK_SEVERITIES,
+  FILE_STATUSES,
+  SSE_EVENT_TYPES,
+  CONNECTION_STATUSES,
+  NOTIFICATION_EVENTS,
+} from "./constants.js";
 
-export type FolderStrategy = "all_pass" | "select" | "rank" | "categorize";
-export type Decision = "approved" | "revision_requested" | "rejected";
+export type {
+  Stage,
+  FolderStrategy,
+  Decision,
+  Severity,
+  FeedbackSeverity,
+  FileStatus,
+  SSEEventType,
+  ConnectionStatus,
+  NotificationEvent,
+} from "./constants.js";
+
+// ---- Validators (Zod schemas + inferred types) ----
+
+export {
+  createReviewSchema,
+  decisionPayloadSchema,
+  policyObjectiveCheckSchema,
+  policySubjectiveCriterionSchema,
+  policyConfigSchema,
+  addFileSchema,
+  listReviewsFilterSchema,
+} from "./validators.js";
+
+export type {
+  CreateReview,
+  DecisionPayload,
+  PolicyConfigInput,
+  AddFileInput,
+  ListReviewsFilter,
+} from "./validators.js";
 
 // ---- Objective / Subjective Results ----
 
@@ -57,17 +89,17 @@ export interface DeliverableMeta {
   policy: string;
   source_agent: string;
   content_type: string;
-  folder_strategy?: FolderStrategy;
+  folder_strategy?: import("./constants.js").FolderStrategy;
   notification?: NotificationConfig;
 }
 
 export interface DeliverableStatus {
-  stage: Stage;
+  stage: import("./constants.js").Stage;
   score: number | null;
   revision_number: number;
   entered_stage_at: string;
   submitted_at: string;
-  rejecting_stage: Stage | null;
+  rejecting_stage: import("./constants.js").Stage | null;
 }
 
 export interface DeliverableFile {
@@ -94,7 +126,7 @@ export interface DeliverableSummary {
   source_agent: string;
   policy: string;
   content_type: string;
-  stage: Stage;
+  stage: import("./constants.js").Stage;
   score: number | null;
   entered_stage_at: string;
   submitted_at: string;
@@ -111,12 +143,7 @@ export interface Deliverable extends DeliverableSummary {
   feedback: Feedback | null;
   history: RevisionEntry[];
   files: DeliverableFile[] | null;
-  folder_strategy: FolderStrategy | null;
-}
-
-export interface DecisionPayload {
-  decision: Decision;
-  reason?: string;
+  folder_strategy: import("./constants.js").FolderStrategy | null;
 }
 
 // ---- Notification ----
@@ -152,7 +179,7 @@ export interface PolicyHumanConfig {
 
 export interface PolicyConfig {
   name: string;
-  stages: Stage[];
+  stages: import("./constants.js").Stage[];
   max_revisions: number;
   objective?: {
     checks: PolicyObjectiveCheck[];
@@ -205,13 +232,3 @@ export interface PipelineCounts {
   approved_72h: number;
   rejected_72h: number;
 }
-
-// ---- SSE ----
-
-export type SSEEventType =
-  | "deliverable:submitted"
-  | "deliverable:stage_changed"
-  | "deliverable:decided"
-  | "deliverable:revised";
-
-export type ConnectionStatus = "connected" | "reconnecting" | "disconnected";

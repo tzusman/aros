@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as fs from "fs";
 import mime from "mime-types";
 import type { Storage } from "../storage.js";
+import { notFound } from "../errors.js";
 
 export function fileRoutes(storage: Storage): Router {
   const router = Router();
@@ -13,8 +14,7 @@ export function fileRoutes(storage: Storage): Router {
       const filePath = await storage.getFilePath(id, filename);
 
       if (!filePath) {
-        res.status(404).json({ error: "File not found" });
-        return;
+        throw notFound(`File not found: ${filename} in review ${id}`);
       }
 
       const contentType = mime.lookup(filename) || "application/octet-stream";
