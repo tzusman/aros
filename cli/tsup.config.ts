@@ -1,4 +1,17 @@
 import { defineConfig } from "tsup";
+import { builtinModules } from "node:module";
+
+const nodeBuiltins = [
+  ...builtinModules,
+  ...builtinModules.map((m) => `node:${m}`),
+];
+
+const esmBanner = `#!/usr/bin/env node
+import { createRequire as __createRequire } from "node:module";
+const require = __createRequire(import.meta.url);`;
+
+const mcpBanner = `import { createRequire as __createRequire } from "node:module";
+const require = __createRequire(import.meta.url);`;
 
 export default defineConfig([
   {
@@ -9,8 +22,9 @@ export default defineConfig([
     splitting: false,
     clean: true,
     dts: false,
-    noExternal: ["@aros/server", "@aros/mcp", "@aros/types"],
-    banner: { js: "#!/usr/bin/env node" },
+    noExternal: [/.*/],
+    external: nodeBuiltins,
+    banner: { js: esmBanner },
   },
   {
     entry: { "mcp-entry": "src/mcp-entry.ts" },
@@ -19,6 +33,8 @@ export default defineConfig([
     platform: "node",
     splitting: false,
     dts: false,
-    noExternal: ["@aros/server", "@aros/mcp", "@aros/types"],
+    noExternal: [/.*/],
+    external: nodeBuiltins,
+    banner: { js: mcpBanner },
   },
 ]);
