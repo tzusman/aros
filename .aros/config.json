@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "port": 4100,
+  "subjective_model": "claude-sonnet-4-20250514"
+}

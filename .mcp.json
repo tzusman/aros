@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "aros": {
+      "command": "node",
+      "args": [
+        "/Users/tzusman/Documents/projects/aros/mcp/dist/index.js",
+        "--project",
+        "/Users/tzusman/Documents/projects/aros"
+      ]
+    }
+  }
+}

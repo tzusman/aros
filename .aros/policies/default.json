@@ -1,0 +1,58 @@
+{
+  "name": "default",
+  "stages": [
+    "objective",
+    "subjective",
+    "human"
+  ],
+  "max_revisions": 3,
+  "objective": {
+    "checks": [
+      {
+        "name": "file_size",
+        "config": {
+          "max_mb": 10
+        },
+        "severity": "blocking"
+      },
+      {
+        "name": "format_check",
+        "config": {
+          "allowed": [
+            "image/*",
+            "text/*",
+            "application/pdf"
+          ]
+        },
+        "severity": "blocking"
+      }
+    ],
+    "fail_threshold": 1
+  },
+  "subjective": {
+    "criteria": [
+      {
+        "name": "relevance",
+        "description": "How well does the deliverable match the brief?",
+        "weight": 3,
+        "scale": 10
+      },
+      {
+        "name": "quality",
+        "description": "Overall production quality",
+        "weight": 2,
+        "scale": 10
+      },
+      {
+        "name": "clarity",
+        "description": "Is the message clear and effective?",
+        "weight": 1,
+        "scale": 10
+      }
+    ],
+    "pass_threshold": 6
+  },
+  "human": {
+    "required": true
+  }
+}

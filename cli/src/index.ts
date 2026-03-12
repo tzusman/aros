@@ -7,6 +7,8 @@ import pc from "picocolors";
 import * as prompts from "@clack/prompts";
 import { Storage } from "@aros/server";
 import { serve } from "./serve.js";
+import { registryCommands } from "./registry-cmd.js";
+import { moduleCommands } from "./module-cmd.js";
 
 const VERSION = "0.1.0";
 
@@ -256,5 +258,8 @@ program
     });
     child.on("exit", (code) => process.exit(code ?? 0));
   });
+
+registryCommands(program);
+moduleCommands(program);
 
 program.parse();

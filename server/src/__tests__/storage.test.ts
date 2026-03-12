@@ -739,3 +739,40 @@ describe("getFilePath()", () => {
     expect(p).toBeNull();
   });
 });
+
+// ---- init creates .aros directory ----
+
+describe("init creates .aros directory", () => {
+  it("creates registry.json with default official source", async () => {
+    await storage.init();
+    const registryPath = path.join(tmpDir, ".aros", "registry.json");
+    expect(fs.existsSync(registryPath)).toBe(true);
+    const registry = JSON.parse(fs.readFileSync(registryPath, "utf-8"));
+    expect(registry.sources).toHaveLength(1);
+    expect(registry.sources[0].name).toBe("official");
+  });
+
+  it("creates empty lock.json", async () => {
+    await storage.init();
+    const lockPath = path.join(tmpDir, ".aros", "lock.json");
+    expect(fs.existsSync(lockPath)).toBe(true);
+    const lock = JSON.parse(fs.readFileSync(lockPath, "utf-8"));
+    expect(lock.version).toBe(1);
+    expect(lock.locked).toEqual({});
+  });
+
+  it("creates modules subdirectories", async () => {
+    await storage.init();
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "modules", "checks"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "modules", "criteria"))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".aros", "modules", "policies"))).toBe(true);
+  });
+});
+
+// ---- projectDir is accessible ----
+
+describe("projectDir is accessible", () => {
+  it("exposes projectDir as public readonly", () => {
+    expect(storage.projectDir).toBe(tmpDir);
+  });
+});

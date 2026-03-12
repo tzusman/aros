@@ -78,7 +78,7 @@ const DEFAULT_POLICY: PolicyConfig = {
 // ---- Storage class ----
 
 export class Storage {
-  private projectDir: string;
+  public readonly projectDir: string;
 
   constructor(projectDir: string) {
     this.projectDir = projectDir;
@@ -147,6 +147,28 @@ export class Storage {
     const defaultPolicyPath = path.join(this.arosDir, "policies", "default.json");
     if (!fs.existsSync(defaultPolicyPath)) {
       this.writeJson(defaultPolicyPath, DEFAULT_POLICY);
+    }
+
+    // Module system directories
+    const arosDir = path.join(this.projectDir, ".aros");
+    fs.mkdirSync(path.join(arosDir, "modules", "checks"), { recursive: true });
+    fs.mkdirSync(path.join(arosDir, "modules", "criteria"), { recursive: true });
+    fs.mkdirSync(path.join(arosDir, "modules", "policies"), { recursive: true });
+
+    const registryPath = path.join(arosDir, "registry.json");
+    if (!fs.existsSync(registryPath)) {
+      fs.writeFileSync(registryPath, JSON.stringify({
+        sources: [{
+          name: "official",
+          url: "https://github.com/aros-project/modules.git",
+          branch: "main",
+        }],
+      }, null, 2));
+    }
+
+    const lockPath = path.join(arosDir, "lock.json");
+    if (!fs.existsSync(lockPath)) {
+      fs.writeFileSync(lockPath, JSON.stringify({ version: 1, locked: {} }, null, 2));
     }
 
     this.ensureGitignore();

@@ -3232,8 +3232,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path4) {
-      let input = path4;
+    function removeDotSegments(path6) {
+      let input = path6;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -3432,8 +3432,8 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path4, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path4 && path4 !== "/" ? path4 : void 0;
+        const [path6, query] = wsComponent.resourceName.split("?");
+        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
         wsComponent.query = query;
         wsComponent.resourceName = void 0;
       }
@@ -6795,12 +6795,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs2, exportName) {
+    function addFormats(ajv, list, fs4, exportName) {
       var _a2;
       var _b;
       (_a2 = (_b = ajv.opts.code).formats) !== null && _a2 !== void 0 ? _a2 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs2[f]);
+        ajv.addFormat(f, fs4[f]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -15396,11 +15396,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path4) {
-      if (!path4 || typeof path4 !== "string") {
+    function lookup(path6) {
+      if (!path6 || typeof path6 !== "string") {
         return false;
       }
-      var extension2 = extname2("x." + path4).toLowerCase().substr(1);
+      var extension2 = extname2("x." + path6).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -16843,17 +16843,17 @@ var init_path = __esm({
   "../node_modules/@anthropic-ai/sdk/internal/utils/path.mjs"() {
     "use strict";
     init_error();
-    createPathTagFunction = (pathEncoder = encodeURIPath) => function path4(statics, ...params) {
+    createPathTagFunction = (pathEncoder = encodeURIPath) => function path6(statics, ...params) {
       if (statics.length === 1)
         return statics[0];
       let postPath = false;
-      const path5 = statics.reduce((previousValue, currentValue, index) => {
+      const path7 = statics.reduce((previousValue, currentValue, index) => {
         if (/[?#]/.test(currentValue)) {
           postPath = true;
         }
         return previousValue + currentValue + (index === params.length ? "" : (postPath ? encodeURIComponent : pathEncoder)(String(params[index])));
       }, "");
-      const pathOnly = path5.split(/[?#]/, 1)[0];
+      const pathOnly = path7.split(/[?#]/, 1)[0];
       const invalidSegments = [];
       const invalidSegmentPattern = /(?<=^|\/)(?:\.|%2e){1,2}(?=\/|$)/gi;
       let match;
@@ -16872,10 +16872,10 @@ var init_path = __esm({
           return acc + spaces + arrows;
         }, "");
         throw new AnthropicError(`Path parameters result in path with invalid segments:
-${path5}
+${path7}
 ${underline}`);
       }
-      return path5;
+      return path7;
     };
     path2 = createPathTagFunction(encodeURIPath);
   }
@@ -19230,8 +19230,8 @@ var init_client = __esm({
       makeStatusError(status, error2, message, headers) {
         return APIError.generate(status, error2, message, headers);
       }
-      buildURL(path4, query) {
-        const url = isAbsoluteURL(path4) ? new URL(path4) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path4.startsWith("/") ? path4.slice(1) : path4));
+      buildURL(path6, query) {
+        const url = isAbsoluteURL(path6) ? new URL(path6) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path6.startsWith("/") ? path6.slice(1) : path6));
         const defaultQuery = this.defaultQuery();
         if (!isEmptyObj(defaultQuery)) {
           query = { ...defaultQuery, ...query };
@@ -19262,24 +19262,24 @@ var init_client = __esm({
        */
       async prepareRequest(request, { url, options }) {
       }
-      get(path4, opts) {
-        return this.methodRequest("get", path4, opts);
+      get(path6, opts) {
+        return this.methodRequest("get", path6, opts);
       }
-      post(path4, opts) {
-        return this.methodRequest("post", path4, opts);
+      post(path6, opts) {
+        return this.methodRequest("post", path6, opts);
       }
-      patch(path4, opts) {
-        return this.methodRequest("patch", path4, opts);
+      patch(path6, opts) {
+        return this.methodRequest("patch", path6, opts);
       }
-      put(path4, opts) {
-        return this.methodRequest("put", path4, opts);
+      put(path6, opts) {
+        return this.methodRequest("put", path6, opts);
       }
-      delete(path4, opts) {
-        return this.methodRequest("delete", path4, opts);
+      delete(path6, opts) {
+        return this.methodRequest("delete", path6, opts);
       }
-      methodRequest(method, path4, opts) {
+      methodRequest(method, path6, opts) {
         return this.request(Promise.resolve(opts).then((opts2) => {
-          return { method, path: path4, ...opts2 };
+          return { method, path: path6, ...opts2 };
         }));
       }
       request(options, remainingRetries = null) {
@@ -19381,8 +19381,8 @@ var init_client = __esm({
         }));
         return { response, options, controller, requestLogID, retryOfRequestLogID, startTime };
       }
-      getAPIList(path4, Page2, opts) {
-        return this.requestAPIList(Page2, { method: "get", path: path4, ...opts });
+      getAPIList(path6, Page2, opts) {
+        return this.requestAPIList(Page2, { method: "get", path: path6, ...opts });
       }
       requestAPIList(Page2, options) {
         const request = this.makeRequest(options, null, void 0);
@@ -19469,8 +19469,8 @@ var init_client = __esm({
       }
       buildRequest(inputOptions, { retryCount = 0 } = {}) {
         const options = { ...inputOptions };
-        const { method, path: path4, query } = options;
-        const url = this.buildURL(path4, query);
+        const { method, path: path6, query } = options;
+        const url = this.buildURL(path6, query);
         if ("timeout" in options)
           validatePositiveInteger("timeout", options.timeout);
         options.timeout = options.timeout ?? this.timeout;
@@ -20086,8 +20086,8 @@ function getErrorMap() {
 
 // ../node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path4, errorMaps, issueData } = params;
-  const fullPath = [...path4, ...issueData.path || []];
+  const { data, path: path6, errorMaps, issueData } = params;
+  const fullPath = [...path6, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -20203,11 +20203,11 @@ var errorUtil;
 
 // ../node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path4, key) {
+  constructor(parent, value, path6, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path4;
+    this._path = path6;
     this._key = key;
   }
   get path() {
@@ -23844,10 +23844,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path4) {
-  if (!path4)
+function getElementAtPath(obj, path6) {
+  if (!path6)
     return obj;
-  return path4.reduce((acc, key) => acc?.[key], obj);
+  return path6.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -24167,11 +24167,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path4, issues) {
+function prefixIssues(path6, issues) {
   return issues.map((iss) => {
     var _a2;
     (_a2 = iss).path ?? (_a2.path = []);
-    iss.path.unshift(path4);
+    iss.path.unshift(path6);
     return iss;
   });
 }
@@ -33907,6 +33907,24 @@ var Storage = class {
     if (!fs.existsSync(defaultPolicyPath)) {
       this.writeJson(defaultPolicyPath, DEFAULT_POLICY);
     }
+    const arosDir = path.join(this.projectDir, ".aros");
+    fs.mkdirSync(path.join(arosDir, "modules", "checks"), { recursive: true });
+    fs.mkdirSync(path.join(arosDir, "modules", "criteria"), { recursive: true });
+    fs.mkdirSync(path.join(arosDir, "modules", "policies"), { recursive: true });
+    const registryPath = path.join(arosDir, "registry.json");
+    if (!fs.existsSync(registryPath)) {
+      fs.writeFileSync(registryPath, JSON.stringify({
+        sources: [{
+          name: "official",
+          url: "https://github.com/aros-project/modules.git",
+          branch: "main"
+        }]
+      }, null, 2));
+    }
+    const lockPath = path.join(arosDir, "lock.json");
+    if (!fs.existsSync(lockPath)) {
+      fs.writeFileSync(lockPath, JSON.stringify({ version: 1, locked: {} }, null, 2));
+    }
     this.ensureGitignore();
   }
   ensureGitignore() {
@@ -34246,7 +34264,7 @@ var Storage = class {
 };
 
 // ../server/dist/pipeline/engine.js
-import * as path3 from "path";
+import * as path5 from "path";
 
 // ../server/dist/pipeline/objective.js
 var DEFAULT_PROFANITY_WORDS = [
@@ -34579,13 +34597,164 @@ function getDriver(name) {
   return drivers.get(name);
 }
 
+// ../server/dist/modules/check-loader.js
+import * as fs2 from "fs";
+import * as path3 from "path";
+import { pathToFileURL } from "url";
+
+// ../server/dist/modules/schemas.js
+var baseManifest = external_exports.object({
+  name: external_exports.string().min(1),
+  version: external_exports.string().min(1),
+  description: external_exports.string()
+});
+var binaryDep = external_exports.object({
+  name: external_exports.string(),
+  versionCheck: external_exports.string(),
+  minVersion: external_exports.string().optional(),
+  install: external_exports.record(external_exports.string()).optional()
+});
+var envDep = external_exports.object({
+  name: external_exports.string(),
+  required: external_exports.boolean().default(true),
+  description: external_exports.string().optional()
+});
+var npmDep = external_exports.object({
+  name: external_exports.string(),
+  minVersion: external_exports.string().optional()
+});
+var dependencies = external_exports.object({
+  binaries: external_exports.array(binaryDep).default([]),
+  env: external_exports.array(envDep).default([]),
+  npm: external_exports.array(npmDep).default([])
+});
+var checkManifestSchema = baseManifest.extend({
+  type: external_exports.literal("check"),
+  supportedTypes: external_exports.array(external_exports.string()).min(1),
+  configSchema: external_exports.record(external_exports.unknown()).default({}),
+  dependencies,
+  entrypoint: external_exports.string()
+});
+var criterionManifestSchema = baseManifest.extend({
+  type: external_exports.literal("criterion"),
+  applicableTo: external_exports.array(external_exports.string()).min(1),
+  defaultWeight: external_exports.number().positive(),
+  scale: external_exports.number().positive(),
+  promptGuidance: external_exports.string().min(1)
+});
+var policyCheckEntry = external_exports.object({
+  name: external_exports.string(),
+  config: external_exports.record(external_exports.unknown()).default({}),
+  severity: external_exports.enum(["blocking", "warning"])
+});
+var policyCriterionEntry = external_exports.object({
+  name: external_exports.string(),
+  description: external_exports.string().optional(),
+  weight: external_exports.number().positive(),
+  scale: external_exports.number().positive()
+});
+var policyBody = external_exports.object({
+  name: external_exports.string(),
+  stages: external_exports.array(external_exports.string()).min(1),
+  max_revisions: external_exports.number().int().min(0),
+  objective: external_exports.object({
+    checks: external_exports.array(policyCheckEntry),
+    fail_threshold: external_exports.number().int().min(1)
+  }).optional(),
+  subjective: external_exports.object({
+    criteria: external_exports.array(policyCriterionEntry),
+    pass_threshold: external_exports.number()
+  }).optional(),
+  human: external_exports.object({ required: external_exports.boolean() }).optional()
+});
+var policyManifestSchema = baseManifest.extend({
+  type: external_exports.literal("policy"),
+  requires: external_exports.object({
+    checks: external_exports.array(external_exports.string()).default([]),
+    criteria: external_exports.array(external_exports.string()).default([])
+  }),
+  policy: policyBody
+});
+
+// ../server/dist/modules/check-loader.js
+function loadCheckManifest(modulesDir, name) {
+  const manifestPath = path3.join(modulesDir, "checks", name, "manifest.json");
+  const raw = JSON.parse(fs2.readFileSync(manifestPath, "utf-8"));
+  return checkManifestSchema.parse(raw);
+}
+async function loadCheck(name, modulesDir) {
+  const entrypoint = path3.join(modulesDir, "checks", name, "check.js");
+  const mod = await import(pathToFileURL(entrypoint).href);
+  return mod.default;
+}
+async function loadAllChecks(modulesDir) {
+  const checks = /* @__PURE__ */ new Map();
+  const checksDir = path3.join(modulesDir, "checks");
+  if (!fs2.existsSync(checksDir))
+    return checks;
+  for (const entry of fs2.readdirSync(checksDir)) {
+    const stat = fs2.statSync(path3.join(checksDir, entry));
+    if (!stat.isDirectory())
+      continue;
+    const jsPath = path3.join(checksDir, entry, "check.js");
+    if (!fs2.existsSync(jsPath))
+      continue;
+    checks.set(entry, await loadCheck(entry, modulesDir));
+  }
+  return checks;
+}
+
+// ../server/dist/modules/criteria-loader.js
+import * as fs3 from "fs";
+import * as path4 from "path";
+function loadCriteriaLibrary(modulesDir) {
+  const library = /* @__PURE__ */ new Map();
+  const criteriaDir = path4.join(modulesDir, "criteria");
+  if (!fs3.existsSync(criteriaDir))
+    return library;
+  for (const entry of fs3.readdirSync(criteriaDir)) {
+    const manifestPath = path4.join(criteriaDir, entry, "manifest.json");
+    if (!fs3.existsSync(manifestPath))
+      continue;
+    const raw = JSON.parse(fs3.readFileSync(manifestPath, "utf-8"));
+    const parsed = criterionManifestSchema.parse(raw);
+    library.set(parsed.name, {
+      name: parsed.name,
+      description: parsed.description,
+      applicableTo: parsed.applicableTo,
+      defaultWeight: parsed.defaultWeight,
+      scale: parsed.scale,
+      promptGuidance: parsed.promptGuidance
+    });
+  }
+  return library;
+}
+
+// ../server/dist/modules/mime-match.js
+function matchMime(contentType, pattern) {
+  if (pattern === "*/*")
+    return true;
+  if (pattern.endsWith("/*")) {
+    const prefix = pattern.slice(0, pattern.indexOf("/"));
+    return contentType.startsWith(prefix + "/");
+  }
+  return contentType === pattern;
+}
+
 // ../server/dist/pipeline/engine.js
 var PipelineEngine = class {
   storage;
   emitSSE;
+  checkModules = /* @__PURE__ */ new Map();
+  criteriaLibrary = /* @__PURE__ */ new Map();
   constructor(storage2, emitSSE) {
     this.storage = storage2;
     this.emitSSE = emitSSE;
+  }
+  async initModules() {
+    const modulesDir = path5.join(this.storage.projectDir, ".aros", "modules");
+    this.checkModules = await loadAllChecks(modulesDir);
+    this.criteriaLibrary = loadCriteriaLibrary(modulesDir);
   }
   // ---- Public API ----
   /**
@@ -34800,6 +34969,16 @@ var PipelineEngine = class {
     if (!objectiveConfig) {
       return null;
     }
+    if (this.checkModules.size > 0) {
+      const passed = await this.runObjectiveWithModules(id, policy);
+      if (!passed) {
+        return {
+          stage: "revision_requested",
+          message: "Objective checks failed"
+        };
+      }
+      return null;
+    }
     const files = await this.storage.listFiles(id);
     const fileInputs = await Promise.all(files.map(async (f) => {
       const { content } = await this.storage.readFile(id, f.filename);
@@ -34853,6 +35032,80 @@ var PipelineEngine = class {
       };
     }
     return null;
+  }
+  async runObjectiveWithModules(id, policy) {
+    const files = await this.storage.listFiles(id);
+    const brief = (await this.storage.readMeta(id)).brief;
+    const modulesDir = path5.join(this.storage.projectDir, ".aros", "modules");
+    const results = [];
+    for (const policyCheck of policy.objective?.checks ?? []) {
+      const mod = this.checkModules.get(policyCheck.name);
+      if (!mod) {
+        results.push({
+          name: policyCheck.name,
+          passed: false,
+          severity: policyCheck.severity,
+          details: `Module not installed: ${policyCheck.name}`,
+          file: null
+        });
+        continue;
+      }
+      const manifest = loadCheckManifest(modulesDir, policyCheck.name);
+      const fileEntries = [];
+      for (const f of files) {
+        const ct = f.content_type || detectContentType(f.filename);
+        if (manifest.supportedTypes.some((p) => matchMime(ct, p))) {
+          const data = await this.storage.readFile(id, f.filename);
+          fileEntries.push({
+            filename: f.filename,
+            content: data.content,
+            contentType: ct,
+            sizeBytes: f.size_bytes
+          });
+        }
+      }
+      if (fileEntries.length === 0)
+        continue;
+      const checkResults = await mod.execute({
+        files: fileEntries,
+        config: policyCheck.config ?? {},
+        brief,
+        projectDir: this.storage.projectDir
+      });
+      for (const r of checkResults) {
+        results.push({ ...r, severity: policyCheck.severity });
+      }
+    }
+    await this.storage.writeObjectiveResults(id, results);
+    const blockingFailures = results.filter((r) => !r.passed && r.severity === "blocking");
+    const threshold = policy.objective?.fail_threshold ?? 1;
+    if (blockingFailures.length >= threshold) {
+      const allFailures = results.filter((r) => !r.passed);
+      const feedback = {
+        stage: "objective",
+        decision: "revision_requested",
+        summary: `Objective checks failed: ${blockingFailures.length} blocking failure(s).`,
+        issues: allFailures.map((r) => ({
+          file: r.file ?? null,
+          location: "",
+          category: r.name,
+          severity: r.severity === "blocking" ? "critical" : "minor",
+          description: r.details,
+          suggestion: r.suggestions?.[0] ?? ""
+        })),
+        reviewer: "objective-pipeline",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await this.storage.writeFeedback(id, feedback);
+      await this.storage.updateStatus(id, {
+        stage: "revision_requested",
+        rejecting_stage: "objective",
+        entered_stage_at: (/* @__PURE__ */ new Date()).toISOString()
+      });
+      this.emit("deliverable:stage_changed", { id, to_stage: "revision_requested" });
+      return false;
+    }
+    return true;
   }
   async runSubjectiveStage(id, policy, now) {
     const subjectiveConfig = policy.subjective;
@@ -34959,7 +35212,7 @@ var PipelineEngine = class {
   }
 };
 function detectContentType(filename) {
-  const ext = path3.extname(filename).toLowerCase();
+  const ext = path5.extname(filename).toLowerCase();
   const map = {
     ".txt": "text/plain",
     ".md": "text/markdown",
