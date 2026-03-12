@@ -6,8 +6,6 @@ import { getDriver } from "../notifications/driver.js";
 import { loadAllChecks, loadCheckManifest } from "../modules/check-loader.js";
 import { loadCriteriaLibrary } from "../modules/criteria-loader.js";
 import { matchMime } from "../modules/mime-match.js";
-import { buildSubjectivePrompt } from "../modules/subjective/prompt-builder.js";
-import { parseSubjectiveResponse, computeWeightedScore } from "../modules/subjective/response-parser.js";
 import type {
   CheckModule,
   CriterionDef,
@@ -47,9 +45,6 @@ export class PipelineEngine {
     }
 
     const policy = await this.storage.readPolicy(meta.policy);
-
-    // Emit submitted SSE
-    this.emit("deliverable:submitted", { id, title: meta.title });
 
     // Emit submitted SSE
     this.emit("deliverable:submitted", { id, title: meta.title });

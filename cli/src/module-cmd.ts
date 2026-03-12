@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
 import * as os from "node:os";
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 import { Command } from "commander";
 import { addModule } from "@aros/server/modules/add.js";
 import {
@@ -127,7 +127,7 @@ export function moduleCommands(program: Command) {
         let allGood = true;
         for (const bin of deps.binaries ?? []) {
           try {
-            execSync(`which ${bin.name}`, { stdio: "pipe" });
+            execFileSync("which", [bin.name], { stdio: "pipe" });
             console.log(`  ✓ ${name}: ${bin.name} found`);
           } catch {
             console.log(`  ✗ ${name}: ${bin.name} not found — install with: ${bin.install?.macos ?? bin.install?.script ?? "unknown"}`);
@@ -136,7 +136,7 @@ export function moduleCommands(program: Command) {
         }
         for (const npmDep of deps.npm ?? []) {
           try {
-            execSync(`npm ls ${npmDep.name}`, { stdio: "pipe" });
+            execFileSync("npm", ["ls", npmDep.name], { stdio: "pipe" });
             console.log(`  ✓ ${name}: npm ${npmDep.name} found`);
           } catch {
             console.log(`  ✗ ${name}: npm ${npmDep.name} not found${npmDep.minVersion ? ` (requires >=${npmDep.minVersion})` : ""}`);
