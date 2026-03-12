@@ -43686,8 +43686,12 @@ async function serve(projectDir, onReady) {
 function findDashboardDist() {
   const here = new URL(".", import.meta.url).pathname;
   const candidates = [
+    // Bundled npx install: cli/dist/ → dashboard/dist/
     path5.resolve(here, "../../dashboard/dist"),
-    path5.resolve(here, "../../../dashboard/dist")
+    // Development: cli/src/ or cli/dist/ → dashboard/dist/
+    path5.resolve(here, "../../../dashboard/dist"),
+    // Monorepo root: repo/dashboard/dist/
+    path5.resolve(here, "../../../../dashboard/dist")
   ];
   for (const dir of candidates) {
     try {
@@ -43809,18 +43813,26 @@ async function firstRunSetup(projectDir) {
   }
   return result;
 }
+function openBrowser(url) {
+  try {
+    const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+    execSync(`${cmd} ${url}`, { stdio: "ignore" });
+  } catch {
+  }
+}
 function printBanner(port, projectDir, startMs, firstRun) {
   const elapsed = Math.round(performance.now() - startMs);
+  const url = `http://localhost:${port}/`;
   console.log();
   console.log(
     `  ${import_picocolors3.default.green(import_picocolors3.default.bold("AROS"))} ${import_picocolors3.default.green(`v${VERSION2}`)}  ${import_picocolors3.default.dim(`ready in ${import_picocolors3.default.bold(String(elapsed))} ms`)}`
   );
   console.log();
   console.log(
-    `  ${import_picocolors3.default.green("\u279C")}  ${import_picocolors3.default.bold("Local")}:    ${import_picocolors3.default.cyan(`http://localhost:${import_picocolors3.default.bold(String(port))}/`)}`
+    `  ${import_picocolors3.default.green("\u279C")}  ${import_picocolors3.default.bold("Dashboard")}:  ${import_picocolors3.default.cyan(`http://localhost:${import_picocolors3.default.bold(String(port))}/`)}`
   );
   console.log(
-    `  ${import_picocolors3.default.green("\u279C")}  ${import_picocolors3.default.bold("Project")}:  ${import_picocolors3.default.dim(projectDir)}`
+    `  ${import_picocolors3.default.green("\u279C")}  ${import_picocolors3.default.bold("Project")}:    ${import_picocolors3.default.dim(projectDir)}`
   );
   if (firstRun?.configured) {
     console.log();
@@ -43837,6 +43849,9 @@ function printBanner(port, projectDir, startMs, firstRun) {
     }
   }
   console.log();
+  if (firstRun) {
+    openBrowser(url);
+  }
 }
 var program2 = new Command();
 program2.name("aros").description("AROS \u2014 Agent Review Orchestration Service").version(VERSION2);

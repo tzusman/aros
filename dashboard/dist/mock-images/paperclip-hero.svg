@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="clip1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg1)"/>
+  <!-- Decorative circles -->
+  <circle cx="850" cy="200" r="180" fill="#e94560" opacity="0.08"/>
+  <circle cx="200" cy="850" r="140" fill="#533483" opacity="0.12"/>
+  <circle cx="540" cy="540" r="320" fill="#e94560" opacity="0.03"/>
+  <!-- Paperclip icon -->
+  <g transform="translate(390, 200)">
+    <path d="M150 80 C150 36, 186 0, 230 0 L230 0 C274 0, 310 36, 310 80 L310 420 C310 486, 256 540, 190 540 L190 540 C124 540, 70 486, 70 420 L70 160 C70 116, 106 80, 150 80 L150 80 Z" fill="none" stroke="url(#clip1)" stroke-width="28" stroke-linecap="round"/>
+  </g>
+  <!-- Company name -->
+  <text x="540" y="820" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="-2">PaperclipAI</text>
+  <!-- Tagline -->
+  <text x="540" y="880" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="#a0a0b8" text-anchor="middle" letter-spacing="4">HOLD EVERYTHING TOGETHER</text>
+  <!-- Badge -->
+  <rect x="390" y="920" width="300" height="48" rx="24" fill="#e94560"/>
+  <text x="540" y="951" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="2">LAUNCHING Q2 2026</text>
+</svg>

@@ -3,5 +3,6 @@
 node_modules/
 dist/
 !cli/dist/
+!dashboard/dist/
 *.tsbuildinfo
 .env

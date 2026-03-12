@@ -81,11 +81,14 @@ export async function serve(projectDir: string, onReady?: (port: number) => void
 }
 
 function findDashboardDist(): string | undefined {
-  // Try several locations relative to cli package
   const here = new URL(".", import.meta.url).pathname;
   const candidates = [
+    // Bundled npx install: cli/dist/ → dashboard/dist/
     path.resolve(here, "../../dashboard/dist"),
+    // Development: cli/src/ or cli/dist/ → dashboard/dist/
     path.resolve(here, "../../../dashboard/dist"),
+    // Monorepo root: repo/dashboard/dist/
+    path.resolve(here, "../../../../dashboard/dist"),
   ];
   for (const dir of candidates) {
     try {

@@ -152,6 +152,15 @@ async function firstRunSetup(projectDir: string): Promise<FirstRunResult> {
   return result;
 }
 
+function openBrowser(url: string): void {
+  try {
+    const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+    execSync(`${cmd} ${url}`, { stdio: "ignore" });
+  } catch {
+    // Non-fatal — user can open manually
+  }
+}
+
 function printBanner(
   port: number,
   projectDir: string,
@@ -159,6 +168,7 @@ function printBanner(
   firstRun: FirstRunResult | null
 ): void {
   const elapsed = Math.round(performance.now() - startMs);
+  const url = `http://localhost:${port}/`;
 
   console.log();
   console.log(
@@ -166,10 +176,10 @@ function printBanner(
   );
   console.log();
   console.log(
-    `  ${pc.green("➜")}  ${pc.bold("Local")}:    ${pc.cyan(`http://localhost:${pc.bold(String(port))}/`)}`
+    `  ${pc.green("➜")}  ${pc.bold("Dashboard")}:  ${pc.cyan(`http://localhost:${pc.bold(String(port))}/`)}`
   );
   console.log(
-    `  ${pc.green("➜")}  ${pc.bold("Project")}:  ${pc.dim(projectDir)}`
+    `  ${pc.green("➜")}  ${pc.bold("Project")}:    ${pc.dim(projectDir)}`
   );
 
   if (firstRun?.configured) {
@@ -188,6 +198,10 @@ function printBanner(
   }
 
   console.log();
+
+  if (firstRun) {
+    openBrowser(url);
+  }
 }
 
 const program = new Command();
