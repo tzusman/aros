@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Storage } from "@aros/server/storage.js";
-import * as fs from "fs";
+import { readFile } from "fs/promises";
 import * as path from "path";
 
 export function registerListPolicies(server: McpServer, storage: Storage): void {
@@ -18,10 +18,14 @@ export function registerListPolicies(server: McpServer, storage: Storage): void 
             // Read full manifest for usage_hint
             let usage_hint: string | undefined;
             try {
+              // Guard against path traversal via unsanitized policy name
+              if (/[/\\]|\.\./.test(name)) {
+                throw new Error(`Unsafe policy name: ${name}`);
+              }
               const manifestPath = path.join(
                 storage.projectDir, ".aros", "modules", "policies", name, "manifest.json"
               );
-              const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+              const manifest = JSON.parse(await readFile(manifestPath, "utf-8"));
               usage_hint = manifest.usage_hint;
             } catch { /* no manifest — installed before usage_hint existed */ }
             return {
