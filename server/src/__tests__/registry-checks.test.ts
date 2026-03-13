@@ -214,3 +214,130 @@ describe("heading-structure", () => {
     expect(results[0].details).toContain("no body text");
   });
 });
+
+describe("subject-line-length", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/subject-line-length/check.ts")).default;
+  });
+
+  it("passes subject line in range", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("email.md", "Your order ships tomorrow\nPreview text here\n\nBody content")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails subject line too long", async () => {
+    const long = "A".repeat(80);
+    const results = await mod.execute(makeCtx({
+      files: [textFile("email.md", `${long}\nPreview\n\nBody`)],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("80");
+  });
+
+  it("fails subject line too short", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("email.md", "Hi\nPreview\n\nBody")],
+      config: { min_chars: 10 },
+    }));
+    expect(results[0].passed).toBe(false);
+  });
+
+  it("uses custom config", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("email.md", "Short but ok\nPreview\n\nBody")],
+      config: { min_chars: 5, max_chars: 20 },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+});
+
+describe("meta-length", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/meta-length/check.ts")).default;
+  });
+
+  it("passes valid frontmatter meta", async () => {
+    const content = `---\nmeta_title: ${" ".repeat(0)}${"A".repeat(55)}\nmeta_description: ${"B".repeat(150)}\n---\n# Page`;
+    const results = await mod.execute(makeCtx({ files: [textFile("page.md", content)] }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails meta_title too long", async () => {
+    const content = `---\nmeta_title: ${"A".repeat(80)}\nmeta_description: ${"B".repeat(150)}\n---\n# Page`;
+    const results = await mod.execute(makeCtx({ files: [textFile("page.md", content)] }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("title");
+  });
+
+  it("fails meta_description too short", async () => {
+    const content = `---\nmeta_title: ${"A".repeat(55)}\nmeta_description: Short\n---\n# Page`;
+    const results = await mod.execute(makeCtx({ files: [textFile("page.md", content)] }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("description");
+  });
+
+  it("falls back to H1 and first paragraph when no frontmatter", async () => {
+    const title = "A".repeat(55);
+    const desc = "B".repeat(150);
+    const content = `# ${title}\n\n${desc}\n\nMore content here.`;
+    const results = await mod.execute(makeCtx({ files: [textFile("page.md", content)] }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("passes when no meta found (skip)", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Just some text with no headings or frontmatter.")],
+    }));
+    expect(results[0].passed).toBe(true);
+    expect(results[0].details).toContain("skip");
+  });
+});
+
+describe("required-sections", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/required-sections/check.ts")).default;
+  });
+
+  it("passes when all sections present", async () => {
+    const content = "# Headline\n\n## Subheadline\n\nText\n\n## Call to Action\n\nBuy now\n\n## Social Proof\n\n5 stars";
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", content)],
+      config: { sections: ["headline", "subheadline", "call to action", "social proof"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails when sections are missing", async () => {
+    const content = "# Headline\n\n## Subheadline\n\nText";
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", content)],
+      config: { sections: ["headline", "subheadline", "call to action", "social proof"] },
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("call to action");
+    expect(results[0].details).toContain("social proof");
+  });
+
+  it("is case-insensitive", async () => {
+    const content = "## CALL TO ACTION\n\nBuy now";
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", content)],
+      config: { sections: ["call to action"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("finds sections in JSON keys", async () => {
+    const content = JSON.stringify({ title: "Product", description: "Great", features: ["Fast"] });
+    const results = await mod.execute(makeCtx({
+      files: [textFile("listing.json", content)],
+      config: { sections: ["title", "description", "features"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+});
