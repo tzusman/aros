@@ -158,7 +158,7 @@ All new checks follow the same pattern: `registry/checks/{name}/manifest.json` +
 - [ ] **Step 1: Create the test file with imports**
 
 ```typescript
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import type { CheckContext } from "@aros/types";
 
 function makeCtx(overrides: Partial<CheckContext> & { files: CheckContext["files"] }): CheckContext {
@@ -416,6 +416,21 @@ describe("link-validation", () => {
     expect(results[0].passed).toBe(true);
   });
 
+  it("detects broken anchor links", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "See the [details](#nonexistent-section) for more info.\n\n## Intro\n\nText here")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("nonexistent-section");
+  });
+
+  it("passes valid anchor links", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "See the [details](#intro) for more info.\n\n## Intro\n\nText here")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
   it("allows localhost when configured", async () => {
     const results = await mod.execute(makeCtx({
       files: [textFile("page.md", "Test at http://localhost:3000")],
@@ -475,6 +490,21 @@ Create `registry/checks/link-validation/check.ts`:
 import type { CheckContext, CheckResult } from "@aros/types";
 
 const URL_REGEX = /(?:https?:\/\/|mailto:)[^\s)<>"'`]*/gi;
+const ANCHOR_REGEX = /\(#([a-zA-Z0-9_-]+)\)/g;
+
+function extractHeadingIds(text: string): Set<string> {
+  const ids = new Set<string>();
+  // Markdown headings → slug (lowercase, spaces to hyphens, strip non-alphanum)
+  for (const match of text.matchAll(/^#{1,6}\s+(.+)$/gm)) {
+    const slug = match[1].trim().toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+    ids.add(slug);
+  }
+  // HTML id attributes
+  for (const match of text.matchAll(/\bid=["']([^"']+)["']/g)) {
+    ids.add(match[1]);
+  }
+  return ids;
+}
 
 export default {
   async execute(ctx: CheckContext): Promise<CheckResult[]> {
@@ -489,11 +519,23 @@ export default {
       }
 
       const urls = file.content.match(URL_REGEX) ?? [];
-      if (urls.length === 0) {
+      const anchors = [...file.content.matchAll(ANCHOR_REGEX)].map((m) => m[1]);
+      if (urls.length === 0 && anchors.length === 0) {
         return { name: "link-validation", file: file.filename, passed: true, details: "No URLs found." };
       }
 
       const issues: string[] = [];
+
+      // Check anchor links against heading IDs
+      if (anchors.length > 0) {
+        const headingIds = extractHeadingIds(file.content);
+        for (const anchor of anchors) {
+          if (!headingIds.has(anchor)) {
+            issues.push(`Broken anchor: #${anchor}`);
+          }
+        }
+      }
+
       for (const url of urls) {
         // Bare protocol
         if (/^https?:\/\/?$/.test(url)) {
@@ -615,6 +657,14 @@ describe("heading-structure", () => {
     }));
     expect(results[0].passed).toBe(true);
   });
+
+  it("warns on heading-only content with no body text between", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n## Section One\n## Section Two\n### Sub")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("no body text");
+  });
 });
 ```
 
@@ -702,6 +752,23 @@ export default {
           if (levels[i] > levels[i - 1] + 1) {
             issues.push(`Heading level skip: H${levels[i - 1]} → H${levels[i]}`);
           }
+        }
+      }
+
+      // Check for heading-only content (no body text between headings)
+      const lines = file.content.split("\n");
+      let consecutiveHeadings = 0;
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue; // skip blank lines
+        if (/^#{1,6}\s+/.test(trimmed) || /^<h[1-6]\b/i.test(trimmed)) {
+          consecutiveHeadings++;
+          if (consecutiveHeadings >= 3) {
+            issues.push("Multiple consecutive headings with no body text between them");
+            break;
+          }
+        } else {
+          consecutiveHeadings = 0;
         }
       }
 
