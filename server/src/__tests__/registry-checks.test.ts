@@ -153,3 +153,64 @@ describe("link-validation", () => {
     expect(results[0].passed).toBe(false);
   });
 });
+
+describe("heading-structure", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/heading-structure/check.ts")).default;
+  });
+
+  it("passes valid heading hierarchy", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n\nIntro text\n\n## Section\n\nBody\n\n### Sub\n\nMore")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails when H1 is missing", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "## Section\n\nBody text")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("H1");
+  });
+
+  it("fails when heading levels are skipped", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n\n### Skipped H2\n\nBody")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("skip");
+  });
+
+  it("fails when multiple H1s present", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n\nText\n\n# Another Title\n\nMore")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("H1");
+  });
+
+  it("allows skip levels when configured", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n\n### Skipped H2\n\nBody")],
+      config: { allow_skip_levels: true },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("handles HTML headings", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.html", "<h1>Title</h1><p>Intro</p><h2>Section</h2>")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("warns on heading-only content with no body text between", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "# Title\n## Section One\n## Section Two\n### Sub")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("no body text");
+  });
+});
