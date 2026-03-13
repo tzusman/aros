@@ -43,11 +43,9 @@ export function ImageCard({
       }}
       className={cn(
         "bg-muted rounded-xl overflow-hidden text-left transition-all cursor-pointer",
-        isSelected
+        isSelected || isInspecting
           ? "ring-2 ring-primary shadow-lg shadow-primary/10"
-          : isInspecting
-            ? "ring-2 ring-primary shadow-lg shadow-primary/10"
-            : "ring-1 ring-border hover:ring-text-muted"
+          : "ring-1 ring-border hover:ring-text-muted"
       )}
     >
       <div className="aspect-video bg-gradient-to-br from-surface to-border flex items-center justify-center overflow-hidden relative">
@@ -75,6 +73,7 @@ export function ImageCard({
               <Maximize2 className="w-3 h-3 text-white" />
             </button>
             <div
+              aria-hidden="true"
               className={cn(
                 "absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all",
                 isSelected
