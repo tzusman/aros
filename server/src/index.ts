@@ -9,6 +9,7 @@ import { deliverableRoutes } from "./routes/deliverables.js";
 import { fileRoutes } from "./routes/files.js";
 import { pipelineRoutes } from "./routes/pipeline.js";
 import { policyRoutes } from "./routes/policies.js";
+import { criteriaRoutes } from "./routes/criteria.js";
 import { errorHandler } from "./errors.js";
 
 export interface ServerOptions {
@@ -58,6 +59,7 @@ export function createServer(options: ServerOptions) {
   app.use("/api/deliverables", fileRoutes(storage));
   app.use("/api/pipeline", pipelineRoutes(storage));
   app.use("/api/policies", policyRoutes(storage));
+  app.use("/api/criteria", criteriaRoutes(storage));
 
   // 7. SSE endpoint
   app.get("/api/events", (req, res) => {

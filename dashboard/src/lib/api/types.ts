@@ -176,3 +176,16 @@ export interface SSEEvent {
 // --- Connection ---
 
 export type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
+
+// --- Custom Criteria ---
+
+export interface CustomCriterion {
+  name: string;
+  type: "criterion";
+  version: string;
+  description: string;
+  applicableTo: string[];
+  defaultWeight: number;
+  scale: number;
+  promptGuidance: string;
+}

@@ -5,6 +5,7 @@ import type {
   PipelineCounts,
   Policy,
   PolicySummary,
+  CustomCriterion,
 } from "./types";
 
 const API_URL = import.meta.env.VITE_AROS_API_URL || "/api";
@@ -83,5 +84,29 @@ export const api = {
 
   async deletePolicy(name: string): Promise<void> {
     await fetchJson(`/policies/${name}`, { method: "DELETE" });
+  },
+
+  // --- Custom Criteria ---
+
+  async listCustomCriteria(): Promise<CustomCriterion[]> {
+    return fetchJson("/criteria");
+  },
+
+  async createCriterion(criterion: CustomCriterion): Promise<CustomCriterion> {
+    return fetchJson("/criteria", {
+      method: "POST",
+      body: JSON.stringify(criterion),
+    });
+  },
+
+  async updateCriterion(name: string, criterion: CustomCriterion): Promise<CustomCriterion> {
+    return fetchJson(`/criteria/${encodeURIComponent(name)}`, {
+      method: "PUT",
+      body: JSON.stringify(criterion),
+    });
+  },
+
+  async deleteCriterion(name: string): Promise<void> {
+    await fetchJson(`/criteria/${encodeURIComponent(name)}`, { method: "DELETE" });
   },
 };
