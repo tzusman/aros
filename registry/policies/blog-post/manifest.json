@@ -1,0 +1,31 @@
+{
+  "name": "blog-post",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Review policy for SEO blog posts. Validates word count and formatting, then runs AI review for tone, readability, and originality before human approval.",
+  "requires": {
+    "checks": ["word-count", "profanity"],
+    "criteria": ["tone-alignment", "readability", "originality"]
+  },
+  "policy": {
+    "name": "blog-post",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "word-count", "config": { "min": 800, "max": 3000 }, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "tone-alignment", "description": "Does the writing match the target tone?", "weight": 2, "scale": 10 },
+        { "name": "readability", "description": "Is the content easy to read and well-structured?", "weight": 3, "scale": 10 },
+        { "name": "originality", "description": "Is the content original and insightful?", "weight": 2, "scale": 10 }
+      ],
+      "pass_threshold": 6.0
+    },
+    "human": { "required": true }
+  }
+}

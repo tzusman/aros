@@ -1,0 +1,12 @@
+{
+  "name": "file-size",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates file size is within maximum limit",
+  "supportedTypes": ["*/*"],
+  "configSchema": {
+    "max_mb": { "type": "number", "default": 10 }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

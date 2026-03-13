@@ -1,0 +1,61 @@
+{
+  "name": "instagram-ad",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Review policy for Instagram ad creatives. Validates image format, dimensions, and aspect ratios, then runs AI subjective review for brand fit and ad compliance before human approval.",
+  "requires": {
+    "checks": ["file-size", "format-check", "aspect-ratio", "profanity", "text-length"],
+    "criteria": ["visual-impact", "brand-consistency", "call-to-action", "platform-fit", "ad-compliance"]
+  },
+  "policy": {
+    "name": "instagram-ad",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        {
+          "name": "format-check",
+          "config": { "allowed": ["image/png", "image/jpeg", "image/jpg", "video/mp4"] },
+          "severity": "blocking"
+        },
+        {
+          "name": "file-size",
+          "config": { "max_mb": 30 },
+          "severity": "blocking"
+        },
+        {
+          "name": "aspect-ratio",
+          "config": {
+            "allowed_ratios": ["1:1", "4:5", "9:16", "1.91:1"],
+            "tolerance": 0.02
+          },
+          "severity": "blocking"
+        },
+        {
+          "name": "profanity",
+          "config": {},
+          "severity": "blocking"
+        },
+        {
+          "name": "text-length",
+          "config": { "max_chars": 2200 },
+          "severity": "warning"
+        }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "visual-impact", "description": "How attention-grabbing is the creative?", "weight": 3, "scale": 10 },
+        { "name": "brand-consistency", "description": "Does it match brand guidelines?", "weight": 2, "scale": 10 },
+        { "name": "call-to-action", "description": "Is there a clear, compelling CTA?", "weight": 2, "scale": 10 },
+        { "name": "platform-fit", "description": "Does it look native to Instagram?", "weight": 2, "scale": 10 },
+        { "name": "ad-compliance", "description": "Does it comply with Meta ad policies?", "weight": 3, "scale": 10 }
+      ],
+      "pass_threshold": 6.0
+    },
+    "human": {
+      "required": true
+    }
+  }
+}

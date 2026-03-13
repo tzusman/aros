@@ -1,0 +1,13 @@
+{
+  "name": "word-count",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates word count is within min/max bounds",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "min": { "type": "number", "default": 0 },
+    "max": { "type": "number", "default": 999999 }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

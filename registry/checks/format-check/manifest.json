@@ -1,0 +1,12 @@
+{
+  "name": "format-check",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates content type matches allowed list",
+  "supportedTypes": ["*/*"],
+  "configSchema": {
+    "allowed": { "type": "array", "items": { "type": "string" }, "default": [] }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}
