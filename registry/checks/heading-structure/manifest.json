@@ -1,0 +1,14 @@
+{
+  "name": "heading-structure",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates heading hierarchy in markdown or HTML content",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "require_h1": { "type": "boolean", "default": true },
+    "max_h1_count": { "type": "number", "default": 1 },
+    "allow_skip_levels": { "type": "boolean", "default": false }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

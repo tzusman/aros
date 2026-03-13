@@ -1,0 +1,63 @@
+{
+  "name": "social-ad",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Paid ad creatives across Instagram, Facebook, LinkedIn, Twitter/X",
+  "usage_hint": "Use for paid ad creatives across any social platform (Instagram, Facebook, LinkedIn, Twitter/X). Covers both the visual asset and accompanying ad copy. If the content is organic (not paid), use social-post instead.",
+  "requires": {
+    "checks": [
+      "format-check",
+      "file-size",
+      "aspect-ratio",
+      "placeholder-detection",
+      "profanity",
+      "link-validation",
+      "text-length",
+      "image-text-ratio"
+    ],
+    "criteria": [
+      "visual-impact",
+      "conversion-potential",
+      "ad-compliance",
+      "value-proposition-clarity",
+      "call-to-action",
+      "platform-native-craft",
+      "platform-fit",
+      "brand-consistency",
+      "urgency-authenticity"
+    ]
+  },
+  "policy": {
+    "name": "social-ad",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "format-check", "config": { "allowed": ["image/png", "image/jpeg", "video/mp4"] }, "severity": "blocking" },
+        { "name": "file-size", "config": { "max_mb": 30 }, "severity": "blocking" },
+        { "name": "aspect-ratio", "config": { "allowed_ratios": ["1:1", "4:5", "9:16", "1.91:1"] }, "severity": "blocking" },
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "text-length", "config": { "max_chars": 2200 }, "severity": "warning" },
+        { "name": "image-text-ratio", "config": { "max_text_percent": 20 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "visual-impact", "description": "Ads must stop the scroll in a competitive feed", "weight": 3, "scale": 10 },
+        { "name": "conversion-potential", "description": "Ads exist to drive measurable action", "weight": 3, "scale": 10 },
+        { "name": "ad-compliance", "description": "Non-compliant ads get rejected by platforms", "weight": 3, "scale": 10 },
+        { "name": "value-proposition-clarity", "description": "Unclear value means wasted ad spend", "weight": 2, "scale": 10 },
+        { "name": "call-to-action", "description": "CTA drives the click", "weight": 2, "scale": 10 },
+        { "name": "platform-native-craft", "description": "Native-feeling ads outperform obvious promotional content", "weight": 2, "scale": 10 },
+        { "name": "platform-fit", "description": "Each platform has distinct audience expectations", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Ad creative must align with brand identity", "weight": 2, "scale": 10 },
+        { "name": "urgency-authenticity", "description": "False urgency in ads increases cost-per-click and burns audiences", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

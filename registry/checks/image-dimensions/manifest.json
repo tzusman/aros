@@ -1,0 +1,15 @@
+{
+  "name": "image-dimensions",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates SVG dimensions via viewBox parsing",
+  "supportedTypes": ["image/svg+xml"],
+  "configSchema": {
+    "min_width": { "type": "number" },
+    "max_width": { "type": "number" },
+    "min_height": { "type": "number" },
+    "max_height": { "type": "number" }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

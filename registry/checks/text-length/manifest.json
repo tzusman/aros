@@ -1,0 +1,14 @@
+{
+  "name": "text-length",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates text character count is within limits (useful for ad copy, captions, headlines)",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "min_chars": { "type": "number", "default": 0 },
+    "max_chars": { "type": "number", "default": 2200 },
+    "field": { "type": "string", "default": "body", "description": "Which field to check (body, headline, etc.)" }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

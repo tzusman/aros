@@ -1,0 +1,10 @@
+{
+  "name": "accessibility-inclusivity",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Reading level, alt text, inclusive language, cognitive load",
+  "applicableTo": ["text/*", "image/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as an accessibility specialist assessing whether this content can be effectively consumed by the broadest possible audience. For text content: assess reading level — marketing content should target a 6th-8th grade reading level (Flesch-Kincaid), not because the audience is unsophisticated but because low cognitive load increases comprehension and conversion across all literacy levels. Check for jargon, idioms, and cultural references that assume specific background knowledge. Evaluate sentence complexity: are there run-on sentences or nested clauses that require re-reading? For visual content: verify that all images have descriptive alt text (not \"image1.png\"), that text-on-image has sufficient contrast (WCAG AA minimum 4.5:1 for body, 3:1 for large text), and that no information is conveyed through color alone. For all content: check for inclusive language — avoid gendered defaults, ableist metaphors (\"blind spot,\" \"falling on deaf ears\"), and assumptions about the reader's identity, family structure, or physical ability. Score 1-3 if reading level exceeds 10th grade, jargon is unexplained, images lack alt text, contrast is insufficient, or language contains exclusionary patterns. Score 4-6 if reading level is reasonable but inconsistent, alt text exists but is perfunctory (\"photo of product\"), contrast passes but marginally, or language is neutral but not actively inclusive. Score 7-10 if reading level is consistently accessible, alt text is descriptive and purposeful, contrast exceeds minimums, language is deliberately inclusive, and the content would be equally effective for someone using a screen reader, translating to another language, or reading in a noisy environment."
+}

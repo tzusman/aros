@@ -1,0 +1,57 @@
+{
+  "name": "email-campaign",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Marketing emails, newsletters, promotional drip sequences",
+  "usage_hint": "Use for promotional emails, newsletters, drip sequences, and any marketing email designed to drive clicks or purchases. Not for transactional emails or onboarding sequences.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "link-validation",
+      "profanity",
+      "subject-line-length",
+      "word-count"
+    ],
+    "criteria": [
+      "email-craft",
+      "conversion-potential",
+      "call-to-action",
+      "tone-alignment",
+      "readability",
+      "customer-empathy",
+      "brand-consistency",
+      "urgency-authenticity",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "email-campaign",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "subject-line-length", "config": { "min_chars": 20, "max_chars": 60 }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 50, "max": 1000 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "email-craft", "description": "Email is a high-noise channel; craft determines open and click-through", "weight": 3, "scale": 10 },
+        { "name": "conversion-potential", "description": "Marketing emails exist to drive action", "weight": 3, "scale": 10 },
+        { "name": "call-to-action", "description": "Every marketing email needs a clear next step", "weight": 2, "scale": 10 },
+        { "name": "tone-alignment", "description": "Tone mismatch erodes trust with the subscriber list", "weight": 2, "scale": 10 },
+        { "name": "readability", "description": "Emails are scanned on mobile in seconds", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Relevance is the primary driver of engagement", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Consistent brand voice builds subscriber trust", "weight": 2, "scale": 10 },
+        { "name": "urgency-authenticity", "description": "Manufactured urgency burns list trust", "weight": 1, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Baseline inclusivity for all subscribers", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.0
+    },
+    "human": { "required": true }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "aspect-ratio",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates image aspect ratio matches allowed ratios (e.g. 1:1, 4:5, 9:16)",
+  "supportedTypes": ["image/*"],
+  "configSchema": {
+    "allowed_ratios": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["1:1"],
+      "description": "Allowed aspect ratios (e.g. ['1:1', '4:5', '9:16', '1.91:1'])"
+    },
+    "tolerance": {
+      "type": "number",
+      "default": 0.02,
+      "description": "Ratio match tolerance (0.02 = 2%)"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

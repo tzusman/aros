@@ -1,0 +1,10 @@
+{
+  "name": "urgency-authenticity",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Use of urgency/scarcity without manipulation or dishonesty",
+  "applicableTo": ["text/*", "image/*"],
+  "defaultWeight": 1,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a consumer psychology specialist assessing whether urgency and scarcity signals are used ethically and effectively. Legitimate urgency is grounded in real constraints: actual inventory limits, genuine deadline-driven events, or time-bound economic conditions. Fabricated urgency — fake countdown timers, \"only 3 left\" on unlimited digital goods, perpetual \"ending soon\" sales — erodes trust and in many jurisdictions violates consumer protection law. Assess whether any urgency language is truthful, specific, and proportionate. Score 1-3 if urgency tactics are deceptive (fake scarcity, manufactured deadlines, pressure language designed to override rational decision-making) or if urgency is the primary persuasion mechanism rather than value. Score 4-6 if urgency is present and not dishonest but is vague (\"limited time\"), disproportionate to the actual stakes, or used as a crutch for otherwise weak copy. Score 7-10 if urgency is either absent (not every piece needs it) or grounded in specific, verifiable constraints, used sparingly, and layered on top of a strong value argument rather than substituting for one. Note: a score of 7+ is achievable with zero urgency language — the absence of manufactured pressure is itself a quality signal."
+}

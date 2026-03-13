@@ -1,0 +1,57 @@
+{
+  "name": "content-article",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "SEO blog posts, thought leadership, editorial content, guides, tutorials",
+  "usage_hint": "Use for blog posts, SEO articles, thought leadership, guides, and editorial content. The goal is organic discovery and audience building, not direct conversion or support.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "link-validation",
+      "profanity",
+      "heading-structure",
+      "meta-length",
+      "word-count"
+    ],
+    "criteria": [
+      "originality",
+      "readability",
+      "seo-effectiveness",
+      "information-architecture",
+      "tone-alignment",
+      "customer-empathy",
+      "value-proposition-clarity",
+      "brand-consistency"
+    ]
+  },
+  "policy": {
+    "name": "content-article",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "heading-structure", "config": { "require_h1": true, "max_h1_count": 1, "allow_skip_levels": false }, "severity": "warning" },
+        { "name": "meta-length", "config": { "title_min": 50, "title_max": 60, "desc_min": 140, "desc_max": 160 }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 800, "max": 3000 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "originality", "description": "Generic content ranks poorly and earns no audience loyalty", "weight": 3, "scale": 10 },
+        { "name": "readability", "description": "Long-form content must sustain engagement to reduce bounce rate", "weight": 3, "scale": 10 },
+        { "name": "seo-effectiveness", "description": "Organic search is the primary distribution channel for content", "weight": 3, "scale": 10 },
+        { "name": "information-architecture", "description": "Well-structured articles rank better and are shared more", "weight": 2, "scale": 10 },
+        { "name": "tone-alignment", "description": "Consistent editorial voice builds audience trust over time", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Content that answers real questions earns search intent match", "weight": 2, "scale": 10 },
+        { "name": "value-proposition-clarity", "description": "Even editorial content should demonstrate brand expertise", "weight": 1, "scale": 10 },
+        { "name": "brand-consistency", "description": "Each article contributes to the brand's content identity", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.0
+    },
+    "human": { "required": true }
+  }
+}

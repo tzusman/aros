@@ -1,0 +1,14 @@
+{
+  "name": "subject-line-length",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates email subject line character count for deliverability and open rates",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "min_chars": { "type": "number", "default": 20 },
+    "max_chars": { "type": "number", "default": 60 },
+    "field": { "type": "string", "default": "subject" }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

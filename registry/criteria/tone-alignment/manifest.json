@@ -1,0 +1,10 @@
+{
+  "name": "tone-alignment",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Match between content voice and the brief's specified tone",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a senior copywriter assessing whether the voice in this piece matches the tone specified in the brief — and sustains it without breaking character. Tone is not just \"formal vs. casual\" — it's the intersection of formality, energy, warmth, and authority, calibrated to the specific audience and context. First, identify the target tone from the brief. Then assess consistency: a piece that opens with punchy, confident copy and drifts into passive, hedging language in the middle has broken tone. Check for register mismatches: jargon in casual content, slang in professional content, humor in serious contexts, or stiffness in content meant to feel approachable. Evaluate whether the tone serves the content's goal — a help article should feel calm and competent, a product launch should feel energized and confident, a support response should feel warm and capable. Assess sentence rhythm: tone lives in the cadence as much as word choice — short, punchy sentences create energy; longer, flowing sentences create warmth; monotonous sentence length creates boredom regardless of word choice. Score 1-3 if the tone contradicts the brief's direction, shifts erratically within the piece, or is inappropriate for the audience and context (too casual for enterprise, too formal for consumer, too energetic for a complaint response). Score 4-6 if the tone generally matches the brief but is inconsistent — correct in the headline but drifting in the body, appropriate vocabulary but monotonous rhythm, or on-target for the audience but generic rather than distinctive. Score 7-10 if the tone precisely matches the brief's direction, sustains consistently from first word to last, varies sentence rhythm to create energy and flow, matches the formality and warmth the audience expects, and feels like a distinct voice rather than default copy."
+}

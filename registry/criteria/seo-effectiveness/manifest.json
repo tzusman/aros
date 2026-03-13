@@ -1,0 +1,10 @@
+{
+  "name": "seo-effectiveness",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Keyword integration, search intent alignment, snippet-readiness",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a senior SEO strategist assessing whether this content is engineered to capture search intent, not just sprinkled with keywords. Start with intent alignment: does the content's structure and depth match what a searcher with this query actually wants? A \"how to\" query demands a tutorial, not a product pitch. A comparison query demands honest evaluation, not a sales page. Assess keyword integration: primary terms should appear in the title, H1, first 100 words, and naturally throughout — but never at the expense of readability. Check for snippet-readiness: does the content contain a concise, direct answer to the implied question within the first 200 words that could be extracted as a featured snippet? Evaluate internal linking opportunity and whether the content builds topical authority. Score 1-3 if there is no discernible keyword strategy, the content doesn't match likely search intent, or keywords are stuffed unnaturally. Score 4-6 if there is a plausible target keyword present in key positions but intent alignment is imperfect, the content lacks structural SEO elements (no subheadings, no snippet-ready answer, thin depth), or keyword usage feels mechanical. Score 7-10 if the content is clearly engineered for a specific search intent, keywords are integrated naturally, the structure supports featured snippet extraction, heading hierarchy maps to related search queries, and the depth of coverage would satisfy a searcher without needing to click back and try another result."
+}

@@ -1,0 +1,16 @@
+{
+  "name": "image-text-ratio",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Estimates the percentage of an SVG image occupied by text elements",
+  "supportedTypes": ["image/svg+xml"],
+  "configSchema": {
+    "max_text_percent": {
+      "type": "number",
+      "default": 20,
+      "description": "Maximum allowed text area percentage (Meta guideline: 20%)"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "required-sections",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates that named sections or fields are present in the deliverable",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "sections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Section headings or field names that must be present"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

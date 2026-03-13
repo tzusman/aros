@@ -1,0 +1,15 @@
+{
+  "name": "meta-length",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates SEO meta title and description character counts",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "title_min": { "type": "number", "default": 50 },
+    "title_max": { "type": "number", "default": 60 },
+    "desc_min": { "type": "number", "default": 140 },
+    "desc_max": { "type": "number", "default": 160 }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

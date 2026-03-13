@@ -1,0 +1,57 @@
+{
+  "name": "social-post",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Organic social media content — text posts, carousels, stories (non-paid)",
+  "usage_hint": "Use for organic (non-paid) social media content — text posts, carousels, stories, threads. If the post is a paid ad, use social-ad. If you're submitting just the graphic with no caption, use social-graphic.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "profanity",
+      "text-length",
+      "link-validation",
+      "format-check",
+      "file-size"
+    ],
+    "criteria": [
+      "platform-native-craft",
+      "originality",
+      "tone-alignment",
+      "brand-consistency",
+      "customer-empathy",
+      "visual-impact",
+      "call-to-action",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "social-post",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 2,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "format-check", "config": { "allowed": ["image/png", "image/jpeg", "text/*"] }, "severity": "blocking" },
+        { "name": "file-size", "config": { "max_mb": 10 }, "severity": "blocking" },
+        { "name": "text-length", "config": { "max_chars": 2200 }, "severity": "warning" },
+        { "name": "link-validation", "config": {}, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "platform-native-craft", "description": "Organic posts must feel native to earn algorithmic and audience favour", "weight": 3, "scale": 10 },
+        { "name": "originality", "description": "Organic content must earn attention, not buy it", "weight": 2, "scale": 10 },
+        { "name": "tone-alignment", "description": "Tone inconsistency fragments brand identity across channels", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Every post compounds brand recognition", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Relevance to audience drives engagement", "weight": 2, "scale": 10 },
+        { "name": "visual-impact", "description": "Visual content dominates organic feed performance", "weight": 2, "scale": 10 },
+        { "name": "call-to-action", "description": "Even organic posts benefit from a soft CTA", "weight": 1, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Baseline inclusivity for all audiences", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 5.5
+    },
+    "human": { "required": true }
+  }
+}
