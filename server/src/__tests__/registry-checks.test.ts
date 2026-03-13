@@ -341,3 +341,92 @@ describe("required-sections", () => {
     expect(results[0].passed).toBe(true);
   });
 });
+
+describe("image-text-ratio", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/image-text-ratio/check.ts")).default;
+  });
+
+  it("passes SVG with small text area", async () => {
+    const svg = '<svg viewBox="0 0 1000 1000"><text x="10" y="50" font-size="20">Hello</text></svg>';
+    const results = await mod.execute(makeCtx({ files: [svgFile("ad.svg", svg)] }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails SVG with large text area", async () => {
+    // Multiple large text elements covering >20%
+    const texts = Array.from({ length: 10 }, (_, i) =>
+      `<text x="0" y="${i * 100}" font-size="80">${"A".repeat(50)}</text>`
+    ).join("");
+    const svg = `<svg viewBox="0 0 1000 1000">${texts}</svg>`;
+    const results = await mod.execute(makeCtx({ files: [svgFile("ad.svg", svg)] }));
+    expect(results[0].passed).toBe(false);
+  });
+
+  it("skips non-SVG images", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [{ filename: "photo.png", content: Buffer.from([]), contentType: "image/png", sizeBytes: 0 }],
+    }));
+    expect(results[0].passed).toBe(true);
+    expect(results[0].details).toContain("SVG only");
+  });
+});
+
+describe("marketplace-fields", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/marketplace-fields/check.ts")).default;
+  });
+
+  it("passes when all required fields present in JSON", async () => {
+    const content = JSON.stringify({ title: "Widget", description: "Great widget", tags: ["sale"] });
+    const results = await mod.execute(makeCtx({
+      files: [textFile("listing.json", content)],
+      config: { required_fields: ["title", "description", "tags"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("fails when required fields missing from JSON", async () => {
+    const content = JSON.stringify({ title: "Widget" });
+    const results = await mod.execute(makeCtx({
+      files: [textFile("listing.json", content)],
+      config: { required_fields: ["title", "description", "tags"] },
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("description");
+    expect(results[0].details).toContain("tags");
+  });
+
+  it("validates field length limits", async () => {
+    const content = JSON.stringify({ title: "A".repeat(100), description: "Short" });
+    const results = await mod.execute(makeCtx({
+      files: [textFile("listing.json", content)],
+      config: {
+        required_fields: ["title", "description"],
+        field_limits: { title: { max: 70 } },
+      },
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("title");
+    expect(results[0].details).toContain("100");
+  });
+
+  it("extracts fields from markdown H2 headings", async () => {
+    const content = "## Title\n\nMy Product\n\n## Description\n\nGreat product\n\n## Features\n\n- Fast";
+    const results = await mod.execute(makeCtx({
+      files: [textFile("listing.md", content)],
+      config: { required_fields: ["title", "description", "features"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("passes non-text files as skip", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [{ filename: "photo.png", content: Buffer.from([]), contentType: "image/png", sizeBytes: 0 }],
+      config: { required_fields: ["title"] },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+});
