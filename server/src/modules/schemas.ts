@@ -92,6 +92,7 @@ const policyBody = z.object({
 
 export const policyManifestSchema = baseManifest.extend({
   type: z.literal("policy"),
+  usage_hint: z.string().optional(),
   requires: z.object({
     checks: z.array(z.string()).default([]),
     criteria: z.array(z.string()).default([]),
