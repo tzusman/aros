@@ -1,0 +1,22 @@
+{
+  "name": "marketplace-fields",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Validates that required marketplace listing fields are populated and within platform limits",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "platform": { "type": "string", "default": "shopify" },
+    "required_fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["title", "description"]
+    },
+    "field_limits": {
+      "type": "object",
+      "default": {},
+      "description": "Per-field character limits: { fieldName: { min?: number, max?: number } }"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}
