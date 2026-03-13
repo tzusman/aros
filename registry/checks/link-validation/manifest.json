@@ -1,0 +1,22 @@
+{
+  "name": "link-validation",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Detects URLs that are broken, placeholder, or structurally malformed",
+  "supportedTypes": ["text/*"],
+  "configSchema": {
+    "allow_localhost": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to allow localhost URLs"
+    },
+    "blocked_domains": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["example.com", "test.com", "foo.com", "yoursite.com"],
+      "description": "Domains to flag as placeholder"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}

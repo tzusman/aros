@@ -73,3 +73,83 @@ describe("placeholder-detection", () => {
     expect(results[0].passed).toBe(false);
   });
 });
+
+describe("link-validation", () => {
+  let mod: { execute: (ctx: CheckContext) => Promise<any[]> };
+  beforeAll(async () => {
+    mod = (await import("../../../registry/checks/link-validation/check.ts")).default;
+  });
+
+  it("detects placeholder domain URLs", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Visit https://example.com/product")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("example.com");
+  });
+
+  it("detects bare protocol", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Link: http://")],
+    }));
+    expect(results[0].passed).toBe(false);
+  });
+
+  it("detects mailto: with no address", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Email us at mailto:")],
+    }));
+    expect(results[0].passed).toBe(false);
+  });
+
+  it("detects URLs with TODO", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "See https://acme.com/TODO-fix-this")],
+    }));
+    expect(results[0].passed).toBe(false);
+  });
+
+  it("passes valid URLs", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Visit https://acme.com/products and https://acme.com/about")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("passes content with no URLs", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Just some text with no links.")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("detects broken anchor links", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "See the [details](#nonexistent-section) for more info.\n\n## Intro\n\nText here")],
+    }));
+    expect(results[0].passed).toBe(false);
+    expect(results[0].details).toContain("nonexistent-section");
+  });
+
+  it("passes valid anchor links", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "See the [details](#intro) for more info.\n\n## Intro\n\nText here")],
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("allows localhost when configured", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Test at http://localhost:3000")],
+      config: { allow_localhost: true },
+    }));
+    expect(results[0].passed).toBe(true);
+  });
+
+  it("blocks localhost by default", async () => {
+    const results = await mod.execute(makeCtx({
+      files: [textFile("page.md", "Test at http://localhost:3000")],
+    }));
+    expect(results[0].passed).toBe(false);
+  });
+});
