@@ -106,6 +106,7 @@ export interface PipelineCounts {
 // --- Policy ---
 
 export interface PolicyObjectiveCheck {
+  name: string;
   type?: string;
   module?: string;
   version?: string;
@@ -157,6 +158,51 @@ export interface Policy extends PolicySummary {
     events: string[];
   }>;
   raw_json?: string;
+}
+
+// --- Registry ---
+
+export interface RegistryCheck {
+  name: string;
+  type: "check";
+  version: string;
+  description: string;
+  severity?: string;
+  config?: Record<string, unknown>;
+}
+
+export interface RegistryCriterion {
+  name: string;
+  type: "criterion";
+  version: string;
+  description: string;
+  applicableTo?: string[];
+  defaultWeight?: number;
+  scale?: number;
+  promptGuidance?: string;
+}
+
+export interface RegistryPolicy {
+  name: string;
+  type: "policy";
+  version: string;
+  description: string;
+  requires?: {
+    checks: string[];
+    criteria: string[];
+  };
+  policy?: Record<string, unknown>;
+}
+
+export interface RegistryCatalog {
+  checks: RegistryCheck[];
+  criteria: RegistryCriterion[];
+  policies: RegistryPolicy[];
+}
+
+export interface InstallResult {
+  message: string;
+  installed: { type: string; name: string }[];
 }
 
 // --- SSE Events ---

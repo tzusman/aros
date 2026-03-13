@@ -1,36 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api/client";
+import { CreatePolicyModal } from "./create-policy-modal";
 import type { PolicySummary } from "@/lib/api/types";
 
 interface PolicyListProps {
   selectedPolicy: string | null;
   onSelect: (name: string) => void;
+  refreshKey?: number;
 }
 
-export function PolicyList({ selectedPolicy, onSelect }: PolicyListProps) {
+export function PolicyList({ selectedPolicy, onSelect, refreshKey }: PolicyListProps) {
   const [policies, setPolicies] = useState<PolicySummary[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const loadPolicies = useCallback(() => {
     api.listPolicies().then(setPolicies).catch(() => {});
   }, []);
 
-  async function createPolicy() {
-    const name = `new-policy-${Date.now()}`;
-    try {
-      const defaultPolicy = await api.getPolicy("default");
-      await api.savePolicy(name, { ...defaultPolicy, name } as any);
-      setPolicies((prev) => [
-        ...prev,
-        { name, stages: defaultPolicy.stages, max_revisions: defaultPolicy.max_revisions },
-      ]);
-      onSelect(name);
-    } catch {
-      onSelect(name);
-    }
+  useEffect(() => {
+    loadPolicies();
+  }, [loadPolicies, refreshKey]);
+
+  function handleCreated(name: string) {
+    setShowCreate(false);
+    loadPolicies();
+    onSelect(name);
   }
+
+  const existingNames = new Set(policies.map((p) => p.name));
 
   return (
     <aside className="w-queue flex flex-col border-r border-border bg-background shrink-0">
@@ -39,7 +39,7 @@ export function PolicyList({ selectedPolicy, onSelect }: PolicyListProps) {
           Policies
         </span>
         <button
-          onClick={createPolicy}
+          onClick={() => setShowCreate(true)}
           className="w-6 h-6 bg-surface border border-border rounded-md flex items-center justify-center cursor-pointer hover:bg-border transition-colors"
           aria-label="Create new policy"
         >
@@ -69,6 +69,14 @@ export function PolicyList({ selectedPolicy, onSelect }: PolicyListProps) {
           ))}
         </div>
       </ScrollArea>
+
+      {showCreate && (
+        <CreatePolicyModal
+          existingNames={existingNames}
+          onCreated={handleCreated}
+          onClose={() => setShowCreate(false)}
+        />
+      )}
     </aside>
   );
 }

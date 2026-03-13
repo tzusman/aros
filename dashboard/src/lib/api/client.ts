@@ -6,6 +6,9 @@ import type {
   Policy,
   PolicySummary,
   CustomCriterion,
+  RegistryCatalog,
+  RegistryPolicy,
+  InstallResult,
 } from "./types";
 
 const API_URL = import.meta.env.VITE_AROS_API_URL || "/api";
@@ -84,6 +87,23 @@ export const api = {
 
   async deletePolicy(name: string): Promise<void> {
     await fetchJson(`/policies/${name}`, { method: "DELETE" });
+  },
+
+  // --- Registry ---
+
+  async getRegistryCatalog(): Promise<RegistryCatalog> {
+    return fetchJson("/registry");
+  },
+
+  async getRegistryPolicy(name: string): Promise<RegistryPolicy> {
+    return fetchJson(`/registry/policies/${name}`);
+  },
+
+  async installPolicy(policyName: string): Promise<InstallResult> {
+    return fetchJson("/registry/install", {
+      method: "POST",
+      body: JSON.stringify({ policy: policyName }),
+    });
   },
 
   // --- Custom Criteria ---

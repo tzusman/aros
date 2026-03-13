@@ -681,16 +681,19 @@ const policies: Record<string, Policy> = {
     objective: {
       checks: [
         {
+          name: "word_count",
           type: "word_count",
           config: { min: 50, max: 2000 },
           severity: "warning",
         },
         {
+          name: "profanity_check",
           type: "profanity_check",
           config: {},
           severity: "blocking",
         },
         {
+          name: "broken_links",
           type: "broken_links",
           config: { timeout_ms: 5000 },
           severity: "blocking",
@@ -758,21 +761,25 @@ const policies: Record<string, Policy> = {
     objective: {
       checks: [
         {
+          name: "word_count",
           type: "word_count",
           config: { min: 100, max: 500 },
           severity: "warning",
         },
         {
+          name: "reading_level",
           type: "reading_level",
           config: { max_grade: 10 },
           severity: "warning",
         },
         {
+          name: "broken_links",
           type: "broken_links",
           config: { timeout_ms: 5000 },
           severity: "blocking",
         },
         {
+          name: "profanity_check",
           type: "profanity_check",
           config: {},
           severity: "blocking",
@@ -840,6 +847,7 @@ const policies: Record<string, Policy> = {
     objective: {
       checks: [
         {
+          name: "lint",
           type: "lint",
           module: "eslint",
           version: "9.x",
@@ -847,6 +855,7 @@ const policies: Record<string, Policy> = {
           severity: "blocking",
         },
         {
+          name: "security_scan",
           type: "security_scan",
           config: { scanner: "semgrep", ruleset: "p/default" },
           severity: "blocking",
@@ -906,21 +915,25 @@ const policies: Record<string, Policy> = {
     objective: {
       checks: [
         {
+          name: "image_dimensions",
           type: "image_dimensions",
           config: { width: 1080, height: 1080 },
           severity: "blocking",
         },
         {
+          name: "file_size",
           type: "file_size",
           config: { max_mb: 2 },
           severity: "warning",
         },
         {
+          name: "format_check",
           type: "format_check",
           config: { allowed: ["image/png", "image/jpeg"] },
           severity: "blocking",
         },
         {
+          name: "brand_colors",
           type: "brand_colors",
           config: { palette: "spring-2026" },
           severity: "warning",
