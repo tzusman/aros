@@ -1,0 +1,17 @@
+{
+  "name": "placeholder-detection",
+  "type": "check",
+  "version": "1.0.0",
+  "description": "Scans for unreplaced template tokens, dummy content, and development artifacts",
+  "supportedTypes": ["text/*", "image/svg+xml"],
+  "configSchema": {
+    "custom_patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Additional regex patterns to flag"
+    }
+  },
+  "dependencies": { "binaries": [], "env": [], "npm": [] },
+  "entrypoint": "check.ts"
+}
