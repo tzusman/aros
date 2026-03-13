@@ -34,7 +34,11 @@ export function ContextPanel({
         ))}
       </TabsList>
       <TabsContent value="brief" className="flex-1 min-h-0 m-0">
-        <BriefTab brief={deliverable.brief} />
+        <BriefTab
+          brief={deliverable.brief}
+          objectiveResults={deliverable.objective_results}
+          onTabChange={onTabChange}
+        />
       </TabsContent>
       <TabsContent value="objective" className="flex-1 min-h-0 m-0">
         <ObjectiveTab checks={deliverable.objective_results} />
