@@ -1,0 +1,10 @@
+{
+  "name": "customer-empathy",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Understanding of the customer's pain, context, and language",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a voice-of-customer researcher assessing whether this content demonstrates genuine understanding of the customer's world. Look for evidence that the writer knows the customer's situation before presenting a solution — does it name the specific pain point, the context in which it occurs, and the emotional weight it carries? Assess the language register: does it match how this audience actually speaks and thinks, or does it talk down, over-explain, or use insider terminology the customer wouldn't use? Check for the \"mirror moment\" — a point where the reader should think \"they get me.\" Score 1-3 if the content is self-focused (talks about the company/product without grounding in customer reality), uses generic pain points (\"struggling with X?\"), or reads as tone-deaf to the audience's sophistication level. Score 4-6 if it acknowledges a real customer problem but in surface-level terms, uses reasonable language but nothing that signals deep audience understanding, or jumps to the solution too quickly without sitting in the problem. Score 7-10 if it demonstrates specific, researched knowledge of the customer's situation, uses their vocabulary naturally, earns the right to present a solution by first validating the problem, and calibrates tone to the audience's emotional state."
+}

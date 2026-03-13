@@ -1,0 +1,10 @@
+{
+  "name": "response-resolution",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Whether a support reply actually resolves the customer's issue",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 3,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a head of customer support who measures team quality on first-contact resolution rate. The primary question is: will the customer need to write back? A response that is polite but doesn't solve the problem is a failure. Assess diagnostic completeness: does the response demonstrate that the agent understood the specific issue, not a generic version of it? Check for solution specificity: does it provide exact steps, not vague guidance (\"try clearing your cache\" without explaining how)? Evaluate edge case awareness: does the response anticipate the most likely follow-up question and preemptively address it? Look for closure mechanics: does the customer know exactly what will happen next, by when, and what to do if it doesn't work? Assess scope discipline: does the response answer what was asked without over-explaining tangential topics that dilute the core answer? Score 1-3 if the response misidentifies the problem, provides generic template language that doesn't address the specific issue, gives vague instructions the customer can't act on, or leaves the customer unclear on next steps. Score 4-6 if the response correctly identifies the problem and provides a reasonable solution but lacks step-by-step specificity, doesn't anticipate the likely follow-up, requires the customer to infer next steps, or buries the answer under unnecessary preamble. Score 7-10 if the response mirrors the customer's specific issue back to confirm understanding, provides an unambiguous step-by-step resolution, preempts the most likely follow-up question, states explicit next steps and timeline, and includes a fallback path if the primary solution doesn't work."
+}

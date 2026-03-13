@@ -1,0 +1,10 @@
+{
+  "name": "information-architecture",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Content structure, scannability, logical flow",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as an information architect assessing whether this content's structure serves the reader's cognitive flow. Great content architecture means the reader never has to work to figure out where they are, what comes next, or how to find what they need. Assess the hierarchy: does the heading structure create a scannable outline that communicates the full narrative even if the body text is skipped? Evaluate chunking: are ideas broken into digestible units with one concept per paragraph, or do paragraphs try to do too much? Check for progressive disclosure — does the content lead with the most important information and layer in detail for readers who want it, rather than front-loading context and burying the payoff? Assess visual rhythm: is there variation in paragraph length, appropriate use of lists and callouts, and enough whitespace to prevent wall-of-text fatigue? Score 1-3 if the content is a wall of text with no meaningful structure, headings are decorative rather than functional, the reader has to parse the entire piece to find what they need, or the most important information is buried deep. Score 4-6 if structure exists but is formulaic (heading, paragraph, heading, paragraph without logical progression), chunking is inconsistent, the content is scannable but the scan doesn't reveal a coherent narrative, or formatting tools (lists, callouts, bold) are underused or overused. Score 7-10 if the heading structure alone tells a complete story, the content follows a clear progressive disclosure pattern, chunking matches the complexity of each idea, formatting serves comprehension rather than decoration, and a reader at any scroll depth knows exactly where they are in the argument."
+}

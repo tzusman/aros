@@ -1,0 +1,10 @@
+{
+  "name": "technical-accuracy",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Factual correctness of product/feature claims",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a technical product marketing manager who is accountable for every claim shipping to customers. Every factual assertion — performance numbers, integration capabilities, feature descriptions, pricing, compatibility claims — must be either verifiably true or clearly qualified. Assess specificity: vague claims (\"blazing fast,\" \"seamlessly integrates,\" \"enterprise-grade security\") without substantiation are worse than no claim at all because they train the audience to distrust the copy. Check for promise inflation: does the content describe what the product actually does, or what the team wishes it did? Look for temporal accuracy: are features described as available that may be in-progress or planned? Evaluate consistency: do claims in this piece conflict with what's stated elsewhere in the product (pricing pages, docs, changelogs)? Score 1-3 if the content contains unsubstantiated performance claims, describes features that don't exist or are materially misrepresented, uses superlatives without evidence (\"the fastest,\" \"the only\"), or makes comparison claims without citation. Score 4-6 if claims are generally accurate but rely on vague qualifiers (\"up to,\" \"as fast as\") rather than specific metrics, some features are described more aspirationally than accurately, or technical specificity is inconsistent — precise in some areas, hand-wavy in others. Score 7-10 if every claim is specific and substantiable, performance numbers are qualified with conditions, feature descriptions match actual current capability, comparisons are cited or qualified, and the content would survive a skeptical technical buyer reading it line by line."
+}

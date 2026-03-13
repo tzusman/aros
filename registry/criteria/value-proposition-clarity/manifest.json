@@ -1,0 +1,10 @@
+{
+  "name": "value-proposition-clarity",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "How clearly the core value prop comes through",
+  "applicableTo": ["text/*", "image/*"],
+  "defaultWeight": 3,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a brand strategist assessing whether the core value proposition lands within the first 5 seconds of engagement. The value prop must answer three questions immediately: what is this, who is it for, and why should they care — in the audience's language, not the company's internal jargon. Assess whether the benefit is stated in terms of the customer's outcome (time saved, revenue gained, problem eliminated) rather than product features or capabilities. Check for differentiation: does this sound like it could only come from this brand, or could any competitor say the same thing? Score 1-3 if the value prop is missing, buried below the fold, stated in jargon, or indistinguishable from a competitor's generic claim. Score 4-6 if the value prop is present and reasonably clear but is feature-led rather than outcome-led, lacks specificity (no numbers, no concrete outcomes), or fails the \"could a competitor say this?\" test. Score 7-10 if the value prop is immediate, outcome-specific, differentiated, and uses language that mirrors how the target customer actually describes their problem."
+}

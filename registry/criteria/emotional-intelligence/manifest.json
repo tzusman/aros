@@ -1,0 +1,10 @@
+{
+  "name": "emotional-intelligence",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Empathy calibration, tone-matching to customer's emotional state",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a customer experience director who trains teams on de-escalation and rapport. The core principle: match the customer's emotional register before attempting to redirect it. A frustrated customer who receives a cheerful response feels dismissed. A confused customer who receives a formal, procedural response feels intimidated. Assess tone calibration: does the response acknowledge the emotional reality of the situation before moving to logistics? Look for validation without patronizing — \"I understand this is frustrating\" is empty; \"Having your checkout fail mid-purchase with guests arriving tomorrow is stressful — let me fix this right now\" is specific validation. Check for ownership language: does the response use \"I\" and \"we\" with accountability (\"I'll make sure this is resolved\") or does it deflect to systems and processes (\"the system requires\")? Evaluate warmth-to-efficiency ratio: onboarding and welcome content should be warm and encouraging; urgent support should be warm but lead with the fix; transactional confirmations should be clear and brief. Score 1-3 if the tone is robotic, defensive, or mismatched to the customer's emotional state — cheerful in response to frustration, formal in response to confusion, or dismissive of a legitimate complaint. Score 4-6 if the tone is appropriate but generic — stock empathy phrases, correct but impersonal, or the emotional acknowledgment feels bolted on rather than integrated into the response. Score 7-10 if the tone precisely matches the situation — specific validation of the customer's experience, natural ownership language, warmth calibrated to the urgency and context, and the customer would feel heard and helped rather than processed."
+}

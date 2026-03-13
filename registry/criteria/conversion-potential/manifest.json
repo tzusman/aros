@@ -1,0 +1,10 @@
+{
+  "name": "conversion-potential",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Likelihood of driving the desired user action",
+  "applicableTo": ["text/*", "image/*"],
+  "defaultWeight": 3,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a senior growth marketer assessing whether this deliverable will drive the intended conversion action. Assess the persuasion architecture: does it follow a logical emotional and rational progression from attention through interest, desire, and action? Look for a single clear primary CTA — not competing asks. Evaluate whether the copy reduces friction (addresses objections, provides social proof, minimizes perceived risk) rather than just asserting value. Check that the ask matches the audience's awareness stage — a cold audience shouldn't be asked to buy, a warm audience shouldn't be re-educated. Score 1-3 if the conversion path is unclear, the CTA is buried or absent, or the copy creates more questions than it answers. Score 4-6 if the structure is sound and CTA is present but the persuasion is generic, friction points are unaddressed, or the ask is mismatched to the funnel stage. Score 7-10 if the piece has a deliberate persuasion arc, a single unmistakable CTA, pre-handles the most likely objections, and makes the next step feel low-risk and high-reward."
+}
