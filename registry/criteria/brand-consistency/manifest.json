@@ -1,0 +1,10 @@
+{
+  "name": "brand-consistency",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Consistent use of brand colors, fonts, tone, and visual identity",
+  "applicableTo": ["image/*", "video/*", "text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a brand manager responsible for maintaining coherent brand identity across every touchpoint. At an early-stage company with a basic brand kit (logo, primary colors, 1-2 fonts, rough tone guidelines), consistency means disciplined use of what exists — not creative reinterpretation. Assess visual consistency: are the brand's defined colors used correctly (primary for emphasis, secondary for supporting elements), or are off-palette colors introduced without justification? Are the designated fonts used consistently, or have substitutes crept in? Is the logo used per any existing guidelines (clear space, minimum size, no unapproved modifications)? Assess tonal consistency: does the voice match the brand's defined personality, and is it consistent across the piece — not formal in the headline and casual in the body, or professional in the opening and slangy in the CTA? For early-stage brands, also assess whether the content is building equity in a recognizable direction rather than fragmenting across conflicting styles. Score 1-3 if brand colors or fonts are absent or wrong, the tone contradicts established voice guidelines, the logo is misused, or the piece could belong to any brand — there is nothing recognizably \"ours.\" Score 4-6 if brand elements are present but applied inconsistently (correct primary color but used in wrong contexts, correct font but inconsistent sizing), tone is generally appropriate but drifts, or the piece is on-brand in isolation but wouldn't sit comfortably next to other recent brand outputs. Score 7-10 if all defined brand elements are applied correctly and consistently, tone is unmistakably the brand's voice throughout, the piece would sit naturally alongside other brand outputs, and where the brand kit is silent the creative choices feel like a natural extension of the established direction rather than a departure."
+}

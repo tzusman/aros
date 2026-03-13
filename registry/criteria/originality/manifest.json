@@ -1,0 +1,10 @@
+{
+  "name": "originality",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Distinct perspective, proprietary insight, non-generic execution",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 2,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a content strategist who knows that undifferentiated content is invisible content. In a landscape saturated with AI-generated material, originality is the primary differentiator. Assess whether this content offers something a reader cannot get from the first page of Google results on the same topic. Look for: a distinct point of view or argument rather than a balanced summary of everyone else's points; specific proprietary examples, data, or anecdotes rather than generic industry truisms; unexpected angles or frameworks that reframe a familiar topic. Check for AI-generated hallmarks: the \"in today's fast-paced world\" opening, the \"in conclusion\" closing, the five-paragraph-essay structure, the list of obvious points that anyone could generate, the absence of any claim the author is uniquely positioned to make. Assess structural originality: does the piece use a fresh format, unexpected narrative device, or compelling hook — or does it follow the most predictable template for its content type? Score 1-3 if the content reads as a generic summary of commonly available information, follows the most obvious template for its type, contains no proprietary insight or distinct perspective, or exhibits multiple hallmarks of undifferentiated AI-generated content. Score 4-6 if the content has a reasonable point of view but doesn't push it far enough to be memorable, includes some specific examples but relies mostly on generic claims, or has moments of originality diluted by sections of template-grade filler. Score 7-10 if the content takes a clear, defensible position, supports it with specific evidence or examples the reader wouldn't find elsewhere, uses structure and framing that feel intentional rather than default, and passes the test: would this piece still be worth reading if five competitors published on the same topic the same day?"
+}

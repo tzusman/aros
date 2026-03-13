@@ -1,0 +1,10 @@
+{
+  "name": "readability",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Ease of reading, sentence clarity, and cognitive flow",
+  "applicableTo": ["text/*"],
+  "defaultWeight": 3,
+  "scale": 10,
+  "promptGuidance": "Evaluate as an editor at a publication known for making complex ideas accessible. Readability is not about dumbing down — it's about removing every obstacle between the reader and the idea. Assess sentence construction: are sentences front-loaded with the subject and verb, or do they bury the point behind subordinate clauses and qualifiers? Check for nominalizations — verbs turned into nouns (\"the implementation of\" instead of \"implement\") — which add syllables without meaning. Evaluate paragraph discipline: does each paragraph advance exactly one idea, with a topic sentence that earns the reader's commitment to the rest? Check for filler: words like \"very,\" \"really,\" \"actually,\" \"in order to,\" \"it is important to note that\" — each one is a tax on the reader's attention. Assess the ratio of concrete to abstract: strong writing anchors abstract concepts in specific examples, numbers, or scenarios. Evaluate transitions: does each section logically follow the previous one, or does the reader have to bridge gaps in the argument? Score 1-3 if sentences regularly exceed 25 words, paragraphs contain multiple competing ideas, filler words are pervasive, the text relies on abstractions without grounding, or the reader must re-read sentences to extract meaning. Score 4-6 if the text is comprehensible on first read but not effortless — some long sentences that could be split, occasional filler, adequate but uninspired transitions, or an over-reliance on passive voice that creates distance. Score 7-10 if every sentence earns its length, paragraphs are focused and disciplined, filler is absent, abstract claims are grounded in concrete specifics, transitions are seamless, and the text reads with a sense of forward momentum where each sentence makes the reader want to read the next one."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "visual-impact",
+  "type": "criterion",
+  "version": "1.0.0",
+  "description": "Stopping power, memorability, and emotional resonance of visual content",
+  "applicableTo": ["image/*", "video/*"],
+  "defaultWeight": 3,
+  "scale": 10,
+  "promptGuidance": "Evaluate as a creative director judging whether this visual would stop a thumb mid-scroll. In a feed environment, you have roughly 300 milliseconds to earn attention — the visual must work at that speed before any copy is read. Assess stopping power: does the image create immediate visual tension through contrast, unexpected composition, bold color, or human-centric elements (faces, hands, eye contact)? Evaluate memorability: after 10 seconds of exposure, would the viewer remember this image specifically or would it blend into the visual noise of their feed? Check for clarity at small scale: does the visual communicate at thumbnail size (roughly 150x150px) and in a moving feed, or does it depend on being viewed at full resolution? Assess emotional resonance: does the visual trigger a feeling — aspiration, curiosity, recognition, delight — or is it merely informational? Evaluate production quality: are there artifacts, resolution issues, awkward crops, inconsistent lighting, or stock-photo sterility that undermine credibility? Score 1-3 if the visual has no stopping power (would be scrolled past), looks like unmodified stock photography, is illegible at feed-scale, contains quality defects, or triggers no emotional response. Score 4-6 if the visual is competent and clean but unremarkable — correct but not compelling, adequate quality but no distinctive style, or communicates the message but wouldn't earn a second look in a competitive feed. Score 7-10 if the visual creates immediate stopping power through deliberate compositional or chromatic tension, communicates clearly at any scale, triggers a specific emotional response aligned with the content's goal, has polished production quality, and would be remembered after the viewer scrolls past."
+}
