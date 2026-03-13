@@ -1,0 +1,57 @@
+{
+  "name": "product-description",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Product listings for own site, Amazon, Shopify, and other marketplaces",
+  "usage_hint": "Use for product listings on your own site or marketplaces (Amazon, Shopify, Etsy). Covers the title, description, bullet points, and specs. Not for feature announcements or changelogs.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "profanity",
+      "required-sections",
+      "word-count",
+      "marketplace-fields",
+      "link-validation"
+    ],
+    "criteria": [
+      "marketplace-optimization",
+      "value-proposition-clarity",
+      "technical-accuracy",
+      "conversion-potential",
+      "readability",
+      "seo-effectiveness",
+      "customer-empathy",
+      "brand-consistency"
+    ]
+  },
+  "policy": {
+    "name": "product-description",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "required-sections", "config": { "sections": ["title", "description", "features"] }, "severity": "blocking" },
+        { "name": "word-count", "config": { "min": 50, "max": 500 }, "severity": "warning" },
+        { "name": "marketplace-fields", "config": { "platform": "shopify", "required_fields": ["title", "description", "tags"] }, "severity": "warning" },
+        { "name": "link-validation", "config": {}, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "marketplace-optimization", "description": "Marketplace algorithm and buyer behaviour require specific optimisation patterns", "weight": 3, "scale": 10 },
+        { "name": "value-proposition-clarity", "description": "Buyers decide in seconds whether a product solves their problem", "weight": 3, "scale": 10 },
+        { "name": "technical-accuracy", "description": "Inaccurate specs cause returns and damage trust", "weight": 3, "scale": 10 },
+        { "name": "conversion-potential", "description": "The listing must convert browsers to buyers", "weight": 2, "scale": 10 },
+        { "name": "readability", "description": "Scannable listings outperform dense copy", "weight": 2, "scale": 10 },
+        { "name": "seo-effectiveness", "description": "Marketplace search is the primary discovery channel", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Listings that address buyer concerns reduce friction", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Consistent voice across listings builds brand trust", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

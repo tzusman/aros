@@ -1,0 +1,51 @@
+{
+  "name": "support-response",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Customer support replies via email, chat, or ticket system",
+  "usage_hint": "Use for customer support replies — email, chat, or ticket responses to a customer who has a question or problem. Speed and resolution matter more than polish.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "profanity",
+      "link-validation",
+      "word-count"
+    ],
+    "criteria": [
+      "response-resolution",
+      "emotional-intelligence",
+      "technical-accuracy",
+      "readability",
+      "customer-empathy",
+      "tone-alignment",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "support-response",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 2,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 20, "max": 1000 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "response-resolution", "description": "Support exists to solve problems; resolution is the only metric that matters", "weight": 3, "scale": 10 },
+        { "name": "emotional-intelligence", "description": "Frustrated customers need acknowledgment before solutions", "weight": 3, "scale": 10 },
+        { "name": "technical-accuracy", "description": "Wrong answers create more tickets and erode trust", "weight": 2, "scale": 10 },
+        { "name": "readability", "description": "Clear responses reduce back-and-forth and resolution time", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Empathetic responses improve satisfaction scores and reduce churn", "weight": 2, "scale": 10 },
+        { "name": "tone-alignment", "description": "Support tone reflects directly on brand perception", "weight": 2, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Responses must be clear to all customers regardless of technical background", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 7.0
+    },
+    "human": { "required": true }
+  }
+}

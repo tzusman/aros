@@ -1,0 +1,55 @@
+{
+  "name": "help-article",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Help center documentation, FAQs, knowledge base articles, how-to guides",
+  "usage_hint": "Use for help center docs, FAQs, knowledge base articles, troubleshooting guides, and how-to content. The reader has a specific problem to solve. Not for blog posts or marketing tutorials.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "link-validation",
+      "profanity",
+      "heading-structure",
+      "word-count",
+      "required-sections"
+    ],
+    "criteria": [
+      "response-resolution",
+      "readability",
+      "technical-accuracy",
+      "information-architecture",
+      "accessibility-inclusivity",
+      "seo-effectiveness",
+      "tone-alignment"
+    ]
+  },
+  "policy": {
+    "name": "help-article",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "heading-structure", "config": { "require_h1": true, "max_h1_count": 1, "allow_skip_levels": false }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 200, "max": 3000 }, "severity": "warning" },
+        { "name": "required-sections", "config": { "sections": ["title", "solution"] }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "response-resolution", "description": "A help article fails if the reader still can't solve their problem", "weight": 3, "scale": 10 },
+        { "name": "readability", "description": "Users in support mode are frustrated; clarity reduces escalations", "weight": 3, "scale": 10 },
+        { "name": "technical-accuracy", "description": "Inaccurate help content causes more support tickets, not fewer", "weight": 3, "scale": 10 },
+        { "name": "information-architecture", "description": "Logical structure lets users skip to what they need", "weight": 2, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Help content must be usable by all customers", "weight": 2, "scale": 10 },
+        { "name": "seo-effectiveness", "description": "Help articles rank for long-tail queries and reduce support volume", "weight": 1, "scale": 10 },
+        { "name": "tone-alignment", "description": "Consistent tone builds trust even in support contexts", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 7.0
+    },
+    "human": { "required": true }
+  }
+}
