@@ -32,6 +32,7 @@ export function ReviewPage() {
   const context = usePanelState("context", true);
   const [contextTab, setContextTab] = useState("brief");
   const [inspectedFile, setInspectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const keyMap = useMemo(
     () => ({
@@ -67,8 +68,12 @@ export function ReviewPage() {
     deliverable?.is_folder &&
     deliverable?.files?.some((f) => f.content_type.startsWith("image/"));
 
+  const isSelectable =
+    isImageFolder && deliverable?.folder_strategy === "select";
+
   useEffect(() => {
     setInspectedFile(null);
+    setSelectedFile(null);
   }, [state.selectedId]);
 
   return (
@@ -86,6 +91,9 @@ export function ReviewPage() {
                     files={deliverable.files}
                     onInspect={setInspectedFile}
                     inspectedFile={inspectedFile}
+                    folderStrategy={deliverable.folder_strategy}
+                    selectedFile={selectedFile}
+                    onSelectFile={setSelectedFile}
                   />
                 ) : (
                   <>
@@ -122,7 +130,13 @@ export function ReviewPage() {
         )}
       </div>
 
-      {deliverable && <DecisionBar deliverableId={deliverable.id} />}
+      {deliverable && (
+        <DecisionBar
+          deliverableId={deliverable.id}
+          selectedFile={isSelectable ? selectedFile : undefined}
+          folderStrategy={isSelectable ? deliverable.folder_strategy : undefined}
+        />
+      )}
     </div>
   );
 }
