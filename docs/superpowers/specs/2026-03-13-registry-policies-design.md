@@ -42,6 +42,25 @@ Checks that need to extract structured fields from deliverable content follow th
 | **Customer** | `onboarding-sequence`, `support-response` |
 | **Brand/Design** | `brand-asset`, `social-graphic` |
 
+### Policy Selection Hints
+
+Each policy manifest includes a `usage_hint` field — a short, plain-language description that helps an AI agent select the right policy for a deliverable. These are surfaced by `list_policies` and should be written as decision criteria, not marketing copy.
+
+| Policy | `usage_hint` |
+|---|---|
+| `landing-page` | Use for any web page designed to convert visitors — product pages, pricing pages, signup pages, feature pages, and campaign landing pages. Not for blog posts or help docs. |
+| `email-campaign` | Use for promotional emails, newsletters, drip sequences, and any marketing email designed to drive clicks or purchases. Not for transactional emails or onboarding sequences. |
+| `social-ad` | Use for paid ad creatives across any social platform (Instagram, Facebook, LinkedIn, Twitter/X). Covers both the visual asset and accompanying ad copy. If the content is organic (not paid), use `social-post` instead. |
+| `social-post` | Use for organic (non-paid) social media content — text posts, carousels, stories, threads. If the post is a paid ad, use `social-ad`. If you're submitting just the graphic with no caption, use `social-graphic`. |
+| `product-description` | Use for product listings on your own site or marketplaces (Amazon, Shopify, Etsy). Covers the title, description, bullet points, and specs. Not for feature announcements or changelogs. |
+| `feature-announcement` | Use for changelog entries, release notes, "what's new" posts, and product update communications. The audience already uses the product — this tells them what changed and why it matters. |
+| `help-article` | Use for help center docs, FAQs, knowledge base articles, troubleshooting guides, and how-to content. The reader has a specific problem to solve. Not for blog posts or marketing tutorials. |
+| `content-article` | Use for blog posts, SEO articles, thought leadership, guides, and editorial content. The goal is organic discovery and audience building, not direct conversion or support. |
+| `onboarding-sequence` | Use for welcome emails, activation sequences, getting-started guides, and first-run in-app messages. The audience just signed up and needs to reach their first value moment. |
+| `support-response` | Use for customer support replies — email, chat, or ticket responses to a customer who has a question or problem. Speed and resolution matter more than polish. |
+| `brand-asset` | Use for core brand materials — logos, icons, banners, design system elements, brand collateral. These are foundational assets that other content is built on. Not for social graphics or ad creatives. |
+| `social-graphic` | Use for social media images, story graphics, cover photos, and event banners. These are visual assets designed for social feeds. If there's accompanying ad copy and it's a paid placement, use `social-ad` instead. |
+
 ### Design Principles
 
 - All policies use stages `["objective", "subjective", "human"]`
@@ -857,6 +876,12 @@ registry/
         └── manifest.json
 ```
 
+### Manifest Schema Additions
+
+**`usage_hint` field (new):** Each policy manifest gains a `usage_hint: string` field at the top level. This is a 1-2 sentence plain-language description that helps AI agents select the right policy. It should describe when to use the policy and, where ambiguity exists, when NOT to use it (pointing to the correct alternative). The `list_policies` MCP tool and the registry API should surface this field. See the Policy Selection Hints table above for all values.
+
+This requires a minor schema update to `policyManifestSchema` in the server to accept the new optional field.
+
 ### Manifest `requires` Convention
 
 Each policy manifest's `requires` block must list all checks and criteria used in its `objective` and `subjective` sections. These are derived directly from the policy composition tables above. For example, `landing-page` would have:
@@ -866,7 +891,8 @@ Each policy manifest's `requires` block must list all checks and criteria used i
   "requires": {
     "checks": ["placeholder-detection", "link-validation", "profanity", "required-sections", "heading-structure", "meta-length", "word-count"],
     "criteria": ["value-proposition-clarity", "conversion-potential", "call-to-action", "readability", "information-architecture", "customer-empathy", "seo-effectiveness", "brand-consistency", "urgency-authenticity", "accessibility-inclusivity"]
-  }
+  },
+  "usage_hint": "Use for any web page designed to convert visitors — product pages, pricing pages, signup pages, feature pages, and campaign landing pages. Not for blog posts or help docs."
 }
 ```
 
