@@ -879,8 +879,9 @@ export interface OnboardResult {
 function resolveRegistryDir(): string | null {
   const here = fileURLToPath(new URL(".", import.meta.url));
   const candidates = [
-    path.resolve(here, "../../registry"),   // dev: cli/src/ → registry/
-    path.resolve(here, "../registry"),       // bundled: cli/dist/ → registry/
+    path.resolve(here, "registry"),          // bundled: cli/dist/registry/
+    path.resolve(here, "../../registry"),    // dev: cli/src/ → registry/
+    path.resolve(here, "../registry"),       // alt bundled layout
     path.resolve(here, "../../../registry"), // monorepo root
   ];
 
@@ -971,11 +972,14 @@ export async function onboard(
 
   let recommendations: Array<{ policy: string; confidence: string; reason: string }> = [];
 
-  try {
-    const recommenderPrompt = buildRecommenderPrompt(scan, registryPolicies);
-    const raw = await callClaude(recommenderPrompt);
+  const recommenderPrompt = buildRecommenderPrompt(scan, registryPolicies);
 
-    if (raw) {
+  // Try up to 2 times (spec: "Retry once with same prompt. If still unparseable, skip.")
+  for (let attempt = 0; attempt < 2 && recommendations.length === 0; attempt++) {
+    try {
+      const raw = await callClaude(recommenderPrompt);
+      if (!raw) break; // Claude unavailable — no point retrying
+
       // Double-parse: outer JSON wrapper from `claude -p --output-format json`
       // wraps the actual response in {"result": "..."}
       const outer = parseJsonResponse(raw);
@@ -996,30 +1000,29 @@ export async function onboard(
       ) {
         recommendations = (inner as Record<string, unknown>).recommendations as typeof recommendations;
       }
+    } catch {
+      // Graceful fallback — retry or proceed with empty recommendations
     }
-  } catch {
-    // Graceful fallback — proceed with empty recommendations
   }
 
   spinner.stop("Analysis complete.");
 
-  // Step 5: Show multiselect — all recommended policies pre-selected
-  const recommendedNames = new Set(recommendations.map((r) => r.policy));
-  const options = registryPolicies.map((p) => ({
-    value: p.name,
-    label: p.name,
-    hint: p.description,
-  }));
+  // Step 5: Show multiselect — only recommended policies, all pre-selected
+  const reasonByName = new Map(recommendations.map((r) => [r.policy, r]));
+  const options = recommendations
+    .filter((r) => registryPolicies.some((p) => p.name === r.policy))
+    .map((r) => ({
+      value: r.policy,
+      label: `${r.policy} ${pc.dim(`(${r.confidence})`)}`,
+      hint: r.reason,
+    }));
 
-  const initialValues = registryPolicies
-    .filter((p) => recommendedNames.has(p.name))
-    .map((p) => p.name);
-
+  const initialValues = options.map((o) => o.value);
   let selectedNames: string[] = initialValues;
 
   try {
     const selected = await prompts.multiselect({
-      message: "Select policies to install:",
+      message: "Recommended policies for your project:",
       options,
       initialValues,
       required: false,
