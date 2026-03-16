@@ -1,6 +1,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as cp from "node:child_process";
+import { fileURLToPath } from "node:url";
+import * as prompts from "@clack/prompts";
+import pc from "picocolors";
 import { Storage } from "@aros/server";
 
 // ---------------------------------------------------------------------------
@@ -856,4 +859,259 @@ export function buildPromptGeneratorPrompt(
   return PROMPT_GENERATOR_TEMPLATE.replace("{{POLICY_DETAILS}}", policyDetails)
     .replace("{{CANDIDATE_FILES}}", candidateFiles.join("\n"))
     .replace("{{PROJECT_DESCRIPTION}}", projectDescription);
+}
+
+// ---------------------------------------------------------------------------
+// Task 9: Main Orchestrator
+// ---------------------------------------------------------------------------
+
+export interface OnboardResult {
+  installedPolicies: string[];
+  suggestedPrompt: string | null;
+  suggestedExplanation: string | null;
+}
+
+/**
+ * Resolve the registry directory by trying candidate paths relative to this
+ * file's location. Returns the first directory that contains a `policies/`
+ * subdirectory, or null if none is found.
+ */
+function resolveRegistryDir(): string | null {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  const candidates = [
+    path.resolve(here, "../../registry"),   // dev: cli/src/ → registry/
+    path.resolve(here, "../registry"),       // bundled: cli/dist/ → registry/
+    path.resolve(here, "../../../registry"), // monorepo root
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(path.join(candidate, "policies"))) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Print the suggested prompt in a bordered box with the explanation below.
+ */
+function printSuggestedPrompt(prompt: string, explanation: string | null): void {
+  const width = 72;
+  const border = pc.cyan("─".repeat(width));
+  const lines = prompt.match(/.{1,68}/g) ?? [prompt];
+
+  console.log();
+  console.log(pc.cyan("┌" + "─".repeat(width) + "┐"));
+  for (const line of lines) {
+    const padding = " ".repeat(Math.max(0, width - line.length));
+    console.log(pc.cyan("│ ") + line + padding + pc.cyan(" │"));
+  }
+  console.log(pc.cyan("└" + "─".repeat(width) + "┘"));
+
+  if (explanation) {
+    console.log();
+    console.log("  " + pc.dim(explanation));
+  }
+  console.log();
+}
+
+/**
+ * Main onboarding orchestrator. Analyzes the project, recommends review
+ * policies, installs selected ones, and suggests a starter prompt.
+ */
+export async function onboard(
+  projectDir: string,
+  storage: Storage,
+): Promise<OnboardResult> {
+  const result: OnboardResult = {
+    installedPolicies: [],
+    suggestedPrompt: null,
+    suggestedExplanation: null,
+  };
+
+  console.log();
+  console.log(
+    `  ${pc.cyan(pc.bold("Smart onboarding"))} ${pc.dim("— analyzing your project to recommend review policies")}`
+  );
+  console.log();
+
+  // Step 1: Resolve registry directory
+  const registryDir = resolveRegistryDir();
+  if (!registryDir) {
+    console.log(pc.yellow("  Could not locate registry directory — skipping onboarding."));
+    return result;
+  }
+
+  // Step 2: Scan repo
+  let scan: ScanResult;
+  try {
+    scan = scanRepo(projectDir);
+  } catch {
+    console.log(pc.yellow("  Could not scan project directory — skipping onboarding."));
+    return result;
+  }
+
+  // Step 3: Load registry policies
+  let registryPolicies: RegistryPolicy[];
+  try {
+    registryPolicies = loadRegistryPolicies(registryDir);
+  } catch {
+    registryPolicies = [];
+  }
+
+  if (registryPolicies.length === 0) {
+    console.log(pc.yellow("  No registry policies found — skipping onboarding."));
+    return result;
+  }
+
+  // Step 4: Call Claude to get recommendations
+  const spinner = prompts.spinner();
+  spinner.start("Analyzing your project...");
+
+  let recommendations: Array<{ policy: string; confidence: string; reason: string }> = [];
+
+  try {
+    const recommenderPrompt = buildRecommenderPrompt(scan, registryPolicies);
+    const raw = await callClaude(recommenderPrompt);
+
+    if (raw) {
+      // Double-parse: outer JSON wrapper from `claude -p --output-format json`
+      // wraps the actual response in {"result": "..."}
+      const outer = parseJsonResponse(raw);
+      const resultStr =
+        outer && typeof outer === "object" && "result" in (outer as object)
+          ? (outer as Record<string, unknown>).result
+          : raw;
+
+      const inner = parseJsonResponse(
+        typeof resultStr === "string" ? resultStr : JSON.stringify(resultStr)
+      );
+
+      if (
+        inner &&
+        typeof inner === "object" &&
+        "recommendations" in (inner as object) &&
+        Array.isArray((inner as Record<string, unknown>).recommendations)
+      ) {
+        recommendations = (inner as Record<string, unknown>).recommendations as typeof recommendations;
+      }
+    }
+  } catch {
+    // Graceful fallback — proceed with empty recommendations
+  }
+
+  spinner.stop("Analysis complete.");
+
+  // Step 5: Show multiselect — all recommended policies pre-selected
+  const recommendedNames = new Set(recommendations.map((r) => r.policy));
+  const options = registryPolicies.map((p) => ({
+    value: p.name,
+    label: p.name,
+    hint: p.description,
+  }));
+
+  const initialValues = registryPolicies
+    .filter((p) => recommendedNames.has(p.name))
+    .map((p) => p.name);
+
+  let selectedNames: string[] = initialValues;
+
+  try {
+    const selected = await prompts.multiselect({
+      message: "Select policies to install:",
+      options,
+      initialValues,
+      required: false,
+    });
+
+    if (!prompts.isCancel(selected)) {
+      selectedNames = selected as string[];
+    }
+  } catch {
+    // Graceful fallback to recommended list
+  }
+
+  // Step 6: Install selected policies
+  try {
+    result.installedPolicies = await installPolicies(storage, selectedNames, registryPolicies);
+  } catch {
+    result.installedPolicies = [];
+  }
+
+  if (result.installedPolicies.length > 0) {
+    console.log();
+    console.log(
+      `  ${pc.green("✔")}  Installed ${pc.bold(String(result.installedPolicies.length))} ${result.installedPolicies.length === 1 ? "policy" : "policies"}: ${result.installedPolicies.join(", ")}`
+    );
+  }
+
+  if (result.installedPolicies.length === 0) {
+    return result;
+  }
+
+  // Step 7: Gather candidate files
+  let candidateFiles: string[] = [];
+  try {
+    candidateFiles = gatherCandidateFiles(projectDir, result.installedPolicies);
+  } catch {
+    candidateFiles = [];
+  }
+
+  // Step 8: Generate starter prompt
+  spinner.start("Generating a starter prompt...");
+
+  try {
+    const installedRegistryPolicies = registryPolicies.filter((p) =>
+      result.installedPolicies.includes(p.name)
+    );
+
+    const projectDescription = scan.readme
+      ? scan.readme.split("\n").slice(0, 5).join(" ")
+      : path.basename(projectDir);
+
+    const promptGenPrompt = buildPromptGeneratorPrompt(
+      installedRegistryPolicies,
+      candidateFiles,
+      projectDescription
+    );
+
+    const raw = await callClaude(promptGenPrompt);
+
+    if (raw) {
+      // Double-parse: same outer JSON wrapper handling
+      const outer = parseJsonResponse(raw);
+      const resultStr =
+        outer && typeof outer === "object" && "result" in (outer as object)
+          ? (outer as Record<string, unknown>).result
+          : raw;
+
+      const inner = parseJsonResponse(
+        typeof resultStr === "string" ? resultStr : JSON.stringify(resultStr)
+      );
+
+      if (inner && typeof inner === "object") {
+        const parsed = inner as Record<string, unknown>;
+        if (typeof parsed.prompt === "string") {
+          result.suggestedPrompt = parsed.prompt;
+        }
+        if (typeof parsed.explanation === "string") {
+          result.suggestedExplanation = parsed.explanation;
+        }
+      }
+    }
+  } catch {
+    // Graceful fallback — no starter prompt
+  }
+
+  spinner.stop(result.suggestedPrompt ? "Starter prompt ready." : "Could not generate starter prompt.");
+
+  // Step 9: Print the suggested prompt
+  if (result.suggestedPrompt) {
+    console.log();
+    console.log(`  ${pc.bold("Suggested starter prompt:")}`);
+    printSuggestedPrompt(result.suggestedPrompt, result.suggestedExplanation);
+  }
+
+  return result;
 }

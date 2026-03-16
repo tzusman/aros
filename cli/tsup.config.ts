@@ -1,5 +1,10 @@
 import { defineConfig } from "tsup";
 import { builtinModules } from "node:module";
+import { cpSync, mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const nodeBuiltins = [
   ...builtinModules,
@@ -25,6 +30,12 @@ export default defineConfig([
     noExternal: [/.*/],
     external: nodeBuiltins,
     banner: { js: esmBanner },
+    onSuccess: async () => {
+      const src = resolve(__dirname, "../registry/policies");
+      const dest = resolve(__dirname, "dist/registry/policies");
+      mkdirSync(dest, { recursive: true });
+      cpSync(src, dest, { recursive: true });
+    },
   },
   {
     entry: { "mcp-entry": "src/mcp-entry.ts" },

@@ -1,0 +1,63 @@
+{
+  "name": "landing-page",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Website landing pages, product pages, feature pages",
+  "usage_hint": "Use for any web page designed to convert visitors — product pages, pricing pages, signup pages, feature pages, and campaign landing pages. Not for blog posts or help docs.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "link-validation",
+      "profanity",
+      "required-sections",
+      "heading-structure",
+      "meta-length",
+      "word-count"
+    ],
+    "criteria": [
+      "value-proposition-clarity",
+      "conversion-potential",
+      "call-to-action",
+      "readability",
+      "information-architecture",
+      "customer-empathy",
+      "seo-effectiveness",
+      "brand-consistency",
+      "urgency-authenticity",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "landing-page",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "required-sections", "config": { "sections": ["headline", "subheadline", "call to action", "social proof"] }, "severity": "blocking" },
+        { "name": "heading-structure", "config": { "require_h1": true, "max_h1_count": 1 }, "severity": "warning" },
+        { "name": "meta-length", "config": { "title_min": 50, "title_max": 60, "desc_min": 140, "desc_max": 160 }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 200, "max": 2000 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "value-proposition-clarity", "description": "Landing pages live or die on immediate value clarity", "weight": 3, "scale": 10 },
+        { "name": "conversion-potential", "description": "The page exists to convert", "weight": 3, "scale": 10 },
+        { "name": "call-to-action", "description": "CTA is the conversion mechanism", "weight": 3, "scale": 10 },
+        { "name": "readability", "description": "Visitors scan, don't read", "weight": 2, "scale": 10 },
+        { "name": "information-architecture", "description": "Structure drives the scroll-to-convert path", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Must demonstrate understanding of visitor's problem", "weight": 2, "scale": 10 },
+        { "name": "seo-effectiveness", "description": "Organic discovery is critical for startup unit economics", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Every page builds or erodes brand equity", "weight": 2, "scale": 10 },
+        { "name": "urgency-authenticity", "description": "Landing pages frequently misuse urgency tactics", "weight": 1, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Baseline inclusivity", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

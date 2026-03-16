@@ -1,0 +1,57 @@
+{
+  "name": "onboarding-sequence",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Welcome emails, activation sequences, getting-started guides, first-run experiences",
+  "usage_hint": "Use for welcome emails, activation sequences, getting-started guides, and first-run in-app messages. The audience just signed up and needs to reach their first value moment.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "link-validation",
+      "profanity",
+      "subject-line-length",
+      "word-count",
+      "required-sections"
+    ],
+    "criteria": [
+      "emotional-intelligence",
+      "customer-empathy",
+      "call-to-action",
+      "email-craft",
+      "readability",
+      "value-proposition-clarity",
+      "information-architecture",
+      "brand-consistency"
+    ]
+  },
+  "policy": {
+    "name": "onboarding-sequence",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 3,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "subject-line-length", "config": { "min_chars": 20, "max_chars": 50 }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 50, "max": 500 }, "severity": "warning" },
+        { "name": "required-sections", "config": { "sections": ["subject", "next step"] }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "emotional-intelligence", "description": "New users are anxious; emotional warmth drives activation", "weight": 3, "scale": 10 },
+        { "name": "customer-empathy", "description": "Onboarding must acknowledge where the user is starting from", "weight": 3, "scale": 10 },
+        { "name": "call-to-action", "description": "Each onboarding step must have a single clear next action", "weight": 2, "scale": 10 },
+        { "name": "email-craft", "description": "Onboarding emails set the tone for the entire user relationship", "weight": 2, "scale": 10 },
+        { "name": "readability", "description": "New users are overwhelmed; simplicity accelerates activation", "weight": 2, "scale": 10 },
+        { "name": "value-proposition-clarity", "description": "Reinforce why they signed up to prevent early churn", "weight": 2, "scale": 10 },
+        { "name": "information-architecture", "description": "Sequential structure guides users through the activation path", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "First impressions define the long-term brand relationship", "weight": 2, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

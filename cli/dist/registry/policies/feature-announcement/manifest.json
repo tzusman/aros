@@ -1,0 +1,55 @@
+{
+  "name": "feature-announcement",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Changelog entries, release notes, what's new posts, product updates",
+  "usage_hint": "Use for changelog entries, release notes, \"what's new\" posts, and product update communications. The audience already uses the product — this tells them what changed and why it matters.",
+  "requires": {
+    "checks": [
+      "placeholder-detection",
+      "profanity",
+      "link-validation",
+      "heading-structure",
+      "word-count"
+    ],
+    "criteria": [
+      "technical-accuracy",
+      "value-proposition-clarity",
+      "readability",
+      "information-architecture",
+      "customer-empathy",
+      "tone-alignment",
+      "originality",
+      "brand-consistency"
+    ]
+  },
+  "policy": {
+    "name": "feature-announcement",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 2,
+    "objective": {
+      "checks": [
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "link-validation", "config": {}, "severity": "blocking" },
+        { "name": "heading-structure", "config": { "require_h1": true, "allow_skip_levels": false }, "severity": "warning" },
+        { "name": "word-count", "config": { "min": 100, "max": 1500 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "technical-accuracy", "description": "Feature announcements must describe what actually shipped", "weight": 3, "scale": 10 },
+        { "name": "value-proposition-clarity", "description": "Users need to understand why the change matters to them", "weight": 3, "scale": 10 },
+        { "name": "readability", "description": "Busy users skim changelogs", "weight": 2, "scale": 10 },
+        { "name": "information-architecture", "description": "Logical structure helps users find relevant updates quickly", "weight": 2, "scale": 10 },
+        { "name": "customer-empathy", "description": "Announcements framed around user benefit drive adoption", "weight": 2, "scale": 10 },
+        { "name": "tone-alignment", "description": "Tone should match the product's voice even in technical content", "weight": 2, "scale": 10 },
+        { "name": "originality", "description": "Avoid generic changelog boilerplate", "weight": 1, "scale": 10 },
+        { "name": "brand-consistency", "description": "Every communication reinforces or undermines brand", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

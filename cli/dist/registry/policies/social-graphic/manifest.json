@@ -1,0 +1,55 @@
+{
+  "name": "social-graphic",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Organic social images, story graphics, cover photos, event banners",
+  "usage_hint": "Use for social media images, story graphics, cover photos, and event banners. These are visual assets designed for social feeds. If there's accompanying ad copy and it's a paid placement, use social-ad instead.",
+  "requires": {
+    "checks": [
+      "format-check",
+      "file-size",
+      "aspect-ratio",
+      "image-text-ratio",
+      "placeholder-detection",
+      "profanity"
+    ],
+    "criteria": [
+      "visual-impact",
+      "visual-hierarchy",
+      "platform-native-craft",
+      "brand-consistency",
+      "platform-fit",
+      "call-to-action",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "social-graphic",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 2,
+    "objective": {
+      "checks": [
+        { "name": "format-check", "config": { "allowed": ["image/png", "image/jpeg", "image/svg+xml"] }, "severity": "blocking" },
+        { "name": "file-size", "config": { "max_mb": 10 }, "severity": "blocking" },
+        { "name": "aspect-ratio", "config": { "allowed_ratios": ["1:1", "4:5", "9:16", "16:9", "1.91:1"] }, "severity": "blocking" },
+        { "name": "placeholder-detection", "config": {}, "severity": "blocking" },
+        { "name": "profanity", "config": {}, "severity": "blocking" },
+        { "name": "image-text-ratio", "config": { "max_text_percent": 20 }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "visual-impact", "description": "Social graphics must stop the scroll in a busy feed", "weight": 3, "scale": 10 },
+        { "name": "visual-hierarchy", "description": "Clear hierarchy guides the eye to the key message", "weight": 2, "scale": 10 },
+        { "name": "platform-native-craft", "description": "Graphics must feel at home on the target platform", "weight": 2, "scale": 10 },
+        { "name": "brand-consistency", "description": "Every visual compounds brand recognition", "weight": 2, "scale": 10 },
+        { "name": "platform-fit", "description": "Dimensions and style must match platform norms", "weight": 2, "scale": 10 },
+        { "name": "call-to-action", "description": "Even organic graphics benefit from a visual or textual CTA", "weight": 1, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Graphics must be accessible to users with visual impairments", "weight": 1, "scale": 10 }
+      ],
+      "pass_threshold": 6.5
+    },
+    "human": { "required": true }
+  }
+}

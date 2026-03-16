@@ -9,6 +9,7 @@ import { Storage } from "@aros/server";
 import { serve } from "./serve.js";
 import { registryCommands } from "./registry-cmd.js";
 import { moduleCommands } from "./module-cmd.js";
+import { onboard } from "./onboard.js";
 
 const VERSION = "0.1.0";
 
@@ -216,7 +217,8 @@ program
 // Default command: init (if needed) + serve
 program
   .argument("[project]", "Project directory")
-  .action(async (projectArg?: string) => {
+  .option("--onboard", "Run smart policy onboarding on first run", true)
+  .action(async (projectArg: string | undefined, opts: { onboard: boolean }) => {
     const startMs = performance.now();
     let projectDir: string;
 
@@ -227,6 +229,11 @@ program
 
     if (!wasInitialized) {
       await storage.init();
+    }
+
+    // Smart onboarding: recommend policies on first run
+    if (!wasInitialized && opts.onboard) {
+      await onboard(projectDir, storage);
     }
 
     // First-run setup: ask about MCP + whitelisting

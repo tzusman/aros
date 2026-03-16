@@ -1,0 +1,45 @@
+{
+  "name": "brand-asset",
+  "type": "policy",
+  "version": "1.0.0",
+  "description": "Logos, banners, icons, design system elements, brand collateral",
+  "usage_hint": "Use for core brand materials — logos, icons, banners, design system elements, brand collateral. These are foundational assets that other content is built on. Not for social graphics or ad creatives.",
+  "requires": {
+    "checks": [
+      "format-check",
+      "file-size",
+      "image-dimensions",
+      "aspect-ratio"
+    ],
+    "criteria": [
+      "brand-consistency",
+      "visual-hierarchy",
+      "visual-impact",
+      "accessibility-inclusivity"
+    ]
+  },
+  "policy": {
+    "name": "brand-asset",
+    "stages": ["objective", "subjective", "human"],
+    "max_revisions": 2,
+    "objective": {
+      "checks": [
+        { "name": "format-check", "config": { "allowed": ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"] }, "severity": "blocking" },
+        { "name": "file-size", "config": { "max_mb": 50 }, "severity": "blocking" },
+        { "name": "image-dimensions", "config": { "min_width": 100, "min_height": 100 }, "severity": "warning" },
+        { "name": "aspect-ratio", "config": { "allowed_ratios": ["1:1", "16:9", "4:3", "2:1"] }, "severity": "warning" }
+      ],
+      "fail_threshold": 1
+    },
+    "subjective": {
+      "criteria": [
+        { "name": "brand-consistency", "description": "Brand assets are the canonical reference; they must embody the brand system", "weight": 3, "scale": 10 },
+        { "name": "visual-hierarchy", "description": "Foundational brand assets must communicate the visual priority system", "weight": 3, "scale": 10 },
+        { "name": "visual-impact", "description": "Brand assets must make a strong first impression across all contexts", "weight": 2, "scale": 10 },
+        { "name": "accessibility-inclusivity", "description": "Brand assets must be accessible and usable across diverse audiences", "weight": 2, "scale": 10 }
+      ],
+      "pass_threshold": 7.0
+    },
+    "human": { "required": true }
+  }
+}
