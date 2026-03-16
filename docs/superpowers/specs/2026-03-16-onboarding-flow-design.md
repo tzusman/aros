@@ -9,48 +9,99 @@ On first run, AROS scans the codebase using `claude --print` to recommend which 
 
 ## Trigger
 
-Part of the existing `aros` CLI flow in `cli/src/index.ts`. Runs after `storage.init()` creates `.aros/` for the first time, before the existing MCP/whitelist setup prompts. Skippable via `--skip-onboard` flag or if `claude` CLI is not available (graceful fallback — just install the default policy).
+Part of the existing `aros` CLI flow in `cli/src/index.ts`. Runs after `storage.init()` creates `.aros/` for the first time, before the existing MCP/whitelist setup prompts. Skippable via `--no-onboard` flag (using Commander's built-in boolean negation: `.option('--onboard', 'Run smart policy onboarding', true)`) or if `claude` CLI is not available (graceful fallback — no extra policies installed beyond the default that `storage.init()` already created).
+
+**Sequencing note:** `onboard()` runs before `firstRunSetup()`. The existing first-run detection in `index.ts` checks for `.mcp.json` and `.claude/settings.json`. Since `onboard()` does not create either of these files, the sequencing is safe — `firstRunSetup()` will still trigger. The `--no-onboard` flag only skips policy onboarding, not MCP setup.
 
 ## Flow
 
 ```
 aros (first run)
-  ├── storage.init()                    ← existing
-  ├── onboard(projectDir, registryDir)  ← NEW
+  ├── storage.init()                       ← existing (creates .aros/ + default.json)
+  ├── onboard(projectDir, registryDir)     ← NEW
   │   ├── scan repo (tree + README + sample files)
   │   ├── read all 14 registry policy manifests
-  │   ├── spawn `claude --print` → policy recommender prompt
+  │   ├── spawn `claude -p` → policy recommender prompt (via stdin)
   │   ├── parse JSON response → recommended policies
   │   ├── interactive confirm (user selects/deselects via @clack/prompts)
   │   ├── install selected → copy manifests to .aros/policies/
   │   ├── gather candidate files for installed policies
-  │   ├── spawn `claude --print` → prompt generator prompt
+  │   ├── spawn `claude -p` → prompt generator prompt (via stdin)
   │   └── print suggested prompt to terminal
-  ├── firstRunSetup()                   ← existing (MCP, whitelist, CLAUDE.md)
-  └── serve()                           ← existing
+  ├── firstRunSetup()                      ← existing (MCP, whitelist, CLAUDE.md)
+  └── serve()                              ← existing
 ```
 
 ## Architecture
 
 ### LLM Invocation
 
-Shell out to `claude --print` via `child_process.spawn()`:
-- Read prompt from stdin (`--print -`)
-- Machine-parseable output (`--output-format stream-json`)
-- No SDK dependency — uses user's existing Claude auth
-- Follows Paperclip's proven pattern
+Shell out to `claude` via `child_process.spawn()`, piping the prompt through stdin:
+
+```typescript
+const child = spawn("claude", [
+  "-p",                          // print mode (non-interactive)
+  "--output-format", "json",     // single JSON object with `result` field
+  "--max-turns", "1",            // no tool use, just respond
+  "--model", "haiku",            // fast + cheap for onboarding
+], { stdio: ["pipe", "pipe", "pipe"] });
+
+child.stdin.write(prompt);
+child.stdin.end();
+
+// Collect stdout, parse JSON on exit
+```
+
+Key design decisions:
+- **`--output-format json`** (not `stream-json`): Returns a single JSON object with a `result` field containing the full text response. No stream parsing needed — just wait for exit and `JSON.parse(stdout)`.
+- **Pipe via stdin**: The prompts can be large (repo tree + 14 policy descriptions). Passing via stdin avoids shell argument length limits. `child.stdin.write(prompt)` then `child.stdin.end()`.
+- **`--model haiku`**: Onboarding doesn't need Opus/Sonnet reasoning power. Haiku is fast and cheap for structured classification tasks.
+- **`--max-turns 1`**: Prevents Claude from attempting tool use during onboarding.
+- No SDK dependency — uses user's existing Claude auth.
+- Follows Paperclip's proven spawn pattern.
+
+### Cost Control
+
+Add `--max-budget-usd 0.05` to each invocation to cap runaway costs. Two Haiku calls with repo summaries should cost well under $0.01 total.
+
+### Timeout & Spinner
+
+Each LLM call gets a 30-second timeout enforced by killing the child process:
+
+```typescript
+const timeout = setTimeout(() => child.kill("SIGTERM"), 30_000);
+child.on("exit", () => clearTimeout(timeout));
+```
+
+Display a `@clack/prompts` spinner during the wait:
+```typescript
+const s = prompts.spinner();
+s.start("Analyzing your project...");
+// ... await LLM call ...
+s.stop("Found 3 recommended policies");
+```
 
 ### Two LLM Calls
 
 1. **Policy Recommender** — receives repo tree + README excerpt + sample filenames + policy catalog → returns JSON array of recommended policies with confidence and reasoning
 2. **Prompt Generator** — receives installed policies + candidate files + project description → returns a ready-to-paste prompt targeting a real file or suggesting new content creation
 
+### Registry Directory Resolution
+
+The `registryDir` parameter is resolved relative to the CLI package's install location, not the user's project:
+
+```typescript
+const registryDir = fileURLToPath(new URL("../../registry", import.meta.url));
+```
+
+This works in development (where `registry/` is a sibling of `cli/`). For npm distribution, the `cli/package.json` `files` array must be updated to include `../../registry` or the manifests must be bundled into `cli/dist/registry/`. The simplest approach: copy `registry/policies/*/manifest.json` into `cli/dist/registry/` as part of the build step in `tsup.config.ts`.
+
 ### Repo Scanning (No LLM)
 
 Before calling Claude, the CLI gathers:
-- **Directory tree**: `fs.readdirSync` recursive, depth-limited (3 levels), excluding `.git`, `node_modules`, `dist`, `.aros`
-- **README excerpt**: First 200 lines of README.md (or README, README.txt)
-- **Sample files**: Up to 50 representative filenames from content-heavy directories (markdown, HTML, images)
+- **Directory tree**: `fs.readdirSync` recursive, depth-limited (3 levels), excluding `.git`, `node_modules`, `dist`, `.aros`, `build`, `coverage`, `.next`, `.cache`
+- **README excerpt**: First 200 lines of README.md (or README, README.txt, README.rst)
+- **Sample files**: Up to 50 representative filenames from content-heavy directories. Targeted extensions: `.md`, `.html`, `.htm`, `.txt`, `.mjml`, `.png`, `.jpg`, `.jpeg`, `.svg`, `.pdf`. Prefer files from shallower directories (more likely to be primary content, not generated). Include file sizes in the output (helps the LLM distinguish a 10KB placeholder from a 50KB real blog post).
 
 ### Policy Installation
 
@@ -65,15 +116,29 @@ After policies are installed, scan for files that match each policy's content ty
 
 ### Interactive Confirmation
 
-Use `@clack/prompts` (already a dependency) to show recommended policies with checkboxes:
+Use `@clack/prompts` `multiselect` (already a dependency) to show **only the recommended policies** (not all 14). All recommendations are **pre-selected** (checked by default) — the user deselects what they don't want, rather than opt-in to each one:
+
+```typescript
+const selected = await prompts.multiselect({
+  message: "Recommended policies for your project:",
+  options: recommendations.map(r => ({
+    value: r.policy,
+    label: `${r.policy} (${r.confidence})`,
+    hint: r.reason,
+  })),
+  initialValues: recommendations.map(r => r.policy), // all pre-selected
+});
+```
+
+Example display:
 ```
 ◆  Recommended policies for your project:
 │
-◻ content-article (high confidence)
+◼ content-article (high confidence)
 │  src/pages/blog/ contains markdown posts — active content marketing program
-◻ landing-page (high confidence)
+◼ landing-page (high confidence)
 │  src/pages/pricing.tsx and other pages are conversion-focused
-◻ social-ad (medium confidence)
+◼ social-ad (medium confidence)
 │  public/ads/ contains image assets that appear to be ad creatives
 │
 └  Press space to toggle, enter to confirm
@@ -106,22 +171,24 @@ AROS has a registry of 14 review policies. Each policy defines a pipeline that c
 
 ## Available Policies
 
-| Policy | Description | Best for |
-|--------|-------------|----------|
+Note: At build time, this table is generated dynamically from all `registry/policies/*/manifest.json` files. The implementation reads each manifest's `name`, `description`, and `usage_hint` fields. Below is the current snapshot for reference.
+
+| Policy | Description | When to use |
+|--------|-------------|-------------|
 | blog-post | SEO blog posts with word count, tone, readability, originality checks | Marketing blogs, SEO content programs |
-| content-article | SEO articles, thought leadership, guides, tutorials | Content marketing, editorial programs |
-| email-campaign | Marketing emails, newsletters, drip sequences | Email marketing, promotional campaigns |
-| social-post | Organic social content — text posts, carousels, stories | Social media management, community engagement |
-| social-ad | Paid ad creatives across Instagram, Facebook, LinkedIn, X | Performance marketing, paid social campaigns |
-| social-graphic | Social images, story graphics, cover photos, event banners | Design teams producing social visuals |
-| instagram-ad | Instagram-specific paid ad creatives (image + video) | Instagram-focused ad campaigns |
-| landing-page | Website landing pages, product pages, pricing pages | Conversion-focused web pages |
-| product-description | Product listings for Shopify, Amazon, own site | E-commerce, marketplace listings |
-| feature-announcement | Changelog entries, release notes, what's-new posts | SaaS product teams, developer tools |
-| help-article | Help center docs, FAQs, knowledge base, troubleshooting | Customer support, documentation teams |
-| brand-asset | Logos, banners, icons, design system elements | Brand/design teams |
-| onboarding-sequence | Welcome emails, activation sequences, getting-started guides | Growth teams, user onboarding |
-| support-response | Customer support replies via email, chat, ticket | Support teams using AI for responses |
+| content-article | SEO articles, thought leadership, guides, tutorials | Blog posts, SEO articles, guides, and editorial content. Goal is organic discovery. Not for conversion or support. |
+| email-campaign | Marketing emails, newsletters, drip sequences | Promotional emails, newsletters, drip sequences. Not for transactional or onboarding emails. |
+| social-post | Organic social content — text posts, carousels, stories | Organic (non-paid) social — text posts, carousels, stories, threads. If paid, use social-ad. If just the graphic, use social-graphic. |
+| social-ad | Paid ad creatives across Instagram, Facebook, LinkedIn, X | Paid ad creatives across any platform. Covers visual asset + ad copy. If organic, use social-post. |
+| social-graphic | Social images, story graphics, cover photos, event banners | Social media images, story graphics, cover photos. Visual assets only. If there's ad copy and it's paid, use social-ad. |
+| instagram-ad | Instagram-specific paid ad creatives (image + video) | Instagram-specific paid campaigns |
+| landing-page | Website landing pages, product pages, pricing pages | Any web page designed to convert — product pages, pricing pages, signup pages, campaign pages. Not blogs or docs. |
+| product-description | Product listings for Shopify, Amazon, own site | Product listings on own site or marketplaces (Amazon, Shopify, Etsy). Covers title, description, bullets, specs. |
+| feature-announcement | Changelog entries, release notes, what's-new posts | Changelog entries, release notes, "what's new" posts. Audience already uses the product. |
+| help-article | Help center docs, FAQs, knowledge base, troubleshooting | Help center docs, FAQs, knowledge base articles, troubleshooting guides. Reader has a problem to solve. |
+| brand-asset | Logos, banners, icons, design system elements | Core brand materials — logos, icons, banners, design system elements. Not for social graphics or ads. |
+| onboarding-sequence | Welcome emails, activation sequences, getting-started guides | Welcome emails, activation sequences, getting-started guides. Audience just signed up. |
+| support-response | Customer support replies via email, chat, ticket | Support replies — email, chat, or ticket responses. Speed and resolution over polish. |
 
 ## How to Decide
 
@@ -272,13 +339,13 @@ You are an onboarding assistant for AROS. The user just installed review policie
 
 AROS works through MCP tools that Claude Code can call. The most important tool is `submit_deliverable`, which creates a review, attaches files, and submits them through a review pipeline (automated checks → AI subjective review → human approval).
 
-The user has these policies installed: {{INSTALLED_POLICIES}}
-
 ## Your Input
 
 <installed_policies>
 {{POLICY_DETAILS}}
 </installed_policies>
+
+Note: `POLICY_DETAILS` contains the full policy JSON objects (name, description, usage_hint, stages, checks, criteria) for each installed policy — not just the names.
 
 <candidate_files>
 {{CANDIDATE_FILES}}
@@ -392,12 +459,36 @@ Candidate files: `emails/templates/spring-sale.html`, `content/blog/getting-star
 - Don't explain what AROS is in the prompt — Claude already knows via CLAUDE.md
 ```
 
+## JSON Parsing
+
+The prompts instruct the LLM to return raw JSON, but LLMs sometimes wrap responses in markdown fences anyway. Use defensive parsing:
+
+```typescript
+function parseJsonResponse(raw: string): unknown {
+  // 1. Try direct parse
+  try { return JSON.parse(raw); } catch {}
+
+  // 2. Strip markdown fences and retry
+  const stripped = raw.replace(/^```(?:json)?\s*\n?/m, "").replace(/\n?```\s*$/m, "");
+  try { return JSON.parse(stripped); } catch {}
+
+  // 3. Extract first JSON object/array
+  const match = raw.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+  if (match) {
+    try { return JSON.parse(match[1]); } catch {}
+  }
+
+  return null; // all parsing failed
+}
+```
+
 ## Graceful Degradation
 
-- **`claude` CLI not found**: Skip onboarding entirely, install only the default policy, print a message: "Install Claude Code to enable smart policy recommendations on first run."
-- **LLM call fails or times out** (30s timeout): Fall back to installing the default policy, no suggested prompt.
-- **LLM returns invalid JSON**: Retry once. If still invalid, fall back to default.
-- **User cancels interactive prompt**: Install nothing extra, proceed to MCP setup.
+- **`claude` CLI not found**: Skip onboarding entirely. `storage.init()` already created the default policy, so no extra installation needed. Print: "Install Claude Code to enable smart policy recommendations on first run."
+- **LLM call fails or times out** (30s): Skip to `firstRunSetup()`. The default policy from `init()` is sufficient.
+- **LLM returns unparseable JSON**: Retry once with same prompt. If still unparseable, skip onboarding.
+- **LLM returns valid JSON but no recommendations**: Skip policy installation, skip prompt generation, proceed normally.
+- **User cancels `multiselect` prompt**: Install nothing extra, proceed to MCP setup.
 
 ## New Files
 
@@ -405,4 +496,5 @@ Candidate files: `emails/templates/spring-sale.html`, `content/blog/getting-star
 
 ## Modified Files
 
-- `cli/src/index.ts` — import and call `onboard()` after `storage.init()`, add `--skip-onboard` flag
+- `cli/src/index.ts` — import and call `onboard()` after `storage.init()`, add `--onboard` / `--no-onboard` flag
+- `cli/tsup.config.ts` (or build script) — copy `registry/policies/*/manifest.json` into `dist/registry/` for npm distribution
