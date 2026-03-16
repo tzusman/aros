@@ -217,7 +217,7 @@ program
 // Default command: init (if needed) + serve
 program
   .argument("[project]", "Project directory")
-  .option("--onboard", "Run smart policy onboarding on first run", true)
+  .option("--no-onboard", "Skip smart policy onboarding on first run")
   .action(async (projectArg: string | undefined, opts: { onboard: boolean }) => {
     const startMs = performance.now();
     let projectDir: string;
