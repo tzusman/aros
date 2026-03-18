@@ -5,15 +5,19 @@ import type { Deliverable } from "@/lib/api/types";
 
 export function ContentArea({
   deliverable,
+  fileContent,
 }: {
   deliverable: Deliverable;
+  fileContent?: string | null;
 }) {
+  const content = fileContent ?? deliverable.content;
+
   return (
     <ScrollArea className="flex-1">
       <div className="px-5 py-4 max-w-content mx-auto">
         <article className="prose prose-sm dark:prose-invert prose-headings:text-text-primary prose-p:text-text-secondary prose-p:leading-relaxed max-w-none">
           <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-            {deliverable.content}
+            {content}
           </ReactMarkdown>
         </article>
       </div>
