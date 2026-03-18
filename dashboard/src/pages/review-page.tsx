@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useApp } from "@/context/app-context";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
@@ -32,6 +32,43 @@ export function ReviewPage() {
   const context = usePanelState("context", true);
   const [contextTab, setContextTab] = useState("brief");
   const [inspectedFile, setInspectedFile] = useState<string | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const [fileLoading, setFileLoading] = useState(false);
+  const fileCacheRef = useRef<Map<string, string>>(new Map());
+
+  const deliverable = state.selectedDeliverable;
+
+  const isImageFolder =
+    deliverable?.is_folder &&
+    deliverable?.files?.some((f) => f.content_type.startsWith("image/"));
+
+  async function fetchFileContent(filename: string) {
+    setInspectedFile(filename);
+    if (!deliverable?.files) return;
+
+    const cacheKey = `${deliverable.id}:${filename}`;
+    const cached = fileCacheRef.current.get(cacheKey);
+    if (cached) {
+      setFileContent(cached);
+      return;
+    }
+
+    const file = deliverable.files.find((f) => f.filename === filename);
+    if (!file?.preview_url) return;
+    setFileLoading(true);
+    try {
+      const res = await fetch(file.preview_url);
+      if (res.ok) {
+        const text = await res.text();
+        fileCacheRef.current.set(cacheKey, text);
+        setFileContent(text);
+      }
+    } catch {
+      setFileContent(null);
+    } finally {
+      setFileLoading(false);
+    }
+  }
 
   const keyMap = useMemo(
     () => ({
@@ -61,15 +98,23 @@ export function ReviewPage() {
 
   useKeyboard(keyMap);
 
-  const deliverable = state.selectedDeliverable;
-
-  const isImageFolder =
-    deliverable?.is_folder &&
-    deliverable?.files?.some((f) => f.content_type.startsWith("image/"));
-
+  // Reset file state and auto-select first file when deliverable changes
+  const prevDeliverableId = useRef(deliverable?.id);
   useEffect(() => {
+    if (deliverable?.id === prevDeliverableId.current) return;
+    prevDeliverableId.current = deliverable?.id;
     setInspectedFile(null);
-  }, [state.selectedId]);
+    setFileContent(null);
+    fileCacheRef.current.clear();
+
+    if (
+      deliverable?.is_folder &&
+      deliverable.files?.length &&
+      !deliverable.files.some((f) => f.content_type.startsWith("image/"))
+    ) {
+      fetchFileContent(deliverable.files[0].filename);
+    }
+  }, [deliverable?.id]);
 
   return (
     <div className="flex flex-col h-full">
@@ -92,9 +137,18 @@ export function ReviewPage() {
                     <FileTabs
                       files={deliverable.files}
                       activeFile={inspectedFile}
-                      onSelect={setInspectedFile}
+                      onSelect={fetchFileContent}
                     />
-                    <ContentArea deliverable={deliverable} />
+                    {fileLoading ? (
+                      <div className="flex-1 flex items-center justify-center">
+                        <p className="text-sm text-text-muted">Loading...</p>
+                      </div>
+                    ) : (
+                      <ContentArea
+                        deliverable={deliverable}
+                        fileContent={fileContent}
+                      />
+                    )}
                   </>
                 )
               ) : (
