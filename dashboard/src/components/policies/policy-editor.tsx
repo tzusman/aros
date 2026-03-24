@@ -1,10 +1,23 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PipelineFlow } from "./pipeline-flow";
-import { SettingsCard } from "./settings-card";
 import { JsonEditor } from "./json-editor";
 import { api } from "@/lib/api/client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Brain,
+  User,
+  Users,
+  Clock,
+  RotateCcw,
+  ArrowUpRight,
+  Bell,
+  Hash,
+  Gauge,
+} from "lucide-react";
 import type { Policy, PolicyHumanConfig } from "@/lib/api/types";
 
 function isRichHumanConfig(
@@ -23,7 +36,6 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
   const [saving, setSaving] = useState(false);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // Reset rawJson when policy changes (component should also be keyed by policy.name)
   useEffect(() => {
     setRawJson(policy.raw_json ?? "");
     setJsonError(null);
@@ -43,7 +55,6 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
   async function save() {
     setSaving(true);
     try {
-      // If JSON view was used, parse and save the edited JSON
       const toSave = showJson && !jsonError ? JSON.parse(rawJson) : policy;
       await api.savePolicy(policy.name, toSave);
       toast.success("Policy saved");
@@ -56,11 +67,14 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-5">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-5">
         <div>
           <h2 className="text-base font-semibold text-text-primary">
             {policy.name}
           </h2>
+          <p className="text-[10px] text-text-muted mt-0.5">
+            {policy.stages.length} stages &middot; max {policy.max_revisions} revisions
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -69,7 +83,7 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
             onClick={() => setShowJson(!showJson)}
             className="text-[10px] cursor-pointer"
           >
-            {showJson ? "Structured" : "View JSON"}
+            {showJson ? "Visual" : "JSON"}
           </Button>
           <Button
             size="sm"
@@ -85,118 +99,290 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
       {showJson ? (
         <JsonEditor value={rawJson} onChange={handleJsonChange} />
       ) : (
-        <>
-          <div className="mb-5">
-            <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2">
-              Review Pipeline
-            </div>
+        <div className="space-y-5">
+          {/* Pipeline visualization */}
+          <section>
+            <SectionLabel>Pipeline</SectionLabel>
             <PipelineFlow policy={policy} />
-          </div>
+          </section>
 
-          <div className="grid grid-cols-2 gap-4">
-            {policy.objective?.checks && (
-              <SettingsCard title="Objective Checks">
+          {/* Objective checks */}
+          {policy.objective?.checks && (
+            <section className="animate-fade-in-up" style={{ animationDelay: "50ms" }}>
+              <SectionLabel>
+                <ShieldCheck className="w-3.5 h-3.5 text-stage-objective inline mr-1 -mt-0.5" />
+                Objective Checks
+                <span className="text-text-muted font-normal ml-1.5">
+                  fail threshold: {policy.objective.fail_threshold}
+                </span>
+              </SectionLabel>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {policy.objective.checks.map((check, i) => (
                   <div
                     key={i}
-                    className="flex justify-between py-0.5 border-b border-background last:border-0"
+                    className="group relative bg-surface rounded-lg p-3 border border-border hover:border-stage-objective/40 transition-colors animate-scale-in"
+                    style={{ animationDelay: `${100 + i * 60}ms` }}
                   >
-                    <span>{check.type || check.module}</span>
-                    <span
-                      className={
-                        check.severity === "blocking"
-                          ? "text-stage-rejected"
-                          : "text-stage-human"
-                      }
-                    >
-                      {check.severity}
-                    </span>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={cn(
+                            "w-7 h-7 rounded-md flex items-center justify-center shrink-0",
+                            check.severity === "blocking"
+                              ? "bg-stage-rejected/10"
+                              : "bg-stage-human/10"
+                          )}
+                        >
+                          {check.severity === "blocking" ? (
+                            <ShieldAlert className="w-3.5 h-3.5 text-stage-rejected" />
+                          ) : (
+                            <ShieldCheck className="w-3.5 h-3.5 text-stage-human" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-medium text-text-primary">
+                            {check.type || check.module}
+                          </div>
+                          {check.version && (
+                            <div className="text-[9px] text-text-muted">
+                              v{check.version}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span
+                        className={cn(
+                          "text-[8px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0",
+                          check.severity === "blocking"
+                            ? "bg-stage-rejected/10 text-stage-rejected"
+                            : "bg-stage-human/10 text-stage-human"
+                        )}
+                      >
+                        {check.severity}
+                      </span>
+                    </div>
+                    {/* Config preview */}
+                    {Object.keys(check.config).length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {Object.entries(check.config).map(([k, v]) => (
+                          <span
+                            key={k}
+                            className="text-[8px] bg-background px-1.5 py-0.5 rounded text-text-muted"
+                          >
+                            {k}: <span className="text-text-secondary">{String(v)}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
-              </SettingsCard>
-            )}
+              </div>
+            </section>
+          )}
 
-            {policy.subjective?.criteria && (
-              <SettingsCard title="Subjective Criteria">
+          {/* Subjective criteria */}
+          {policy.subjective?.criteria && (
+            <section className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
+              <SectionLabel>
+                <Brain className="w-3.5 h-3.5 text-stage-subjective inline mr-1 -mt-0.5" />
+                Subjective Criteria
+                {policy.subjective.evaluation_model && (
+                  <span className="text-text-muted font-normal ml-1.5">
+                    model: {policy.subjective.evaluation_model.replace("claude-", "").replace(/-\d+$/, "")}
+                  </span>
+                )}
+              </SectionLabel>
+
+              {/* Threshold gauge */}
+              <div className="mb-3 flex items-center gap-3">
+                <Gauge className="w-3.5 h-3.5 text-stage-subjective shrink-0" />
+                <div className="flex-1">
+                  <div className="flex justify-between text-[9px] mb-1">
+                    <span className="text-text-muted">Pass threshold</span>
+                    <span className="text-text-primary font-semibold">
+                      {policy.subjective.pass_threshold}/{policy.subjective.criteria[0]?.scale || 10}
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-background rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-stage-subjective rounded-full animate-bar-fill origin-left"
+                      style={{
+                        width: `${(policy.subjective.pass_threshold / (policy.subjective.criteria[0]?.scale || 10)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Criteria with weight bars */}
+              <div className="space-y-1.5">
                 {policy.subjective.criteria.map((c, i) => (
                   <div
                     key={i}
-                    className="flex justify-between py-0.5 border-b border-background last:border-0"
+                    className="group bg-surface rounded-lg p-2.5 border border-border hover:border-stage-subjective/40 transition-colors animate-scale-in"
+                    style={{ animationDelay: `${200 + i * 60}ms` }}
                   >
-                    <span>{c.name}</span>
-                    <span>weight: {c.weight.toFixed(2)}</span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-medium text-text-primary">
+                        {c.name}
+                      </span>
+                      <span className="text-[9px] text-text-muted tabular-nums">
+                        {(c.weight * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-text-muted leading-relaxed mb-2">
+                      {c.description}
+                    </p>
+                    {/* Weight bar */}
+                    <div className="h-1 bg-background rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full animate-bar-fill origin-left"
+                        style={{
+                          width: `${c.weight * 100}%`,
+                          backgroundColor: `color-mix(in srgb, #8b5cf6 ${50 + c.weight * 100}%, #8b5cf680)`,
+                          animationDelay: `${250 + i * 80}ms`,
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
-                <div className="mt-1.5 pt-1 border-t border-border text-text-muted">
-                  Pass threshold: {policy.subjective.pass_threshold}
+              </div>
+            </section>
+          )}
+
+          {/* Human review & revision — side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Human review */}
+            {policy.human && (
+              <section className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+                <SectionLabel>
+                  <User className="w-3.5 h-3.5 text-stage-human inline mr-1 -mt-0.5" />
+                  Human Review
+                </SectionLabel>
+                <div className="bg-surface rounded-lg p-3.5 border border-border space-y-2.5">
+                  {isRichHumanConfig(policy.human) ? (
+                    <>
+                      <ConfigRow
+                        icon={<Users className="w-3 h-3 text-stage-human" />}
+                        label="Reviewers"
+                        value={`${policy.human.required_reviewers} (${policy.human.consensus_rule.replace("_", " ")})`}
+                      />
+                      <ConfigRow
+                        icon={<User className="w-3 h-3 text-stage-human" />}
+                        label="Assignment"
+                        value={policy.human.assignment_strategy.replace("_", " ")}
+                      />
+                      <ConfigRow
+                        icon={<Clock className="w-3 h-3 text-stage-human" />}
+                        label="SLA"
+                        value={`${policy.human.sla_hours}h`}
+                      />
+                    </>
+                  ) : (
+                    <ConfigRow
+                      icon={<User className="w-3 h-3 text-stage-human" />}
+                      label="Required"
+                      value={policy.human.required ? "Yes" : "No"}
+                    />
+                  )}
                 </div>
-              </SettingsCard>
+              </section>
             )}
 
-            {isRichHumanConfig(policy.human) && (
-              <SettingsCard title="Human Review">
-                <div>
-                  Strategy: <span className="text-text-primary">{policy.human.assignment_strategy}</span>
-                </div>
-                <div>
-                  Reviewers: <span className="text-text-primary">{policy.human.required_reviewers}</span>
-                </div>
-                <div>
-                  SLA: <span className="text-text-primary">{policy.human.sla_hours}h</span>
-                </div>
-              </SettingsCard>
-            )}
-
-            {policy.human && !isRichHumanConfig(policy.human) && (
-              <SettingsCard title="Human Review">
-                <div>
-                  Required: <span className="text-text-primary">{policy.human.required ? "Yes" : "No"}</span>
-                </div>
-              </SettingsCard>
-            )}
-
+            {/* Revision settings */}
             {policy.revision_handling && (
-              <SettingsCard title="Revision Settings">
-                <div>
-                  Max revisions: <span className="text-text-primary">{policy.max_revisions}</span>
+              <section className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+                <SectionLabel>
+                  <RotateCcw className="w-3.5 h-3.5 text-stage-revising inline mr-1 -mt-0.5" />
+                  Revisions
+                </SectionLabel>
+                <div className="bg-surface rounded-lg p-3.5 border border-border space-y-2.5">
+                  <ConfigRow
+                    icon={<Hash className="w-3 h-3 text-stage-revising" />}
+                    label="Max"
+                    value={String(policy.max_revisions)}
+                  />
+                  <ConfigRow
+                    icon={<RotateCcw className="w-3 h-3 text-stage-revising" />}
+                    label="Mode"
+                    value={policy.revision_handling.mode.replace("_", " ")}
+                  />
+                  {policy.revision_handling.max_auto_revisions != null && (
+                    <ConfigRow
+                      icon={<Brain className="w-3 h-3 text-stage-revising" />}
+                      label="Auto revisions"
+                      value={String(policy.revision_handling.max_auto_revisions)}
+                    />
+                  )}
+                  {policy.revision_handling.escalate_after_auto_fail != null && (
+                    <ConfigRow
+                      icon={<ArrowUpRight className="w-3 h-3 text-stage-revising" />}
+                      label="Escalate on fail"
+                      value={policy.revision_handling.escalate_after_auto_fail ? "Yes" : "No"}
+                    />
+                  )}
                 </div>
-                <div>
-                  Mode: <span className="text-text-primary">{policy.revision_handling.mode}</span>
-                </div>
-                {policy.revision_handling.max_auto_revisions != null && (
-                  <div>
-                    Auto revisions: <span className="text-text-primary">{policy.revision_handling.max_auto_revisions}</span>
-                  </div>
-                )}
-                {policy.revision_handling.escalate_after_auto_fail != null && (
-                  <div>
-                    Escalate on fail: <span className="text-text-primary">{policy.revision_handling.escalate_after_auto_fail ? "Yes" : "No"}</span>
-                  </div>
-                )}
-              </SettingsCard>
-            )}
-
-            {policy.default_notifications && policy.default_notifications.length > 0 ? (
-              <SettingsCard title="Notifications">
-                {policy.default_notifications.map((n, i) => (
-                  <div key={i} className="mb-1">
-                    <div>
-                      Driver: <span className="text-text-primary">{n.driver}</span>
-                    </div>
-                    <div>
-                      Events: <span className="text-text-primary">{n.events.join(", ")}</span>
-                    </div>
-                  </div>
-                ))}
-              </SettingsCard>
-            ) : (
-              <SettingsCard title="Notifications">
-                <span className="text-text-muted">No default notifications</span>
-              </SettingsCard>
+              </section>
             )}
           </div>
-        </>
+
+          {/* Notifications */}
+          {policy.default_notifications && policy.default_notifications.length > 0 && (
+            <section className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+              <SectionLabel>
+                <Bell className="w-3.5 h-3.5 text-active inline mr-1 -mt-0.5" />
+                Notifications
+              </SectionLabel>
+              <div className="flex flex-wrap gap-2">
+                {policy.default_notifications.map((n, i) => (
+                  <div
+                    key={i}
+                    className="bg-surface rounded-lg px-3 py-2 border border-border flex items-center gap-2 animate-scale-in"
+                    style={{ animationDelay: `${450 + i * 60}ms` }}
+                  >
+                    <span className="text-[10px] font-medium text-text-primary capitalize">
+                      {n.driver}
+                    </span>
+                    <span className="text-[8px] text-text-muted">
+                      {n.events.map((e) => e.split(":")[1]).join(", ")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
+    </div>
+  );
+}
+
+/* ── Helpers ── */
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-2.5 flex items-center">
+      {children}
+    </div>
+  );
+}
+
+function ConfigRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-5 h-5 rounded flex items-center justify-center bg-background shrink-0">
+        {icon}
+      </div>
+      <span className="text-[10px] text-text-muted flex-1">{label}</span>
+      <span className="text-[10px] text-text-primary font-medium">{value}</span>
     </div>
   );
 }

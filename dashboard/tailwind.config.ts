@@ -94,10 +94,29 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "flow-dash": {
+          to: { strokeDashoffset: "-12" },
+        },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "bar-fill": {
+          from: { transform: "scaleX(0)" },
+          to: { transform: "scaleX(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "flow-dash": "flow-dash 0.8s linear infinite",
+        "fade-in-up": "fade-in-up 0.3s ease-out both",
+        "scale-in": "scale-in 0.25s ease-out both",
+        "bar-fill": "bar-fill 0.5s ease-out both",
       },
     },
   },
