@@ -31,7 +31,7 @@ describe("fetchModuleFromGit", () => {
       'export default { execute: async () => [] };'
     );
     const { execSync } = await import("node:child_process");
-    execSync("git init && git branch -M main && git add -A && git commit -m init", { cwd: repoDir, stdio: "pipe" });
+    execSync("git init -b main && git config user.email test@test.com && git config user.name Test && git add -A && git commit -m init", { cwd: repoDir, stdio: "pipe" });
   });
 
   it("fetches a module directory to a destination", async () => {
@@ -52,7 +52,7 @@ describe("getLatestSha", () => {
     fs.mkdirSync(path.join(repoDir, "checks", "test"), { recursive: true });
     fs.writeFileSync(path.join(repoDir, "checks", "test", "manifest.json"), "{}");
     const { execSync } = await import("node:child_process");
-    execSync("git init && git branch -M main && git add -A && git commit -m init", { cwd: repoDir, stdio: "pipe" });
+    execSync("git init -b main && git config user.email test@test.com && git config user.name Test && git add -A && git commit -m init", { cwd: repoDir, stdio: "pipe" });
   });
 
   it("returns the HEAD sha", async () => {

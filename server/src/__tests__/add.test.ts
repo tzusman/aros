@@ -46,7 +46,7 @@ beforeEach(async () => {
   );
 
   const { execSync } = await import("node:child_process");
-  execSync("git init && git branch -M main && git add -A && git commit -m init", { cwd: sourceRepoDir, stdio: "pipe" });
+  execSync("git init -b main && git config user.email test@test.com && git config user.name Test && git add -A && git commit -m init", { cwd: sourceRepoDir, stdio: "pipe" });
 
   // Write registry pointing to source repo
   fs.writeFileSync(
@@ -116,7 +116,7 @@ describe("addModule", () => {
         },
       })
     );
-    execSync("git add -A && git commit -m 'add policy'", { cwd: sourceRepoDir, stdio: "pipe" });
+    execSync("git add -A && git commit -m 'add policy'", { cwd: sourceRepoDir, stdio: "pipe", env: { ...process.env, GIT_AUTHOR_NAME: "Test", GIT_AUTHOR_EMAIL: "test@test.com", GIT_COMMITTER_NAME: "Test", GIT_COMMITTER_EMAIL: "test@test.com" } });
 
     await addModule(projectDir, "policies/test-policy");
 
