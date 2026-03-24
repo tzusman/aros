@@ -3,7 +3,6 @@ import {
   ShieldCheck,
   Brain,
   User,
-  ArrowRight,
 } from "lucide-react";
 import type { Policy, PolicyHumanConfig } from "@/lib/api/types";
 
