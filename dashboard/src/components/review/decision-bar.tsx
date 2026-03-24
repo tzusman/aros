@@ -4,15 +4,34 @@ import { Input } from "@/components/ui/input";
 import { api, ApiError } from "@/lib/api/client";
 import { useApp } from "@/context/app-context";
 import { toast } from "sonner";
-import { Info, Check, RotateCcw, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Info, Check, RotateCcw, X } from "lucide-react";
 import type { Decision } from "@/lib/api/types";
+import type { FileAnnotations } from "@/pages/review-page";
 
 interface DecisionBarProps {
   deliverableId: string;
   brief: string;
+  annotations: FileAnnotations;
 }
 
-export function DecisionBar({ deliverableId, brief }: DecisionBarProps) {
+function serializeAnnotations(annotations: FileAnnotations): string {
+  const lines: string[] = [];
+  const entries = Object.entries(annotations).filter(
+    ([, a]) => a.verdict || a.note.trim()
+  );
+  if (entries.length === 0) return "";
+
+  for (const [filename, ann] of entries) {
+    const parts: string[] = [];
+    if (ann.verdict === "approved") parts.push("KEEP");
+    if (ann.verdict === "disqualified") parts.push("CUT");
+    if (ann.note.trim()) parts.push(ann.note.trim());
+    lines.push(`- ${filename}: ${parts.join(" — ")}`);
+  }
+  return lines.join("\n");
+}
+
+export function DecisionBar({ deliverableId, brief, annotations }: DecisionBarProps) {
   const { dispatch } = useApp();
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -21,10 +40,16 @@ export function DecisionBar({ deliverableId, brief }: DecisionBarProps) {
   async function submit(decision: Decision) {
     if (decision !== "approved" && !reason.trim()) return;
     setSubmitting(true);
+
+    // Build full reason from typed feedback + per-file annotations
+    const annotationBlock = serializeAnnotations(annotations);
+    const parts = [reason.trim(), annotationBlock].filter(Boolean);
+    const fullReason = parts.join("\n\n") || undefined;
+
     try {
       await api.submitDecision(deliverableId, {
         decision,
-        reason: reason.trim() || undefined,
+        reason: fullReason,
       });
       dispatch({ type: "REMOVE_FROM_QUEUE", id: deliverableId });
       setReason("");

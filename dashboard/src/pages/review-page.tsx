@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useApp } from "@/context/app-context";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
@@ -8,11 +8,21 @@ import { MediaViewer } from "@/components/review/media-viewer";
 import { ScoreBadge } from "@/components/review/score-badge";
 import { ChevronLeft, ChevronRight, Moon, Sun, Monitor } from "lucide-react";
 
+export type FileVerdict = "approved" | "disqualified";
+
+export interface FileAnnotation {
+  verdict: FileVerdict | null;
+  note: string;
+}
+
+export type FileAnnotations = Record<string, FileAnnotation>;
+
 export function ReviewPage() {
   const { id: routeId } = useParams<{ id: string }>();
   const { state, selectDeliverable } = useApp();
   const { theme, setTheme } = useTheme();
   const [inspectedFile, setInspectedFile] = useState<string | null>(null);
+  const [annotations, setAnnotations] = useState<FileAnnotations>({});
 
   useEffect(() => {
     if (routeId && routeId !== state.selectedId) {
@@ -20,8 +30,10 @@ export function ReviewPage() {
     }
   }, [routeId]);
 
+  // Reset state when switching deliverables
   useEffect(() => {
     setInspectedFile(null);
+    setAnnotations({});
   }, [state.selectedId]);
 
   const queueIndex = state.queue.findIndex((d) => d.id === state.selectedId);
@@ -38,12 +50,30 @@ export function ReviewPage() {
     }
   }
 
+  const setFileVerdict = useCallback(
+    (filename: string, verdict: FileVerdict | null) => {
+      setAnnotations((prev) => ({
+        ...prev,
+        [filename]: { ...prev[filename], verdict, note: prev[filename]?.note || "" },
+      }));
+    },
+    []
+  );
+
+  const setFileNote = useCallback(
+    (filename: string, note: string) => {
+      setAnnotations((prev) => ({
+        ...prev,
+        [filename]: { ...prev[filename], verdict: prev[filename]?.verdict ?? null, note },
+      }));
+    },
+    []
+  );
+
   const keyMap = useMemo(
     () => ({
       j: goNext,
       k: goPrev,
-      ArrowRight: goNext,
-      ArrowLeft: goPrev,
     }),
     [state.queue, state.selectedId, selectDeliverable]
   );
@@ -64,6 +94,12 @@ export function ReviewPage() {
       : state.connectionStatus === "reconnecting"
         ? "bg-stage-human"
         : "bg-stage-rejected";
+
+  // Annotation counts for the header
+  const approvedCount = Object.values(annotations).filter((a) => a.verdict === "approved").length;
+  const disqualifiedCount = Object.values(annotations).filter((a) => a.verdict === "disqualified").length;
+  const notedCount = Object.values(annotations).filter((a) => a.note.trim()).length;
+  const hasAnnotations = approvedCount > 0 || disqualifiedCount > 0 || notedCount > 0;
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
@@ -97,7 +133,7 @@ export function ReviewPage() {
           {deliverable && (
             <>
               <div className="w-px h-4 bg-border" />
-              <span className="text-xs font-medium text-text-primary truncate max-w-[40vw]">
+              <span className="text-xs font-medium text-text-primary truncate max-w-[30vw]">
                 {deliverable.title}
               </span>
               {deliverable.revision_number > 1 && (
@@ -105,6 +141,24 @@ export function ReviewPage() {
                   v{deliverable.revision_number}
                 </span>
               )}
+            </>
+          )}
+
+          {/* Inline annotation tally */}
+          {hasAnnotations && (
+            <>
+              <div className="w-px h-4 bg-border" />
+              <div className="flex items-center gap-1.5 text-[10px]">
+                {approvedCount > 0 && (
+                  <span className="text-stage-approved font-medium">{approvedCount} kept</span>
+                )}
+                {disqualifiedCount > 0 && (
+                  <span className="text-stage-rejected font-medium">{disqualifiedCount} cut</span>
+                )}
+                {notedCount > 0 && (
+                  <span className="text-text-muted">{notedCount} noted</span>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -131,6 +185,9 @@ export function ReviewPage() {
             deliverable={deliverable}
             inspectedFile={inspectedFile}
             onInspect={setInspectedFile}
+            annotations={annotations}
+            onSetVerdict={setFileVerdict}
+            onSetNote={setFileNote}
           />
         ) : (
           <div className="h-full flex items-center justify-center">
@@ -146,6 +203,7 @@ export function ReviewPage() {
         <DecisionBar
           deliverableId={deliverable.id}
           brief={deliverable.brief}
+          annotations={annotations}
         />
       )}
     </div>
