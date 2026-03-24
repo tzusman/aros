@@ -22,6 +22,8 @@ interface MediaViewerProps {
   annotations: FileAnnotations;
   onSetVerdict: (filename: string, verdict: FileVerdict | null) => void;
   onSetNote: (filename: string, note: string) => void;
+  selectedFile?: string | null;
+  onSelectFile?: (filename: string | null) => void;
 }
 
 export function MediaViewer({
@@ -31,6 +33,8 @@ export function MediaViewer({
   annotations,
   onSetVerdict,
   onSetNote,
+  selectedFile,
+  onSelectFile,
 }: MediaViewerProps) {
   const isMediaFolder =
     deliverable.is_folder &&
@@ -54,6 +58,8 @@ export function MediaViewer({
         annotations={annotations}
         onSetVerdict={onSetVerdict}
         onSetNote={onSetNote}
+        selectedFile={selectedFile}
+        onSelectFile={onSelectFile}
       />
     );
   }
@@ -234,6 +240,8 @@ function MediaFolderViewer({
   annotations,
   onSetVerdict,
   onSetNote,
+  selectedFile,
+  onSelectFile,
 }: {
   files: DeliverableFile[];
   inspectedFile: string | null;
@@ -241,6 +249,8 @@ function MediaFolderViewer({
   annotations: FileAnnotations;
   onSetVerdict: (filename: string, verdict: FileVerdict | null) => void;
   onSetNote: (filename: string, note: string) => void;
+  selectedFile?: string | null;
+  onSelectFile?: (filename: string | null) => void;
 }) {
   const [mode, setMode] = useState<"default" | "single">(
     inspectedFile ? "single" : "default"
@@ -408,42 +418,72 @@ function MediaFolderViewer({
     );
   }
 
-  // ── 2 images: comparison slider ──
-  if (mediaFiles.length === 2) {
+  // ── 2 images: comparison slider (only in review mode, not select) ──
+  if (mediaFiles.length === 2 && !onSelectFile) {
     return (
       <CompareView files={[mediaFiles[0], mediaFiles[1]]} />
     );
   }
 
-  // ── 3+ images: grid with object-contain (no cropping) ──
+  // ── Grid view (2+ in select mode, 3+ in review mode) ──
+  const isSelectMode = !!onSelectFile;
+
+  // Adaptive columns: fewer items = larger cards
+  const gridCols = isSelectMode
+    ? mediaFiles.length <= 2
+      ? "grid-cols-2"
+      : mediaFiles.length <= 4
+        ? "grid-cols-2"
+        : "grid-cols-2 md:grid-cols-3"
+    : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+
   return (
-    <div className="h-full overflow-y-auto p-3">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className={cn(
+      "flex-1 min-h-0 p-4",
+      isSelectMode
+        ? "flex items-center justify-center"
+        : "overflow-y-auto"
+    )}>
+      <div className={cn(
+        "grid gap-4",
+        gridCols,
+        isSelectMode && "w-full h-full max-h-full",
+        isSelectMode && mediaFiles.length <= 4 && "max-w-5xl"
+      )}>
         {mediaFiles.map((file) => {
           const ann = annotations[file.filename];
           const verdict = ann?.verdict ?? null;
           const note = ann?.note ?? "";
+          const isSelected = isSelectMode && selectedFile === file.filename;
 
           return (
             <div
               key={file.filename}
               className={cn(
-                "group relative rounded-lg overflow-hidden bg-surface transition-all",
-                verdict === "approved"
-                  ? "ring-2 ring-stage-approved shadow-md shadow-stage-approved/10"
-                  : verdict === "disqualified"
-                    ? "ring-2 ring-stage-rejected"
-                    : "ring-1 ring-border hover:ring-text-muted"
+                "group relative rounded-lg overflow-hidden bg-surface transition-all flex flex-col",
+                isSelectMode && "min-h-0",
+                isSelected
+                  ? "ring-2 ring-active shadow-lg shadow-active/15"
+                  : verdict === "approved"
+                    ? "ring-2 ring-stage-approved shadow-md shadow-stage-approved/10"
+                    : verdict === "disqualified"
+                      ? "ring-2 ring-stage-rejected"
+                      : "ring-1 ring-border hover:ring-text-muted"
               )}
             >
               {/* Clickable image area */}
               <button
                 onClick={() => {
-                  onInspect(file.filename);
-                  setMode("single");
+                  if (isSelectMode) {
+                    onSelectFile(isSelected ? null : file.filename);
+                  } else {
+                    onInspect(file.filename);
+                    setMode("single");
+                  }
                 }}
                 className={cn(
-                  "w-full cursor-pointer transition-opacity flex items-center justify-center p-2",
+                  "w-full cursor-pointer transition-opacity flex items-center justify-center",
+                  isSelectMode ? "flex-1 min-h-0 p-3" : "p-2",
                   verdict === "disqualified" && "opacity-25"
                 )}
               >
@@ -451,13 +491,19 @@ function MediaFolderViewer({
                   <video
                     src={file.preview_url}
                     muted
-                    className="w-full h-auto rounded"
+                    className={cn(
+                      "rounded",
+                      isSelectMode ? "max-w-full max-h-full object-contain" : "w-full h-auto"
+                    )}
                   />
                 ) : file.preview_url ? (
                   <img
                     src={file.preview_url}
                     alt={file.filename}
-                    className="w-full h-auto object-contain rounded"
+                    className={cn(
+                      "object-contain rounded",
+                      isSelectMode ? "max-w-full max-h-full" : "w-full h-auto"
+                    )}
                   />
                 ) : (
                   <div className="w-full aspect-video flex items-center justify-center">
@@ -468,8 +514,24 @@ function MediaFolderViewer({
                 )}
               </button>
 
-              {/* Verdict badge */}
-              {verdict && (
+              {/* Select-mode radio indicator */}
+              {isSelectMode && (
+                <div
+                  className={cn(
+                    "absolute top-3 right-3 w-6 h-6 rounded-full border-2 flex items-center justify-center z-10 transition-all",
+                    isSelected
+                      ? "bg-active border-active"
+                      : "bg-black/20 border-white/50"
+                  )}
+                >
+                  {isSelected && (
+                    <Check className="w-3.5 h-3.5 text-white" />
+                  )}
+                </div>
+              )}
+
+              {/* Verdict badge (review mode only) */}
+              {!isSelectMode && verdict && (
                 <div
                   className={cn(
                     "absolute top-1.5 left-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white z-10",
@@ -484,7 +546,7 @@ function MediaFolderViewer({
 
               {/* Note indicator */}
               {note.trim() && (
-                <div className="absolute top-1.5 left-1.5 z-10" style={{ marginTop: verdict ? "22px" : 0 }}>
+                <div className="absolute top-1.5 left-1.5 z-10" style={{ marginTop: !isSelectMode && verdict ? "22px" : 0 }}>
                   <div className="bg-active text-white text-[8px] px-1.5 py-0.5 rounded-full max-w-[12ch] truncate">
                     {note}
                   </div>
@@ -492,7 +554,7 @@ function MediaFolderViewer({
               )}
 
               {/* Score pill */}
-              {file.score !== null && (
+              {!isSelectMode && file.score !== null && (
                 <div
                   className={cn(
                     "absolute top-1.5 right-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full z-10",
@@ -508,22 +570,24 @@ function MediaFolderViewer({
               )}
 
               {/* Filename label */}
-              <div className="px-2 py-1.5 border-t border-border">
+              <div className="px-2 py-1.5 border-t border-border shrink-0">
                 <span className="text-[10px] text-text-secondary truncate block">
                   {file.filename}
                 </span>
               </div>
 
-              {/* Action buttons on hover */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <FileActions
-                  filename={file.filename}
-                  annotations={annotations}
-                  onSetVerdict={onSetVerdict}
-                  onSetNote={onSetNote}
-                  layout="overlay"
-                />
-              </div>
+              {/* Action buttons on hover (review mode only) */}
+              {!isSelectMode && (
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <FileActions
+                    filename={file.filename}
+                    annotations={annotations}
+                    onSetVerdict={onSetVerdict}
+                    onSetNote={onSetNote}
+                    layout="overlay"
+                  />
+                </div>
+              )}
             </div>
           );
         })}

@@ -22,6 +22,7 @@ export function ReviewPage() {
   const { state, selectDeliverable } = useApp();
   const { theme, setTheme } = useTheme();
   const [inspectedFile, setInspectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [annotations, setAnnotations] = useState<FileAnnotations>({});
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function ReviewPage() {
   // Reset state when switching deliverables
   useEffect(() => {
     setInspectedFile(null);
+    setSelectedFile(null);
     setAnnotations({});
   }, [state.selectedId]);
 
@@ -195,6 +197,8 @@ export function ReviewPage() {
             annotations={annotations}
             onSetVerdict={setFileVerdict}
             onSetNote={setFileNote}
+            selectedFile={selectedFile}
+            onSelectFile={deliverable.folder_strategy === "select" ? setSelectedFile : undefined}
           />
         ) : (
           <div className="h-full flex items-center justify-center">
@@ -211,6 +215,8 @@ export function ReviewPage() {
           deliverableId={deliverable.id}
           brief={deliverable.brief}
           annotations={annotations}
+          folderStrategy={deliverable.folder_strategy}
+          selectedFile={selectedFile}
         />
       )}
     </div>
