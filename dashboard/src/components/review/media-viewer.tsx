@@ -11,6 +11,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import { cn } from "@/lib/utils";
+import { CompareView } from "@/components/folder/compare-view";
 import type { Deliverable, DeliverableFile } from "@/lib/api/types";
 import type { FileAnnotations, FileVerdict } from "@/pages/review-page";
 
@@ -241,8 +242,8 @@ function MediaFolderViewer({
   onSetVerdict: (filename: string, verdict: FileVerdict | null) => void;
   onSetNote: (filename: string, note: string) => void;
 }) {
-  const [mode, setMode] = useState<"grid" | "single">(
-    inspectedFile ? "single" : "grid"
+  const [mode, setMode] = useState<"default" | "single">(
+    inspectedFile ? "single" : "default"
   );
 
   const mediaFiles = files.filter(
@@ -251,6 +252,7 @@ function MediaFolderViewer({
       f.content_type.startsWith("video/")
   );
 
+  // ── Single-file inspection view (clicking a card in grid or navigating) ──
   if (mode === "single" || inspectedFile) {
     const currentName = inspectedFile || mediaFiles[0]?.filename;
     const idx = mediaFiles.findIndex((f) => f.filename === currentName);
@@ -265,18 +267,21 @@ function MediaFolderViewer({
       <div className="h-full flex flex-col">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-          <button
-            onClick={() => {
-              setMode("grid");
-              onInspect(null);
-            }}
-            className="text-[10px] text-text-muted hover:text-text-secondary flex items-center gap-1 cursor-pointer"
-          >
-            <Grid2x2 className="w-3 h-3" /> Grid
-          </button>
+          {mediaFiles.length > 1 ? (
+            <button
+              onClick={() => {
+                setMode("default");
+                onInspect(null);
+              }}
+              className="text-[10px] text-text-muted hover:text-text-secondary flex items-center gap-1 cursor-pointer"
+            >
+              <Grid2x2 className="w-3 h-3" /> Back
+            </button>
+          ) : (
+            <div />
+          )}
 
           <div className="flex items-center gap-2">
-            {/* Verdict indicator */}
             {verdict && (
               <span
                 className={cn(
@@ -303,7 +308,6 @@ function MediaFolderViewer({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Per-file actions */}
             <FileActions
               filename={file.filename}
               annotations={annotations}
@@ -311,10 +315,7 @@ function MediaFolderViewer({
               onSetNote={onSetNote}
               layout="inline"
             />
-
             <div className="w-px h-4 bg-border" />
-
-            {/* Navigation */}
             <div className="flex gap-0.5">
               <button
                 disabled={idx <= 0}
@@ -365,10 +366,59 @@ function MediaFolderViewer({
     );
   }
 
-  // ── Grid view ──
+  // ── 1 image: show it large and centered ──
+  if (mediaFiles.length === 1) {
+    const file = mediaFiles[0];
+    return (
+      <div className="h-full flex items-center justify-center p-6 bg-background">
+        <div className="relative group">
+          {file.content_type.startsWith("video/") ? (
+            <video
+              src={file.preview_url}
+              controls
+              className="max-w-full max-h-[calc(100vh-8rem)] rounded-lg"
+            />
+          ) : file.preview_url ? (
+            <img
+              src={file.preview_url}
+              alt={file.filename}
+              className="max-w-full max-h-[calc(100vh-8rem)] object-contain rounded-lg"
+            />
+          ) : (
+            <div className="w-full max-w-3xl aspect-video bg-surface rounded-lg flex items-center justify-center">
+              <span className="text-3xl font-bold text-text-muted">
+                {file.filename.replace(/\.[^.]+$/, "").toUpperCase()}
+              </span>
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+            {file.filename}
+          </div>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <FileActions
+              filename={file.filename}
+              annotations={annotations}
+              onSetVerdict={onSetVerdict}
+              onSetNote={onSetNote}
+              layout="overlay"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── 2 images: comparison slider ──
+  if (mediaFiles.length === 2) {
+    return (
+      <CompareView files={[mediaFiles[0], mediaFiles[1]]} />
+    );
+  }
+
+  // ── 3+ images: grid with object-contain (no cropping) ──
   return (
     <div className="h-full overflow-y-auto p-3">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {mediaFiles.map((file) => {
           const ann = annotations[file.filename];
           const verdict = ann?.verdict ?? null;
@@ -378,7 +428,7 @@ function MediaFolderViewer({
             <div
               key={file.filename}
               className={cn(
-                "group relative aspect-video rounded-lg overflow-hidden bg-surface transition-all",
+                "group relative rounded-lg overflow-hidden bg-surface transition-all",
                 verdict === "approved"
                   ? "ring-2 ring-stage-approved shadow-md shadow-stage-approved/10"
                   : verdict === "disqualified"
@@ -393,7 +443,7 @@ function MediaFolderViewer({
                   setMode("single");
                 }}
                 className={cn(
-                  "w-full h-full cursor-pointer transition-opacity",
+                  "w-full cursor-pointer transition-opacity flex items-center justify-center p-2",
                   verdict === "disqualified" && "opacity-25"
                 )}
               >
@@ -401,16 +451,16 @@ function MediaFolderViewer({
                   <video
                     src={file.preview_url}
                     muted
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto rounded"
                   />
                 ) : file.preview_url ? (
                   <img
                     src={file.preview_url}
                     alt={file.filename}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain rounded"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full aspect-video flex items-center justify-center">
                     <span className="text-sm font-bold text-text-muted">
                       {file.filename.replace(/\.[^.]+$/, "").toUpperCase()}
                     </span>
@@ -418,7 +468,7 @@ function MediaFolderViewer({
                 )}
               </button>
 
-              {/* Verdict badge - top left */}
+              {/* Verdict badge */}
               {verdict && (
                 <div
                   className={cn(
@@ -432,7 +482,7 @@ function MediaFolderViewer({
                 </div>
               )}
 
-              {/* Note indicator - below verdict */}
+              {/* Note indicator */}
               {note.trim() && (
                 <div className="absolute top-1.5 left-1.5 z-10" style={{ marginTop: verdict ? "22px" : 0 }}>
                   <div className="bg-active text-white text-[8px] px-1.5 py-0.5 rounded-full max-w-[12ch] truncate">
@@ -441,7 +491,7 @@ function MediaFolderViewer({
                 </div>
               )}
 
-              {/* Score pill - top right */}
+              {/* Score pill */}
               {file.score !== null && (
                 <div
                   className={cn(
@@ -458,13 +508,13 @@ function MediaFolderViewer({
               )}
 
               {/* Filename label */}
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 pointer-events-none">
-                <span className="text-[10px] text-white/90 truncate block">
+              <div className="px-2 py-1.5 border-t border-border">
+                <span className="text-[10px] text-text-secondary truncate block">
                   {file.filename}
                 </span>
               </div>
 
-              {/* Action buttons - appear on hover */}
+              {/* Action buttons on hover */}
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <FileActions
                   filename={file.filename}

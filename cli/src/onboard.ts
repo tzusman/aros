@@ -917,13 +917,49 @@ function printSuggestedPrompt(prompt: string, explanation: string | null): void 
   console.log();
 }
 
+const DEMO_STARTER_PROMPT = `Submit the two demo SVGs for review through AROS:
+
+1. Submit .aros/demo/image-one.svg
+2. Submit .aros/demo/image-two.svg
+
+Use the AROS MCP tools (create_review, add_file, submit_for_review) to send each one.`;
+
 /**
- * Main onboarding orchestrator. Analyzes the project, recommends review
- * policies, installs selected ones, and suggests a starter prompt.
+ * Copy bundled demo SVGs into the project's .aros/demo/ directory.
+ */
+export function installDemoFiles(projectDir: string): void {
+  const demoDir = path.join(projectDir, ".aros", "demo");
+  if (!fs.existsSync(demoDir)) {
+    fs.mkdirSync(demoDir, { recursive: true });
+  }
+
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  const bundledDemo = path.resolve(here, "demo");
+
+  // If bundled demo files exist, copy them
+  if (fs.existsSync(bundledDemo)) {
+    for (const name of ["image-one.svg", "image-two.svg"]) {
+      const src = path.join(bundledDemo, name);
+      const dest = path.join(demoDir, name);
+      if (fs.existsSync(src) && !fs.existsSync(dest)) {
+        fs.copyFileSync(src, dest);
+      }
+    }
+  }
+}
+
+interface OnboardOptions {
+  skipDemo?: boolean;
+}
+
+/**
+ * Main onboarding orchestrator. Installs policies from the registry
+ * and optionally copies demo SVG files.
  */
 export async function onboard(
   projectDir: string,
   storage: Storage,
+  opts: OnboardOptions = {},
 ): Promise<OnboardResult> {
   const result: OnboardResult = {
     installedPolicies: [],
@@ -931,189 +967,29 @@ export async function onboard(
     suggestedExplanation: null,
   };
 
-  console.log();
-  console.log(
-    `  ${pc.cyan(pc.bold("Smart onboarding"))} ${pc.dim("— analyzing your project to recommend review policies")}`
-  );
-  console.log();
-
-  // Step 1: Resolve registry directory
+  // Install registry policies
   const registryDir = resolveRegistryDir();
-  if (!registryDir) {
-    console.log(pc.yellow("  Could not locate registry directory — skipping onboarding."));
-    return result;
-  }
-
-  // Step 2: Scan repo
-  let scan: ScanResult;
-  try {
-    scan = scanRepo(projectDir);
-  } catch {
-    console.log(pc.yellow("  Could not scan project directory — skipping onboarding."));
-    return result;
-  }
-
-  // Step 3: Load registry policies
-  let registryPolicies: RegistryPolicy[];
-  try {
-    registryPolicies = loadRegistryPolicies(registryDir);
-  } catch {
-    registryPolicies = [];
-  }
-
-  if (registryPolicies.length === 0) {
-    console.log(pc.yellow("  No registry policies found — skipping onboarding."));
-    return result;
-  }
-
-  // Step 4: Call Claude to get recommendations
-  const spinner = prompts.spinner();
-  spinner.start("Analyzing your project...");
-
-  let recommendations: Array<{ policy: string; confidence: string; reason: string }> = [];
-
-  const recommenderPrompt = buildRecommenderPrompt(scan, registryPolicies);
-
-  // Try up to 2 times (spec: "Retry once with same prompt. If still unparseable, skip.")
-  for (let attempt = 0; attempt < 2 && recommendations.length === 0; attempt++) {
+  if (registryDir) {
+    let registryPolicies: RegistryPolicy[];
     try {
-      const raw = await callClaude(recommenderPrompt);
-      if (!raw) break; // Claude unavailable — no point retrying
-
-      // Double-parse: outer JSON wrapper from `claude -p --output-format json`
-      // wraps the actual response in {"result": "..."}
-      const outer = parseJsonResponse(raw);
-      const resultStr =
-        outer && typeof outer === "object" && "result" in (outer as object)
-          ? (outer as Record<string, unknown>).result
-          : raw;
-
-      const inner = parseJsonResponse(
-        typeof resultStr === "string" ? resultStr : JSON.stringify(resultStr)
-      );
-
-      if (
-        inner &&
-        typeof inner === "object" &&
-        "recommendations" in (inner as object) &&
-        Array.isArray((inner as Record<string, unknown>).recommendations)
-      ) {
-        recommendations = (inner as Record<string, unknown>).recommendations as typeof recommendations;
-      }
+      registryPolicies = loadRegistryPolicies(registryDir);
     } catch {
-      // Graceful fallback — retry or proceed with empty recommendations
+      registryPolicies = [];
     }
-  }
 
-  spinner.stop("Analysis complete.");
-
-  // Step 5: Show multiselect — only recommended policies, all pre-selected
-  const reasonByName = new Map(recommendations.map((r) => [r.policy, r]));
-  const options = recommendations
-    .filter((r) => registryPolicies.some((p) => p.name === r.policy))
-    .map((r) => ({
-      value: r.policy,
-      label: `${r.policy} ${pc.dim(`(${r.confidence})`)}`,
-      hint: r.reason,
-    }));
-
-  const initialValues = options.map((o) => o.value);
-  let selectedNames: string[] = initialValues;
-
-  try {
-    const selected = await prompts.multiselect({
-      message: "Recommended policies for your project:",
-      options,
-      initialValues,
-      required: false,
-    });
-
-    if (!prompts.isCancel(selected)) {
-      selectedNames = selected as string[];
-    }
-  } catch {
-    // Graceful fallback to recommended list
-  }
-
-  // Step 6: Install selected policies
-  try {
-    result.installedPolicies = await installPolicies(storage, selectedNames, registryPolicies);
-  } catch {
-    result.installedPolicies = [];
-  }
-
-  if (result.installedPolicies.length > 0) {
-    console.log();
-    console.log(
-      `  ${pc.green("✔")}  Installed ${pc.bold(String(result.installedPolicies.length))} ${result.installedPolicies.length === 1 ? "policy" : "policies"}: ${result.installedPolicies.join(", ")}`
-    );
-  }
-
-  if (result.installedPolicies.length === 0) {
-    return result;
-  }
-
-  // Step 7: Gather candidate files
-  let candidateFiles: string[] = [];
-  try {
-    candidateFiles = gatherCandidateFiles(projectDir, result.installedPolicies);
-  } catch {
-    candidateFiles = [];
-  }
-
-  // Step 8: Generate starter prompt
-  spinner.start("Generating a starter prompt...");
-
-  try {
-    const installedRegistryPolicies = registryPolicies.filter((p) =>
-      result.installedPolicies.includes(p.name)
-    );
-
-    const projectDescription = scan.readme
-      ? scan.readme.split("\n").slice(0, 5).join(" ")
-      : path.basename(projectDir);
-
-    const promptGenPrompt = buildPromptGeneratorPrompt(
-      installedRegistryPolicies,
-      candidateFiles,
-      projectDescription
-    );
-
-    const raw = await callClaude(promptGenPrompt);
-
-    if (raw) {
-      // Double-parse: same outer JSON wrapper handling
-      const outer = parseJsonResponse(raw);
-      const resultStr =
-        outer && typeof outer === "object" && "result" in (outer as object)
-          ? (outer as Record<string, unknown>).result
-          : raw;
-
-      const inner = parseJsonResponse(
-        typeof resultStr === "string" ? resultStr : JSON.stringify(resultStr)
-      );
-
-      if (inner && typeof inner === "object") {
-        const parsed = inner as Record<string, unknown>;
-        if (typeof parsed.prompt === "string") {
-          result.suggestedPrompt = parsed.prompt;
-        }
-        if (typeof parsed.explanation === "string") {
-          result.suggestedExplanation = parsed.explanation;
-        }
+    if (registryPolicies.length > 0) {
+      const allNames = registryPolicies.map((p) => p.name);
+      try {
+        result.installedPolicies = await installPolicies(storage, allNames, registryPolicies);
+      } catch {
+        result.installedPolicies = [];
       }
     }
-  } catch {
-    // Graceful fallback — no starter prompt
   }
 
-  spinner.stop(result.suggestedPrompt ? "Starter prompt ready." : "Could not generate starter prompt.");
-
-  // Step 9: Print the suggested prompt
-  if (result.suggestedPrompt) {
-    console.log();
-    console.log(`  ${pc.bold("Suggested starter prompt:")}`);
-    printSuggestedPrompt(result.suggestedPrompt, result.suggestedExplanation);
+  // Copy demo SVGs
+  if (!opts.skipDemo) {
+    installDemoFiles(projectDir);
   }
 
   return result;

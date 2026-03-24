@@ -1163,8 +1163,8 @@ var require_command = __commonJS({
     "use strict";
     var EventEmitter2 = __require("events").EventEmitter;
     var childProcess = __require("child_process");
-    var path15 = __require("path");
-    var fs12 = __require("fs");
+    var path17 = __require("path");
+    var fs14 = __require("fs");
     var process2 = __require("process");
     var { Argument: Argument2, humanReadableArgName } = require_argument();
     var { CommanderError: CommanderError2 } = require_error();
@@ -2145,7 +2145,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} subcommandName
        */
       _checkForMissingExecutable(executableFile, executableDir, subcommandName) {
-        if (fs12.existsSync(executableFile)) return;
+        if (fs14.existsSync(executableFile)) return;
         const executableDirMessage = executableDir ? `searched for local subcommand relative to directory '${executableDir}'` : "no directory for search for local subcommand, use .executableDir() to supply a custom directory";
         const executableMissing = `'${executableFile}' does not exist
  - if '${subcommandName}' is not meant to be an executable command, remove description parameter from '.command()' and use '.description()' instead
@@ -2163,11 +2163,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         let launchWithNode = false;
         const sourceExt = [".js", ".ts", ".tsx", ".mjs", ".cjs"];
         function findFile(baseDir, baseName) {
-          const localBin = path15.resolve(baseDir, baseName);
-          if (fs12.existsSync(localBin)) return localBin;
-          if (sourceExt.includes(path15.extname(baseName))) return void 0;
+          const localBin = path17.resolve(baseDir, baseName);
+          if (fs14.existsSync(localBin)) return localBin;
+          if (sourceExt.includes(path17.extname(baseName))) return void 0;
           const foundExt = sourceExt.find(
-            (ext) => fs12.existsSync(`${localBin}${ext}`)
+            (ext) => fs14.existsSync(`${localBin}${ext}`)
           );
           if (foundExt) return `${localBin}${foundExt}`;
           return void 0;
@@ -2179,21 +2179,21 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._scriptPath) {
           let resolvedScriptPath;
           try {
-            resolvedScriptPath = fs12.realpathSync(this._scriptPath);
+            resolvedScriptPath = fs14.realpathSync(this._scriptPath);
           } catch {
             resolvedScriptPath = this._scriptPath;
           }
-          executableDir = path15.resolve(
-            path15.dirname(resolvedScriptPath),
+          executableDir = path17.resolve(
+            path17.dirname(resolvedScriptPath),
             executableDir
           );
         }
         if (executableDir) {
           let localFile = findFile(executableDir, executableFile);
           if (!localFile && !subcommand._executableFile && this._scriptPath) {
-            const legacyName = path15.basename(
+            const legacyName = path17.basename(
               this._scriptPath,
-              path15.extname(this._scriptPath)
+              path17.extname(this._scriptPath)
             );
             if (legacyName !== this._name) {
               localFile = findFile(
@@ -2204,7 +2204,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           }
           executableFile = localFile || executableFile;
         }
-        launchWithNode = sourceExt.includes(path15.extname(executableFile));
+        launchWithNode = sourceExt.includes(path17.extname(executableFile));
         let proc;
         if (process2.platform !== "win32") {
           if (launchWithNode) {
@@ -3051,7 +3051,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @return {Command}
        */
       nameFromFilename(filename) {
-        this._name = path15.basename(filename, path15.extname(filename));
+        this._name = path17.basename(filename, path17.extname(filename));
         return this;
       }
       /**
@@ -3065,9 +3065,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} [path]
        * @return {(string|null|Command)}
        */
-      executableDir(path16) {
-        if (path16 === void 0) return this._executableDir;
-        this._executableDir = path16;
+      executableDir(path18) {
+        if (path18 === void 0) return this._executableDir;
+        this._executableDir = path18;
         return this;
       }
       /**
@@ -4241,7 +4241,7 @@ var require_src2 = __commonJS({
 var require_depd = __commonJS({
   "../node_modules/depd/index.js"(exports, module) {
     "use strict";
-    var relative3 = __require("path").relative;
+    var relative4 = __require("path").relative;
     module.exports = depd;
     var basePath = process.cwd();
     function containsNamespace(str, namespace) {
@@ -4433,7 +4433,7 @@ var require_depd = __commonJS({
       return formatted;
     }
     function formatLocation(callSite) {
-      return relative3(basePath, callSite[0]) + ":" + callSite[1] + ":" + callSite[2];
+      return relative4(basePath, callSite[0]) + ":" + callSite[1] + ":" + callSite[2];
     }
     function getStack() {
       var limit = Error.stackTraceLimit;
@@ -8892,10 +8892,10 @@ var require_raw_body = __commonJS({
       if (done) {
         return readStream(stream, encoding, length, limit, wrap(done));
       }
-      return new Promise(function executor(resolve5, reject) {
+      return new Promise(function executor(resolve6, reject) {
         readStream(stream, encoding, length, limit, function onRead(err, buf) {
           if (err) return reject(err);
-          resolve5(buf);
+          resolve6(buf);
         });
       });
     }
@@ -18699,7 +18699,7 @@ var require_mime_types = __commonJS({
   "../node_modules/mime-types/index.js"(exports) {
     "use strict";
     var db = require_mime_db();
-    var extname3 = __require("path").extname;
+    var extname4 = __require("path").extname;
     var mimeScore = require_mimeScore();
     var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
     var TEXT_TYPE_REGEXP = /^text\//i;
@@ -18751,11 +18751,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path15) {
-      if (!path15 || typeof path15 !== "string") {
+    function lookup(path17) {
+      if (!path17 || typeof path17 !== "string") {
         return false;
       }
-      var extension2 = extname3("x." + path15).toLowerCase().slice(1);
+      var extension2 = extname4("x." + path17).toLowerCase().slice(1);
       if (!extension2) {
         return false;
       }
@@ -22229,18 +22229,18 @@ var require_view = __commonJS({
   "../node_modules/express/lib/view.js"(exports, module) {
     "use strict";
     var debug = require_src2()("express:view");
-    var path15 = __require("path");
-    var fs12 = __require("fs");
-    var dirname3 = path15.dirname;
-    var basename5 = path15.basename;
-    var extname3 = path15.extname;
-    var join16 = path15.join;
-    var resolve5 = path15.resolve;
+    var path17 = __require("path");
+    var fs14 = __require("fs");
+    var dirname3 = path17.dirname;
+    var basename5 = path17.basename;
+    var extname4 = path17.extname;
+    var join18 = path17.join;
+    var resolve6 = path17.resolve;
     module.exports = View;
     function View(name, options) {
       var opts = options || {};
       this.defaultEngine = opts.defaultEngine;
-      this.ext = extname3(name);
+      this.ext = extname4(name);
       this.name = name;
       this.root = opts.root;
       if (!this.ext && !this.defaultEngine) {
@@ -22264,17 +22264,17 @@ var require_view = __commonJS({
       this.path = this.lookup(fileName);
     }
     View.prototype.lookup = function lookup(name) {
-      var path16;
+      var path18;
       var roots = [].concat(this.root);
       debug('lookup "%s"', name);
-      for (var i = 0; i < roots.length && !path16; i++) {
+      for (var i = 0; i < roots.length && !path18; i++) {
         var root = roots[i];
-        var loc = resolve5(root, name);
+        var loc = resolve6(root, name);
         var dir = dirname3(loc);
         var file = basename5(loc);
-        path16 = this.resolve(dir, file);
+        path18 = this.resolve(dir, file);
       }
-      return path16;
+      return path18;
     };
     View.prototype.render = function render(options, callback) {
       var sync = true;
@@ -22294,23 +22294,23 @@ var require_view = __commonJS({
       });
       sync = false;
     };
-    View.prototype.resolve = function resolve6(dir, file) {
+    View.prototype.resolve = function resolve7(dir, file) {
       var ext = this.ext;
-      var path16 = join16(dir, file);
-      var stat4 = tryStat(path16);
+      var path18 = join18(dir, file);
+      var stat4 = tryStat(path18);
       if (stat4 && stat4.isFile()) {
-        return path16;
+        return path18;
       }
-      path16 = join16(dir, basename5(file, ext), "index" + ext);
-      stat4 = tryStat(path16);
+      path18 = join18(dir, basename5(file, ext), "index" + ext);
+      stat4 = tryStat(path18);
       if (stat4 && stat4.isFile()) {
-        return path16;
+        return path18;
       }
     };
-    function tryStat(path16) {
-      debug('stat "%s"', path16);
+    function tryStat(path18) {
+      debug('stat "%s"', path18);
       try {
-        return fs12.statSync(path16);
+        return fs14.statSync(path18);
       } catch (e2) {
         return void 0;
       }
@@ -23512,15 +23512,15 @@ var require_dist = __commonJS({
           if (token.type === endType)
             break;
           if (token.type === "char" || token.type === "escape") {
-            let path15 = token.value;
+            let path17 = token.value;
             let cur = tokens[pos];
             while (cur.type === "char" || cur.type === "escape") {
-              path15 += cur.value;
+              path17 += cur.value;
               cur = tokens[++pos];
             }
             output.push({
               type: "text",
-              value: encodePath(path15)
+              value: encodePath(path17)
             });
             continue;
           }
@@ -23544,16 +23544,16 @@ var require_dist = __commonJS({
       }
       return new TokenData(consumeUntil("end"), str);
     }
-    function compile(path15, options = {}) {
+    function compile(path17, options = {}) {
       const { encode = encodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const data = typeof path15 === "object" ? path15 : parse(path15, options);
+      const data = typeof path17 === "object" ? path17 : parse(path17, options);
       const fn = tokensToFunction(data.tokens, delimiter, encode);
-      return function path16(params = {}) {
-        const [path17, ...missing] = fn(params);
+      return function path18(params = {}) {
+        const [path19, ...missing] = fn(params);
         if (missing.length) {
           throw new TypeError(`Missing parameters: ${missing.join(", ")}`);
         }
-        return path17;
+        return path19;
       };
     }
     function tokensToFunction(tokens, delimiter, encode) {
@@ -23609,9 +23609,9 @@ var require_dist = __commonJS({
         return [encodeValue(value)];
       };
     }
-    function match(path15, options = {}) {
+    function match(path17, options = {}) {
       const { decode = decodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const { regexp, keys } = pathToRegexp(path15, options);
+      const { regexp, keys } = pathToRegexp(path17, options);
       const decoders = keys.map((key) => {
         if (decode === false)
           return NOOP_VALUE;
@@ -23623,7 +23623,7 @@ var require_dist = __commonJS({
         const m2 = regexp.exec(input);
         if (!m2)
           return false;
-        const path16 = m2[0];
+        const path18 = m2[0];
         const params = /* @__PURE__ */ Object.create(null);
         for (let i = 1; i < m2.length; i++) {
           if (m2[i] === void 0)
@@ -23632,15 +23632,15 @@ var require_dist = __commonJS({
           const decoder = decoders[i - 1];
           params[key.name] = decoder(m2[i]);
         }
-        return { path: path16, params };
+        return { path: path18, params };
       };
     }
-    function pathToRegexp(path15, options = {}) {
+    function pathToRegexp(path17, options = {}) {
       const { delimiter = DEFAULT_DELIMITER, end = true, sensitive = false, trailing = true } = options;
       const keys = [];
       const flags = sensitive ? "" : "i";
       const sources = [];
-      for (const input of pathsToArray(path15, [])) {
+      for (const input of pathsToArray(path17, [])) {
         const data = typeof input === "object" ? input : parse(input, options);
         for (const tokens of flatten(data.tokens, 0, [])) {
           sources.push(toRegExpSource(tokens, delimiter, keys, data.originalPath));
@@ -23770,18 +23770,18 @@ var require_layer = __commonJS({
     var TRAILING_SLASH_REGEXP = /\/+$/;
     var MATCHING_GROUP_REGEXP = /\((?:\?<(.*?)>)?(?!\?)/g;
     module.exports = Layer;
-    function Layer(path15, options, fn) {
+    function Layer(path17, options, fn) {
       if (!(this instanceof Layer)) {
-        return new Layer(path15, options, fn);
+        return new Layer(path17, options, fn);
       }
-      debug("new %o", path15);
+      debug("new %o", path17);
       const opts = options || {};
       this.handle = fn;
       this.keys = [];
       this.name = fn.name || "<anonymous>";
       this.params = void 0;
       this.path = void 0;
-      this.slash = path15 === "/" && opts.end === false;
+      this.slash = path17 === "/" && opts.end === false;
       function matcher(_path) {
         if (_path instanceof RegExp) {
           const keys = [];
@@ -23820,7 +23820,7 @@ var require_layer = __commonJS({
           decode: decodeParam
         });
       }
-      this.matchers = Array.isArray(path15) ? path15.map(matcher) : [matcher(path15)];
+      this.matchers = Array.isArray(path17) ? path17.map(matcher) : [matcher(path17)];
     }
     Layer.prototype.handleError = function handleError(error, req, res, next) {
       const fn = this.handle;
@@ -23860,9 +23860,9 @@ var require_layer = __commonJS({
         next(err);
       }
     };
-    Layer.prototype.match = function match(path15) {
+    Layer.prototype.match = function match(path17) {
       let match2;
-      if (path15 != null) {
+      if (path17 != null) {
         if (this.slash) {
           this.params = {};
           this.path = "";
@@ -23870,7 +23870,7 @@ var require_layer = __commonJS({
         }
         let i = 0;
         while (!match2 && i < this.matchers.length) {
-          match2 = this.matchers[i](path15);
+          match2 = this.matchers[i](path17);
           i++;
         }
       }
@@ -23898,13 +23898,13 @@ var require_layer = __commonJS({
         throw err;
       }
     }
-    function loosen(path15) {
-      if (path15 instanceof RegExp || path15 === "/") {
-        return path15;
+    function loosen(path17) {
+      if (path17 instanceof RegExp || path17 === "/") {
+        return path17;
       }
-      return Array.isArray(path15) ? path15.map(function(p2) {
+      return Array.isArray(path17) ? path17.map(function(p2) {
         return loosen(p2);
-      }) : String(path15).replace(TRAILING_SLASH_REGEXP, "");
+      }) : String(path17).replace(TRAILING_SLASH_REGEXP, "");
     }
   }
 });
@@ -23920,9 +23920,9 @@ var require_route = __commonJS({
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
     module.exports = Route;
-    function Route(path15) {
-      debug("new %o", path15);
-      this.path = path15;
+    function Route(path17) {
+      debug("new %o", path17);
+      this.path = path17;
       this.stack = [];
       this.methods = /* @__PURE__ */ Object.create(null);
     }
@@ -24043,11 +24043,11 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router5;
+    module.exports = Router6;
     module.exports.Route = Route;
-    function Router5(options) {
-      if (!(this instanceof Router5)) {
-        return new Router5(options);
+    function Router6(options) {
+      if (!(this instanceof Router6)) {
+        return new Router6(options);
       }
       const opts = options || {};
       function router(req, res, next) {
@@ -24061,9 +24061,9 @@ var require_router = __commonJS({
       router.stack = [];
       return router;
     }
-    Router5.prototype = function() {
+    Router6.prototype = function() {
     };
-    Router5.prototype.param = function param(name, fn) {
+    Router6.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -24083,7 +24083,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router5.prototype.handle = function handle(req, res, callback) {
+    Router6.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -24130,8 +24130,8 @@ var require_router = __commonJS({
         if (++sync > 100) {
           return setImmediate(next, err);
         }
-        const path15 = getPathname(req);
-        if (path15 == null) {
+        const path17 = getPathname(req);
+        if (path17 == null) {
           return done(layerError);
         }
         let layer;
@@ -24139,7 +24139,7 @@ var require_router = __commonJS({
         let route;
         while (match !== true && idx < stack.length) {
           layer = stack[idx++];
-          match = matchLayer(layer, path15);
+          match = matchLayer(layer, path17);
           route = layer.route;
           if (typeof match !== "boolean") {
             layerError = layerError || match;
@@ -24177,18 +24177,18 @@ var require_router = __commonJS({
           } else if (route) {
             layer.handleRequest(req, res, next);
           } else {
-            trimPrefix(layer, layerError, layerPath, path15);
+            trimPrefix(layer, layerError, layerPath, path17);
           }
           sync = 0;
         });
       }
-      function trimPrefix(layer, layerError, layerPath, path15) {
+      function trimPrefix(layer, layerError, layerPath, path17) {
         if (layerPath.length !== 0) {
-          if (layerPath !== path15.substring(0, layerPath.length)) {
+          if (layerPath !== path17.substring(0, layerPath.length)) {
             next(layerError);
             return;
           }
-          const c = path15[layerPath.length];
+          const c = path17[layerPath.length];
           if (c && c !== "/") {
             next(layerError);
             return;
@@ -24210,9 +24210,9 @@ var require_router = __commonJS({
         }
       }
     };
-    Router5.prototype.use = function use(handler) {
+    Router6.prototype.use = function use(handler) {
       let offset = 0;
-      let path15 = "/";
+      let path17 = "/";
       if (typeof handler !== "function") {
         let arg = handler;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -24220,7 +24220,7 @@ var require_router = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path15 = handler;
+          path17 = handler;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -24232,8 +24232,8 @@ var require_router = __commonJS({
         if (typeof fn !== "function") {
           throw new TypeError("argument handler must be a function");
         }
-        debug("use %o %s", path15, fn.name || "<anonymous>");
-        const layer = new Layer(path15, {
+        debug("use %o %s", path17, fn.name || "<anonymous>");
+        const layer = new Layer(path17, {
           sensitive: this.caseSensitive,
           strict: false,
           end: false
@@ -24243,9 +24243,9 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router5.prototype.route = function route(path15) {
-      const route2 = new Route(path15);
-      const layer = new Layer(path15, {
+    Router6.prototype.route = function route(path17) {
+      const route2 = new Route(path17);
+      const layer = new Layer(path17, {
         sensitive: this.caseSensitive,
         strict: this.strict,
         end: true
@@ -24258,8 +24258,8 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router5.prototype[method] = function(path15) {
-        const route = this.route(path15);
+      Router6.prototype[method] = function(path17) {
+        const route = this.route(path17);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
@@ -24288,9 +24288,9 @@ var require_router = __commonJS({
       const fqdnIndex = url.substring(0, pathLength).indexOf("://");
       return fqdnIndex !== -1 ? url.substring(0, url.indexOf("/", 3 + fqdnIndex)) : void 0;
     }
-    function matchLayer(layer, path15) {
+    function matchLayer(layer, path17) {
       try {
-        return layer.match(path15);
+        return layer.match(path17);
       } catch (err) {
         return err;
       }
@@ -24439,9 +24439,9 @@ var require_application = __commonJS({
     var compileETag = require_utils3().compileETag;
     var compileQueryParser = require_utils3().compileQueryParser;
     var compileTrust = require_utils3().compileTrust;
-    var resolve5 = __require("path").resolve;
+    var resolve6 = __require("path").resolve;
     var once = require_once();
-    var Router5 = require_router();
+    var Router6 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app = exports = module.exports = {};
@@ -24457,7 +24457,7 @@ var require_application = __commonJS({
         enumerable: true,
         get: function getrouter() {
           if (router === null) {
-            router = new Router5({
+            router = new Router6({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
@@ -24493,7 +24493,7 @@ var require_application = __commonJS({
       this.mountpath = "/";
       this.locals.settings = this.settings;
       this.set("view", View);
-      this.set("views", resolve5("views"));
+      this.set("views", resolve6("views"));
       this.set("jsonp callback name", "callback");
       if (env === "production") {
         this.enable("view cache");
@@ -24518,7 +24518,7 @@ var require_application = __commonJS({
     };
     app.use = function use(fn) {
       var offset = 0;
-      var path15 = "/";
+      var path17 = "/";
       if (typeof fn !== "function") {
         var arg = fn;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -24526,7 +24526,7 @@ var require_application = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path15 = fn;
+          path17 = fn;
         }
       }
       var fns = flatten.call(slice.call(arguments, offset), Infinity);
@@ -24536,12 +24536,12 @@ var require_application = __commonJS({
       var router = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router.use(path15, fn2);
+          return router.use(path17, fn2);
         }
-        debug(".use app under %s", path15);
-        fn2.mountpath = path15;
+        debug(".use app under %s", path17);
+        fn2.mountpath = path17;
         fn2.parent = this;
-        router.use(path15, function mounted_app(req, res, next) {
+        router.use(path17, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -24553,8 +24553,8 @@ var require_application = __commonJS({
       }, this);
       return this;
     };
-    app.route = function route(path15) {
-      return this.router.route(path15);
+    app.route = function route(path17) {
+      return this.router.route(path17);
     };
     app.engine = function engine(ext, fn) {
       if (typeof fn !== "function") {
@@ -24597,7 +24597,7 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app.path = function path15() {
+    app.path = function path17() {
       return this.parent ? this.parent.path() + this.mountpath : "";
     };
     app.enabled = function enabled(setting) {
@@ -24613,17 +24613,17 @@ var require_application = __commonJS({
       return this.set(setting, false);
     };
     methods.forEach(function(method) {
-      app[method] = function(path15) {
+      app[method] = function(path17) {
         if (method === "get" && arguments.length === 1) {
-          return this.set(path15);
+          return this.set(path17);
         }
-        var route = this.route(path15);
+        var route = this.route(path17);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
     });
-    app.all = function all(path15) {
-      var route = this.route(path15);
+    app.all = function all(path17) {
+      var route = this.route(path17);
       var args = slice.call(arguments, 1);
       for (var i = 0; i < methods.length; i++) {
         route[methods[i]].apply(route, args);
@@ -25533,7 +25533,7 @@ var require_request = __commonJS({
       var subdomains2 = !isIP(hostname) ? hostname.split(".").reverse() : [hostname];
       return subdomains2.slice(offset);
     });
-    defineGetter(req, "path", function path15() {
+    defineGetter(req, "path", function path17() {
       return parse(this).pathname;
     });
     defineGetter(req, "host", function host() {
@@ -25941,32 +25941,32 @@ var require_send = __commonJS({
     var escapeHtml = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs12 = __require("fs");
+    var fs14 = __require("fs");
     var mime3 = require_mime_types();
     var ms = require_ms();
     var onFinished = require_on_finished();
     var parseRange = require_range_parser();
-    var path15 = __require("path");
+    var path17 = __require("path");
     var statuses = require_statuses();
     var Stream2 = __require("stream");
     var util2 = __require("util");
-    var extname3 = path15.extname;
-    var join16 = path15.join;
-    var normalize2 = path15.normalize;
-    var resolve5 = path15.resolve;
-    var sep = path15.sep;
+    var extname4 = path17.extname;
+    var join18 = path17.join;
+    var normalize2 = path17.normalize;
+    var resolve6 = path17.resolve;
+    var sep2 = path17.sep;
     var BYTES_RANGE_REGEXP = /^ *bytes=/;
     var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1e3;
     var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
     module.exports = send;
-    function send(req, path16, options) {
-      return new SendStream(req, path16, options);
+    function send(req, path18, options) {
+      return new SendStream(req, path18, options);
     }
-    function SendStream(req, path16, options) {
+    function SendStream(req, path18, options) {
       Stream2.call(this);
       var opts = options || {};
       this.options = opts;
-      this.path = path16;
+      this.path = path18;
       this.req = req;
       this._acceptRanges = opts.acceptRanges !== void 0 ? Boolean(opts.acceptRanges) : true;
       this._cacheControl = opts.cacheControl !== void 0 ? Boolean(opts.cacheControl) : true;
@@ -25982,7 +25982,7 @@ var require_send = __commonJS({
       this._maxage = opts.maxAge || opts.maxage;
       this._maxage = typeof this._maxage === "string" ? ms(this._maxage) : Number(this._maxage);
       this._maxage = !isNaN(this._maxage) ? Math.min(Math.max(0, this._maxage), MAX_MAXAGE) : 0;
-      this._root = opts.root ? resolve5(opts.root) : null;
+      this._root = opts.root ? resolve6(opts.root) : null;
     }
     util2.inherits(SendStream, Stream2);
     SendStream.prototype.error = function error(status, err) {
@@ -26080,10 +26080,10 @@ var require_send = __commonJS({
       var lastModified = this.res.getHeader("Last-Modified");
       return parseHttpDate(lastModified) <= parseHttpDate(ifRange);
     };
-    SendStream.prototype.redirect = function redirect(path16) {
+    SendStream.prototype.redirect = function redirect(path18) {
       var res = this.res;
       if (hasListeners(this, "directory")) {
-        this.emit("directory", res, path16);
+        this.emit("directory", res, path18);
         return;
       }
       if (this.hasTrailingSlash()) {
@@ -26103,38 +26103,38 @@ var require_send = __commonJS({
     SendStream.prototype.pipe = function pipe(res) {
       var root = this._root;
       this.res = res;
-      var path16 = decode(this.path);
-      if (path16 === -1) {
+      var path18 = decode(this.path);
+      if (path18 === -1) {
         this.error(400);
         return res;
       }
-      if (~path16.indexOf("\0")) {
+      if (~path18.indexOf("\0")) {
         this.error(400);
         return res;
       }
       var parts;
       if (root !== null) {
-        if (path16) {
-          path16 = normalize2("." + sep + path16);
+        if (path18) {
+          path18 = normalize2("." + sep2 + path18);
         }
-        if (UP_PATH_REGEXP.test(path16)) {
-          debug('malicious path "%s"', path16);
+        if (UP_PATH_REGEXP.test(path18)) {
+          debug('malicious path "%s"', path18);
           this.error(403);
           return res;
         }
-        parts = path16.split(sep);
-        path16 = normalize2(join16(root, path16));
+        parts = path18.split(sep2);
+        path18 = normalize2(join18(root, path18));
       } else {
-        if (UP_PATH_REGEXP.test(path16)) {
-          debug('malicious path "%s"', path16);
+        if (UP_PATH_REGEXP.test(path18)) {
+          debug('malicious path "%s"', path18);
           this.error(403);
           return res;
         }
-        parts = normalize2(path16).split(sep);
-        path16 = resolve5(path16);
+        parts = normalize2(path18).split(sep2);
+        path18 = resolve6(path18);
       }
       if (containsDotFile(parts)) {
-        debug('%s dotfile "%s"', this._dotfiles, path16);
+        debug('%s dotfile "%s"', this._dotfiles, path18);
         switch (this._dotfiles) {
           case "allow":
             break;
@@ -26148,13 +26148,13 @@ var require_send = __commonJS({
         }
       }
       if (this._index.length && this.hasTrailingSlash()) {
-        this.sendIndex(path16);
+        this.sendIndex(path18);
         return res;
       }
-      this.sendFile(path16);
+      this.sendFile(path18);
       return res;
     };
-    SendStream.prototype.send = function send2(path16, stat4) {
+    SendStream.prototype.send = function send2(path18, stat4) {
       var len = stat4.size;
       var options = this.options;
       var opts = {};
@@ -26166,9 +26166,9 @@ var require_send = __commonJS({
         this.headersAlreadySent();
         return;
       }
-      debug('pipe "%s"', path16);
-      this.setHeader(path16, stat4);
-      this.type(path16);
+      debug('pipe "%s"', path18);
+      this.setHeader(path18, stat4);
+      this.type(path18);
       if (this.isConditionalGET()) {
         if (this.isPreconditionFailure()) {
           this.error(412);
@@ -26217,30 +26217,30 @@ var require_send = __commonJS({
         res.end();
         return;
       }
-      this.stream(path16, opts);
+      this.stream(path18, opts);
     };
-    SendStream.prototype.sendFile = function sendFile(path16) {
+    SendStream.prototype.sendFile = function sendFile(path18) {
       var i = 0;
       var self = this;
-      debug('stat "%s"', path16);
-      fs12.stat(path16, function onstat(err, stat4) {
-        var pathEndsWithSep = path16[path16.length - 1] === sep;
-        if (err && err.code === "ENOENT" && !extname3(path16) && !pathEndsWithSep) {
+      debug('stat "%s"', path18);
+      fs14.stat(path18, function onstat(err, stat4) {
+        var pathEndsWithSep = path18[path18.length - 1] === sep2;
+        if (err && err.code === "ENOENT" && !extname4(path18) && !pathEndsWithSep) {
           return next(err);
         }
         if (err) return self.onStatError(err);
-        if (stat4.isDirectory()) return self.redirect(path16);
+        if (stat4.isDirectory()) return self.redirect(path18);
         if (pathEndsWithSep) return self.error(404);
-        self.emit("file", path16, stat4);
-        self.send(path16, stat4);
+        self.emit("file", path18, stat4);
+        self.send(path18, stat4);
       });
       function next(err) {
         if (self._extensions.length <= i) {
           return err ? self.onStatError(err) : self.error(404);
         }
-        var p2 = path16 + "." + self._extensions[i++];
+        var p2 = path18 + "." + self._extensions[i++];
         debug('stat "%s"', p2);
-        fs12.stat(p2, function(err2, stat4) {
+        fs14.stat(p2, function(err2, stat4) {
           if (err2) return next(err2);
           if (stat4.isDirectory()) return next();
           self.emit("file", p2, stat4);
@@ -26248,7 +26248,7 @@ var require_send = __commonJS({
         });
       }
     };
-    SendStream.prototype.sendIndex = function sendIndex(path16) {
+    SendStream.prototype.sendIndex = function sendIndex(path18) {
       var i = -1;
       var self = this;
       function next(err) {
@@ -26256,9 +26256,9 @@ var require_send = __commonJS({
           if (err) return self.onStatError(err);
           return self.error(404);
         }
-        var p2 = join16(path16, self._index[i]);
+        var p2 = join18(path18, self._index[i]);
         debug('stat "%s"', p2);
-        fs12.stat(p2, function(err2, stat4) {
+        fs14.stat(p2, function(err2, stat4) {
           if (err2) return next(err2);
           if (stat4.isDirectory()) return next();
           self.emit("file", p2, stat4);
@@ -26267,10 +26267,10 @@ var require_send = __commonJS({
       }
       next();
     };
-    SendStream.prototype.stream = function stream(path16, options) {
+    SendStream.prototype.stream = function stream(path18, options) {
       var self = this;
       var res = this.res;
-      var stream2 = fs12.createReadStream(path16, options);
+      var stream2 = fs14.createReadStream(path18, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -26285,17 +26285,17 @@ var require_send = __commonJS({
         self.emit("end");
       });
     };
-    SendStream.prototype.type = function type(path16) {
+    SendStream.prototype.type = function type(path18) {
       var res = this.res;
       if (res.getHeader("Content-Type")) return;
-      var ext = extname3(path16);
+      var ext = extname4(path18);
       var type2 = mime3.contentType(ext) || "application/octet-stream";
       debug("content-type %s", type2);
       res.setHeader("Content-Type", type2);
     };
-    SendStream.prototype.setHeader = function setHeader(path16, stat4) {
+    SendStream.prototype.setHeader = function setHeader(path18, stat4) {
       var res = this.res;
-      this.emit("headers", res, path16, stat4);
+      this.emit("headers", res, path18, stat4);
       if (this._acceptRanges && !res.getHeader("Accept-Ranges")) {
         debug("accept ranges");
         res.setHeader("Accept-Ranges", "bytes");
@@ -26353,9 +26353,9 @@ var require_send = __commonJS({
       }
       return err instanceof Error ? createError(status, err, { expose: false }) : createError(status, err);
     }
-    function decode(path16) {
+    function decode(path18) {
       try {
-        return decodeURIComponent(path16);
+        return decodeURIComponent(path18);
       } catch (err) {
         return -1;
       }
@@ -26499,7 +26499,7 @@ var require_response = __commonJS({
     var http = __require("http");
     var onFinished = require_on_finished();
     var mime3 = require_mime_types();
-    var path15 = __require("path");
+    var path17 = __require("path");
     var pathIsAbsolute = __require("path").isAbsolute;
     var statuses = require_statuses();
     var sign = require_cookie_signature().sign;
@@ -26508,8 +26508,8 @@ var require_response = __commonJS({
     var setCharset = require_utils3().setCharset;
     var cookie = require_cookie();
     var send = require_send();
-    var extname3 = path15.extname;
-    var resolve5 = path15.resolve;
+    var extname4 = path17.extname;
+    var resolve6 = path17.resolve;
     var vary = require_vary();
     var { Buffer: Buffer2 } = __require("buffer");
     var res = Object.create(http.ServerResponse.prototype);
@@ -26655,26 +26655,26 @@ var require_response = __commonJS({
       this.type("txt");
       return this.send(body);
     };
-    res.sendFile = function sendFile(path16, options, callback) {
+    res.sendFile = function sendFile(path18, options, callback) {
       var done = callback;
       var req = this.req;
       var res2 = this;
       var next = req.next;
       var opts = options || {};
-      if (!path16) {
+      if (!path18) {
         throw new TypeError("path argument is required to res.sendFile");
       }
-      if (typeof path16 !== "string") {
+      if (typeof path18 !== "string") {
         throw new TypeError("path must be a string to res.sendFile");
       }
       if (typeof options === "function") {
         done = options;
         opts = {};
       }
-      if (!opts.root && !pathIsAbsolute(path16)) {
+      if (!opts.root && !pathIsAbsolute(path18)) {
         throw new TypeError("path must be absolute or specify root to res.sendFile");
       }
-      var pathname = encodeURI(path16);
+      var pathname = encodeURI(path18);
       opts.etag = this.app.enabled("etag");
       var file = send(req, pathname, opts);
       sendfile(res2, file, opts, function(err) {
@@ -26685,7 +26685,7 @@ var require_response = __commonJS({
         }
       });
     };
-    res.download = function download(path16, filename, options, callback) {
+    res.download = function download(path18, filename, options, callback) {
       var done = callback;
       var name = filename;
       var opts = options || null;
@@ -26702,7 +26702,7 @@ var require_response = __commonJS({
         opts = filename;
       }
       var headers = {
-        "Content-Disposition": contentDisposition(name || path16)
+        "Content-Disposition": contentDisposition(name || path18)
       };
       if (opts && opts.headers) {
         var keys = Object.keys(opts.headers);
@@ -26715,7 +26715,7 @@ var require_response = __commonJS({
       }
       opts = Object.create(opts);
       opts.headers = headers;
-      var fullPath = !opts.root ? resolve5(path16) : path16;
+      var fullPath = !opts.root ? resolve6(path18) : path18;
       return this.sendFile(fullPath, opts, done);
     };
     res.contentType = res.type = function contentType(type) {
@@ -26746,7 +26746,7 @@ var require_response = __commonJS({
     };
     res.attachment = function attachment(filename) {
       if (filename) {
-        this.type(extname3(filename));
+        this.type(extname4(filename));
       }
       this.set("Content-Disposition", contentDisposition(filename));
       return this;
@@ -26964,7 +26964,7 @@ var require_serve_static = __commonJS({
     var encodeUrl = require_encodeurl();
     var escapeHtml = require_escape_html();
     var parseUrl = require_parseurl();
-    var resolve5 = __require("path").resolve;
+    var resolve6 = __require("path").resolve;
     var send = require_send();
     var url = __require("url");
     module.exports = serveStatic;
@@ -26983,7 +26983,7 @@ var require_serve_static = __commonJS({
         throw new TypeError("option setHeaders must be function");
       }
       opts.maxage = opts.maxage || opts.maxAge || 0;
-      opts.root = resolve5(root);
+      opts.root = resolve6(root);
       var onDirectory = redirect ? createRedirectDirectoryListener() : createNotFoundDirectoryListener();
       return function serveStatic2(req, res, next) {
         if (req.method !== "GET" && req.method !== "HEAD") {
@@ -26998,11 +26998,11 @@ var require_serve_static = __commonJS({
         }
         var forwardError = !fallthrough;
         var originalUrl = parseUrl.original(req);
-        var path15 = parseUrl(req).pathname;
-        if (path15 === "/" && originalUrl.pathname.substr(-1) !== "/") {
-          path15 = "";
+        var path17 = parseUrl(req).pathname;
+        if (path17 === "/" && originalUrl.pathname.substr(-1) !== "/") {
+          path17 = "";
         }
-        var stream = send(req, path15, opts);
+        var stream = send(req, path17, opts);
         stream.on("directory", onDirectory);
         if (setHeaders) {
           stream.on("headers", setHeaders);
@@ -27069,7 +27069,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router5 = require_router();
+    var Router6 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -27091,8 +27091,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router5.Route;
-    exports.Router = Router5;
+    exports.Route = Router6.Route;
+    exports.Router = Router6;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -35647,7 +35647,7 @@ var require_mime_types2 = __commonJS({
   "../server/node_modules/mime-types/index.js"(exports) {
     "use strict";
     var db = require_mime_db2();
-    var extname3 = __require("path").extname;
+    var extname4 = __require("path").extname;
     var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
     var TEXT_TYPE_REGEXP = /^text\//i;
     exports.charset = charset;
@@ -35697,11 +35697,11 @@ var require_mime_types2 = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path15) {
-      if (!path15 || typeof path15 !== "string") {
+    function lookup(path17) {
+      if (!path17 || typeof path17 !== "string") {
         return false;
       }
-      var extension2 = extname3("x." + path15).toLowerCase().substr(1);
+      var extension2 = extname4("x." + path17).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -35957,7 +35957,7 @@ var sleep;
 var init_sleep = __esm({
   "../node_modules/@anthropic-ai/sdk/internal/utils/sleep.mjs"() {
     "use strict";
-    sleep = (ms) => new Promise((resolve5) => setTimeout(resolve5, ms));
+    sleep = (ms) => new Promise((resolve6) => setTimeout(resolve6, ms));
   }
 });
 
@@ -36716,8 +36716,8 @@ var init_api_promise = __esm({
     init_parse();
     APIPromise = class _APIPromise extends Promise {
       constructor(client, responsePromise, parseResponse = defaultParseResponse) {
-        super((resolve5) => {
-          resolve5(null);
+        super((resolve6) => {
+          resolve6(null);
         });
         this.responsePromise = responsePromise;
         this.parseResponse = parseResponse;
@@ -37144,17 +37144,17 @@ var init_path = __esm({
   "../node_modules/@anthropic-ai/sdk/internal/utils/path.mjs"() {
     "use strict";
     init_error();
-    createPathTagFunction = (pathEncoder = encodeURIPath) => function path15(statics, ...params) {
+    createPathTagFunction = (pathEncoder = encodeURIPath) => function path17(statics, ...params) {
       if (statics.length === 1)
         return statics[0];
       let postPath = false;
-      const path16 = statics.reduce((previousValue, currentValue, index) => {
+      const path18 = statics.reduce((previousValue, currentValue, index) => {
         if (/[?#]/.test(currentValue)) {
           postPath = true;
         }
         return previousValue + currentValue + (index === params.length ? "" : (postPath ? encodeURIComponent : pathEncoder)(String(params[index])));
       }, "");
-      const pathOnly = path16.split(/[?#]/, 1)[0];
+      const pathOnly = path18.split(/[?#]/, 1)[0];
       const invalidSegments = [];
       const invalidSegmentPattern = /(?<=^|\/)(?:\.|%2e){1,2}(?=\/|$)/gi;
       let match;
@@ -37173,10 +37173,10 @@ var init_path = __esm({
           return acc + spaces + arrows;
         }, "");
         throw new AnthropicError(`Path parameters result in path with invalid segments:
-${path16}
+${path18}
 ${underline}`);
       }
-      return path16;
+      return path18;
     };
     path2 = createPathTagFunction(encodeURIPath);
   }
@@ -37911,12 +37911,12 @@ var init_BetaMessageStream = __esm({
           }
           return this._emit("error", new AnthropicError(String(error)));
         });
-        __classPrivateFieldSet(this, _BetaMessageStream_connectedPromise, new Promise((resolve5, reject) => {
-          __classPrivateFieldSet(this, _BetaMessageStream_resolveConnectedPromise, resolve5, "f");
+        __classPrivateFieldSet(this, _BetaMessageStream_connectedPromise, new Promise((resolve6, reject) => {
+          __classPrivateFieldSet(this, _BetaMessageStream_resolveConnectedPromise, resolve6, "f");
           __classPrivateFieldSet(this, _BetaMessageStream_rejectConnectedPromise, reject, "f");
         }), "f");
-        __classPrivateFieldSet(this, _BetaMessageStream_endPromise, new Promise((resolve5, reject) => {
-          __classPrivateFieldSet(this, _BetaMessageStream_resolveEndPromise, resolve5, "f");
+        __classPrivateFieldSet(this, _BetaMessageStream_endPromise, new Promise((resolve6, reject) => {
+          __classPrivateFieldSet(this, _BetaMessageStream_resolveEndPromise, resolve6, "f");
           __classPrivateFieldSet(this, _BetaMessageStream_rejectEndPromise, reject, "f");
         }), "f");
         __classPrivateFieldGet(this, _BetaMessageStream_connectedPromise, "f").catch(() => {
@@ -38074,11 +38074,11 @@ var init_BetaMessageStream = __esm({
        *   const message = await stream.emitted('message') // rejects if the stream errors
        */
       emitted(event) {
-        return new Promise((resolve5, reject) => {
+        return new Promise((resolve6, reject) => {
           __classPrivateFieldSet(this, _BetaMessageStream_catchingPromiseCreated, true, "f");
           if (event !== "error")
             this.once("error", reject);
-          this.once(event, resolve5);
+          this.once(event, resolve6);
         });
       }
       async done() {
@@ -38375,7 +38375,7 @@ var init_BetaMessageStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve5, reject) => readQueue.push({ resolve: resolve5, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve6, reject) => readQueue.push({ resolve: resolve6, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -38604,12 +38604,12 @@ var init_MessageStream = __esm({
           }
           return this._emit("error", new AnthropicError(String(error)));
         });
-        __classPrivateFieldSet(this, _MessageStream_connectedPromise, new Promise((resolve5, reject) => {
-          __classPrivateFieldSet(this, _MessageStream_resolveConnectedPromise, resolve5, "f");
+        __classPrivateFieldSet(this, _MessageStream_connectedPromise, new Promise((resolve6, reject) => {
+          __classPrivateFieldSet(this, _MessageStream_resolveConnectedPromise, resolve6, "f");
           __classPrivateFieldSet(this, _MessageStream_rejectConnectedPromise, reject, "f");
         }), "f");
-        __classPrivateFieldSet(this, _MessageStream_endPromise, new Promise((resolve5, reject) => {
-          __classPrivateFieldSet(this, _MessageStream_resolveEndPromise, resolve5, "f");
+        __classPrivateFieldSet(this, _MessageStream_endPromise, new Promise((resolve6, reject) => {
+          __classPrivateFieldSet(this, _MessageStream_resolveEndPromise, resolve6, "f");
           __classPrivateFieldSet(this, _MessageStream_rejectEndPromise, reject, "f");
         }), "f");
         __classPrivateFieldGet(this, _MessageStream_connectedPromise, "f").catch(() => {
@@ -38767,11 +38767,11 @@ var init_MessageStream = __esm({
        *   const message = await stream.emitted('message') // rejects if the stream errors
        */
       emitted(event) {
-        return new Promise((resolve5, reject) => {
+        return new Promise((resolve6, reject) => {
           __classPrivateFieldSet(this, _MessageStream_catchingPromiseCreated, true, "f");
           if (event !== "error")
             this.once("error", reject);
-          this.once(event, resolve5);
+          this.once(event, resolve6);
         });
       }
       async done() {
@@ -39067,7 +39067,7 @@ var init_MessageStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve5, reject) => readQueue.push({ resolve: resolve5, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve6, reject) => readQueue.push({ resolve: resolve6, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -39531,8 +39531,8 @@ var init_client = __esm({
       makeStatusError(status, error, message, headers) {
         return APIError.generate(status, error, message, headers);
       }
-      buildURL(path15, query) {
-        const url = isAbsoluteURL(path15) ? new URL(path15) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path15.startsWith("/") ? path15.slice(1) : path15));
+      buildURL(path17, query) {
+        const url = isAbsoluteURL(path17) ? new URL(path17) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path17.startsWith("/") ? path17.slice(1) : path17));
         const defaultQuery = this.defaultQuery();
         if (!isEmptyObj(defaultQuery)) {
           query = { ...defaultQuery, ...query };
@@ -39563,24 +39563,24 @@ var init_client = __esm({
        */
       async prepareRequest(request, { url, options }) {
       }
-      get(path15, opts) {
-        return this.methodRequest("get", path15, opts);
+      get(path17, opts) {
+        return this.methodRequest("get", path17, opts);
       }
-      post(path15, opts) {
-        return this.methodRequest("post", path15, opts);
+      post(path17, opts) {
+        return this.methodRequest("post", path17, opts);
       }
-      patch(path15, opts) {
-        return this.methodRequest("patch", path15, opts);
+      patch(path17, opts) {
+        return this.methodRequest("patch", path17, opts);
       }
-      put(path15, opts) {
-        return this.methodRequest("put", path15, opts);
+      put(path17, opts) {
+        return this.methodRequest("put", path17, opts);
       }
-      delete(path15, opts) {
-        return this.methodRequest("delete", path15, opts);
+      delete(path17, opts) {
+        return this.methodRequest("delete", path17, opts);
       }
-      methodRequest(method, path15, opts) {
+      methodRequest(method, path17, opts) {
         return this.request(Promise.resolve(opts).then((opts2) => {
-          return { method, path: path15, ...opts2 };
+          return { method, path: path17, ...opts2 };
         }));
       }
       request(options, remainingRetries = null) {
@@ -39682,8 +39682,8 @@ var init_client = __esm({
         }));
         return { response, options, controller, requestLogID, retryOfRequestLogID, startTime };
       }
-      getAPIList(path15, Page2, opts) {
-        return this.requestAPIList(Page2, { method: "get", path: path15, ...opts });
+      getAPIList(path17, Page2, opts) {
+        return this.requestAPIList(Page2, { method: "get", path: path17, ...opts });
       }
       requestAPIList(Page2, options) {
         const request = this.makeRequest(options, null, void 0);
@@ -39770,8 +39770,8 @@ var init_client = __esm({
       }
       buildRequest(inputOptions, { retryCount = 0 } = {}) {
         const options = { ...inputOptions };
-        const { method, path: path15, query } = options;
-        const url = this.buildURL(path15, query);
+        const { method, path: path17, query } = options;
+        const url = this.buildURL(path17, query);
         if ("timeout" in options)
           validatePositiveInteger("timeout", options.timeout);
         options.timeout = options.timeout ?? this.timeout;
@@ -39921,13 +39921,13 @@ __export(registry_exports, {
   writeLockfile: () => writeLockfile,
   writeRegistry: () => writeRegistry
 });
-import * as fs6 from "fs";
-import * as path8 from "path";
+import * as fs7 from "fs";
+import * as path9 from "path";
 function readRegistry(arosDir) {
-  return JSON.parse(fs6.readFileSync(path8.join(arosDir, "registry.json"), "utf-8"));
+  return JSON.parse(fs7.readFileSync(path9.join(arosDir, "registry.json"), "utf-8"));
 }
 function writeRegistry(arosDir, registry) {
-  fs6.writeFileSync(path8.join(arosDir, "registry.json"), JSON.stringify(registry, null, 2));
+  fs7.writeFileSync(path9.join(arosDir, "registry.json"), JSON.stringify(registry, null, 2));
 }
 function addSource(arosDir, source) {
   const registry = readRegistry(arosDir);
@@ -39943,10 +39943,10 @@ function removeSource(arosDir, name) {
   writeRegistry(arosDir, registry);
 }
 function readLockfile(arosDir) {
-  return JSON.parse(fs6.readFileSync(path8.join(arosDir, "lock.json"), "utf-8"));
+  return JSON.parse(fs7.readFileSync(path9.join(arosDir, "lock.json"), "utf-8"));
 }
 function writeLockfile(arosDir, lockfile) {
-  fs6.writeFileSync(path8.join(arosDir, "lock.json"), JSON.stringify(lockfile, null, 2));
+  fs7.writeFileSync(path9.join(arosDir, "lock.json"), JSON.stringify(lockfile, null, 2));
 }
 function lockModule(arosDir, key, entry) {
   const lockfile = readLockfile(arosDir);
@@ -40885,7 +40885,7 @@ is not a problem with esbuild. You need to fix your environment instead.
         let latestResultPromise;
         let provideLatestResult;
         if (isContext)
-          requestCallbacks["on-end"] = (id, request2) => new Promise((resolve5) => {
+          requestCallbacks["on-end"] = (id, request2) => new Promise((resolve6) => {
             buildResponseToResult(request2, (err, result, onEndErrors, onEndWarnings) => {
               const response = {
                 errors: onEndErrors,
@@ -40895,7 +40895,7 @@ is not a problem with esbuild. You need to fix your environment instead.
               latestResultPromise = void 0;
               provideLatestResult = void 0;
               sendResponse(id, response);
-              resolve5();
+              resolve6();
             });
           });
         sendRequest(refs, request, (error, response) => {
@@ -40912,10 +40912,10 @@ is not a problem with esbuild. You need to fix your environment instead.
           let didDispose = false;
           const result = {
             rebuild: () => {
-              if (!latestResultPromise) latestResultPromise = new Promise((resolve5, reject) => {
+              if (!latestResultPromise) latestResultPromise = new Promise((resolve6, reject) => {
                 let settlePromise;
                 provideLatestResult = (err, result2) => {
-                  if (!settlePromise) settlePromise = () => err ? reject(err) : resolve5(result2);
+                  if (!settlePromise) settlePromise = () => err ? reject(err) : resolve6(result2);
                 };
                 const triggerAnotherBuild = () => {
                   const request2 = {
@@ -40936,7 +40936,7 @@ is not a problem with esbuild. You need to fix your environment instead.
               });
               return latestResultPromise;
             },
-            watch: (options2 = {}) => new Promise((resolve5, reject) => {
+            watch: (options2 = {}) => new Promise((resolve6, reject) => {
               if (!streamIn.hasFS) throw new Error(`Cannot use the "watch" API in this environment`);
               const keys = {};
               const delay = getFlag(options2, keys, "delay", mustBeInteger);
@@ -40948,10 +40948,10 @@ is not a problem with esbuild. You need to fix your environment instead.
               if (delay) request2.delay = delay;
               sendRequest(refs, request2, (error2) => {
                 if (error2) reject(new Error(error2));
-                else resolve5(void 0);
+                else resolve6(void 0);
               });
             }),
-            serve: (options2 = {}) => new Promise((resolve5, reject) => {
+            serve: (options2 = {}) => new Promise((resolve6, reject) => {
               if (!streamIn.hasFS) throw new Error(`Cannot use the "serve" API in this environment`);
               const keys = {};
               const port = getFlag(options2, keys, "port", mustBeValidPortNumber);
@@ -40989,28 +40989,28 @@ is not a problem with esbuild. You need to fix your environment instead.
                     sendResponse(id, {});
                   };
                 }
-                resolve5(response2);
+                resolve6(response2);
               });
             }),
-            cancel: () => new Promise((resolve5) => {
-              if (didDispose) return resolve5();
+            cancel: () => new Promise((resolve6) => {
+              if (didDispose) return resolve6();
               const request2 = {
                 command: "cancel",
                 key: buildKey
               };
               sendRequest(refs, request2, () => {
-                resolve5();
+                resolve6();
               });
             }),
-            dispose: () => new Promise((resolve5) => {
-              if (didDispose) return resolve5();
+            dispose: () => new Promise((resolve6) => {
+              if (didDispose) return resolve6();
               didDispose = true;
               const request2 = {
                 command: "dispose",
                 key: buildKey
               };
               sendRequest(refs, request2, () => {
-                resolve5();
+                resolve6();
                 scheduleOnDisposeCallbacks();
                 refs.unref();
               });
@@ -41049,7 +41049,7 @@ is not a problem with esbuild. You need to fix your environment instead.
             onLoad: []
           };
           i++;
-          let resolve5 = (path32, options = {}) => {
+          let resolve6 = (path32, options = {}) => {
             if (!isSetupDone) throw new Error('Cannot call "resolve" before plugin setup has completed');
             if (typeof path32 !== "string") throw new Error(`The path to resolve must be a string`);
             let keys2 = /* @__PURE__ */ Object.create(null);
@@ -41093,7 +41093,7 @@ is not a problem with esbuild. You need to fix your environment instead.
           };
           let promise = setup({
             initialOptions,
-            resolve: resolve5,
+            resolve: resolve6,
             onStart(callback) {
               let registeredText = `This error came from the "onStart" callback registered here:`;
               let registeredNote = extractCallerV8(new Error(registeredText), streamIn, "onStart");
@@ -41544,9 +41544,9 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e2.text}`;
       if (regexp.flags) result = `(?${regexp.flags})${result}`;
       return result;
     }
-    var fs12 = __require("fs");
+    var fs14 = __require("fs");
     var os3 = __require("os");
-    var path15 = __require("path");
+    var path17 = __require("path");
     var ESBUILD_BINARY_PATH = process.env.ESBUILD_BINARY_PATH || ESBUILD_BINARY_PATH;
     var isValidBinaryPath = (x2) => !!x2 && x2 !== "/usr/bin/esbuild";
     var packageDarwin_arm64 = "@esbuild/darwin-arm64";
@@ -41605,19 +41605,19 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e2.text}`;
     }
     function pkgForSomeOtherPlatform() {
       const libMainJS = __require.resolve("esbuild");
-      const nodeModulesDirectory = path15.dirname(path15.dirname(path15.dirname(libMainJS)));
-      if (path15.basename(nodeModulesDirectory) === "node_modules") {
+      const nodeModulesDirectory = path17.dirname(path17.dirname(path17.dirname(libMainJS)));
+      if (path17.basename(nodeModulesDirectory) === "node_modules") {
         for (const unixKey in knownUnixlikePackages) {
           try {
             const pkg = knownUnixlikePackages[unixKey];
-            if (fs12.existsSync(path15.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs14.existsSync(path17.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
         for (const windowsKey in knownWindowsPackages) {
           try {
             const pkg = knownWindowsPackages[windowsKey];
-            if (fs12.existsSync(path15.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs14.existsSync(path17.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
@@ -41625,12 +41625,12 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e2.text}`;
       return null;
     }
     function downloadedBinPath(pkg, subpath) {
-      const esbuildLibDir = path15.dirname(__require.resolve("esbuild"));
-      return path15.join(esbuildLibDir, `downloaded-${pkg.replace("/", "-")}-${path15.basename(subpath)}`);
+      const esbuildLibDir = path17.dirname(__require.resolve("esbuild"));
+      return path17.join(esbuildLibDir, `downloaded-${pkg.replace("/", "-")}-${path17.basename(subpath)}`);
     }
     function generateBinPath() {
       if (isValidBinaryPath(ESBUILD_BINARY_PATH)) {
-        if (!fs12.existsSync(ESBUILD_BINARY_PATH)) {
+        if (!fs14.existsSync(ESBUILD_BINARY_PATH)) {
           console.warn(`[esbuild] Ignoring bad configuration: ESBUILD_BINARY_PATH=${ESBUILD_BINARY_PATH}`);
         } else {
           return { binPath: ESBUILD_BINARY_PATH, isWASM: false };
@@ -41642,7 +41642,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e2.text}`;
         binPath = __require.resolve(`${pkg}/${subpath}`);
       } catch (e2) {
         binPath = downloadedBinPath(pkg, subpath);
-        if (!fs12.existsSync(binPath)) {
+        if (!fs14.existsSync(binPath)) {
           try {
             __require.resolve(pkg);
           } catch {
@@ -41716,17 +41716,17 @@ for your current platform.`);
         }
         if (pnpapi) {
           const root = pnpapi.getPackageInformation(pnpapi.topLevel).packageLocation;
-          const binTargetPath = path15.join(
+          const binTargetPath = path17.join(
             root,
             "node_modules",
             ".cache",
             "esbuild",
-            `pnpapi-${pkg.replace("/", "-")}-${"0.25.12"}-${path15.basename(subpath)}`
+            `pnpapi-${pkg.replace("/", "-")}-${"0.25.12"}-${path17.basename(subpath)}`
           );
-          if (!fs12.existsSync(binTargetPath)) {
-            fs12.mkdirSync(path15.dirname(binTargetPath), { recursive: true });
-            fs12.copyFileSync(binPath, binTargetPath);
-            fs12.chmodSync(binTargetPath, 493);
+          if (!fs14.existsSync(binTargetPath)) {
+            fs14.mkdirSync(path17.dirname(binTargetPath), { recursive: true });
+            fs14.copyFileSync(binPath, binTargetPath);
+            fs14.chmodSync(binTargetPath, 493);
           }
           return { binPath: binTargetPath, isWASM };
         }
@@ -41971,46 +41971,46 @@ More information: The file containing the code for esbuild's JavaScript API (${_
         }
       };
       longLivedService = {
-        build: (options) => new Promise((resolve5, reject) => {
+        build: (options) => new Promise((resolve6, reject) => {
           service.buildOrContext({
             callName: "build",
             refs,
             options,
             isTTY: isTTY(),
             defaultWD,
-            callback: (err, res) => err ? reject(err) : resolve5(res)
+            callback: (err, res) => err ? reject(err) : resolve6(res)
           });
         }),
-        context: (options) => new Promise((resolve5, reject) => service.buildOrContext({
+        context: (options) => new Promise((resolve6, reject) => service.buildOrContext({
           callName: "context",
           refs,
           options,
           isTTY: isTTY(),
           defaultWD,
-          callback: (err, res) => err ? reject(err) : resolve5(res)
+          callback: (err, res) => err ? reject(err) : resolve6(res)
         })),
-        transform: (input, options) => new Promise((resolve5, reject) => service.transform({
+        transform: (input, options) => new Promise((resolve6, reject) => service.transform({
           callName: "transform",
           refs,
           input,
           options: options || {},
           isTTY: isTTY(),
           fs: fsAsync,
-          callback: (err, res) => err ? reject(err) : resolve5(res)
+          callback: (err, res) => err ? reject(err) : resolve6(res)
         })),
-        formatMessages: (messages, options) => new Promise((resolve5, reject) => service.formatMessages({
+        formatMessages: (messages, options) => new Promise((resolve6, reject) => service.formatMessages({
           callName: "formatMessages",
           refs,
           messages,
           options,
-          callback: (err, res) => err ? reject(err) : resolve5(res)
+          callback: (err, res) => err ? reject(err) : resolve6(res)
         })),
-        analyzeMetafile: (metafile, options) => new Promise((resolve5, reject) => service.analyzeMetafile({
+        analyzeMetafile: (metafile, options) => new Promise((resolve6, reject) => service.analyzeMetafile({
           callName: "analyzeMetafile",
           refs,
           metafile: typeof metafile === "string" ? metafile : JSON.stringify(metafile),
           options,
-          callback: (err, res) => err ? reject(err) : resolve5(res)
+          callback: (err, res) => err ? reject(err) : resolve6(res)
         }))
       };
       return longLivedService;
@@ -42088,13 +42088,13 @@ error: ${text}`);
         worker.postMessage(msg);
         let status = Atomics.wait(sharedBufferView, 0, 0);
         if (status !== "ok" && status !== "not-equal") throw new Error("Internal error: Atomics.wait() failed: " + status);
-        let { message: { id: id2, resolve: resolve5, reject, properties } } = worker_threads2.receiveMessageOnPort(mainPort);
+        let { message: { id: id2, resolve: resolve6, reject, properties } } = worker_threads2.receiveMessageOnPort(mainPort);
         if (id !== id2) throw new Error(`Internal error: Expected id ${id} but got id ${id2}`);
         if (reject) {
           applyProperties(reject, properties);
           throw reject;
         }
-        return resolve5;
+        return resolve6;
       };
       worker.unref();
       return {
@@ -42178,10 +42178,10 @@ error: ${text}`);
 });
 
 // src/index.ts
-import * as fs11 from "fs";
-import * as path14 from "path";
+import * as fs13 from "fs";
+import * as path16 from "path";
 import { execSync as execSync2 } from "child_process";
-import { fileURLToPath } from "url";
+import { fileURLToPath as fileURLToPath2 } from "url";
 
 // ../node_modules/commander/esm.mjs
 var import_index = __toESM(require_commander(), 1);
@@ -42599,8 +42599,8 @@ ${import_picocolors.default.cyan(d2)}
 var J = `${import_picocolors.default.gray(o)}  `;
 
 // ../server/dist/index.js
-var import_express5 = __toESM(require_express2(), 1);
-import * as path6 from "path";
+var import_express6 = __toESM(require_express2(), 1);
+import * as path7 from "path";
 
 // ../server/dist/storage.js
 var import_mime_types = __toESM(require_mime_types2(), 1);
@@ -43887,8 +43887,8 @@ function getErrorMap() {
 
 // ../node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path15, errorMaps, issueData } = params;
-  const fullPath = [...path15, ...issueData.path || []];
+  const { data, path: path17, errorMaps, issueData } = params;
+  const fullPath = [...path17, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -44004,11 +44004,11 @@ var errorUtil;
 
 // ../node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path15, key) {
+  constructor(parent, value, path17, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path15;
+    this._path = path17;
     this._key = key;
   }
   get path() {
@@ -47517,6 +47517,7 @@ var policyBody = external_exports.object({
 });
 var policyManifestSchema = baseManifest.extend({
   type: external_exports.literal("policy"),
+  usage_hint: external_exports.string().optional(),
   requires: external_exports.object({
     checks: external_exports.array(external_exports.string()).default([]),
     criteria: external_exports.array(external_exports.string()).default([])
@@ -48169,7 +48170,7 @@ var ReaddirpStream = class extends Readable {
     this._directoryFilter = normalizeFilter(opts.directoryFilter);
     const statMethod = opts.lstat ? lstat : stat;
     if (wantBigintFsStats) {
-      this._stat = (path15) => statMethod(path15, { bigint: true });
+      this._stat = (path17) => statMethod(path17, { bigint: true });
     } else {
       this._stat = statMethod;
     }
@@ -48194,8 +48195,8 @@ var ReaddirpStream = class extends Readable {
         const par = this.parent;
         const fil = par && par.files;
         if (fil && fil.length > 0) {
-          const { path: path15, depth } = par;
-          const slice = fil.splice(0, batch).map((dirent) => this._formatEntry(dirent, path15));
+          const { path: path17, depth } = par;
+          const slice = fil.splice(0, batch).map((dirent) => this._formatEntry(dirent, path17));
           const awaited = await Promise.all(slice);
           for (const entry of awaited) {
             if (!entry)
@@ -48235,20 +48236,20 @@ var ReaddirpStream = class extends Readable {
       this.reading = false;
     }
   }
-  async _exploreDir(path15, depth) {
+  async _exploreDir(path17, depth) {
     let files;
     try {
-      files = await readdir(path15, this._rdOptions);
+      files = await readdir(path17, this._rdOptions);
     } catch (error) {
       this._onError(error);
     }
-    return { files, depth, path: path15 };
+    return { files, depth, path: path17 };
   }
-  async _formatEntry(dirent, path15) {
+  async _formatEntry(dirent, path17) {
     let entry;
     const basename5 = this._isDirent ? dirent.name : dirent;
     try {
-      const fullPath = presolve(pjoin(path15, basename5));
+      const fullPath = presolve(pjoin(path17, basename5));
       entry = { path: prelative(this._root, fullPath), fullPath, basename: basename5 };
       entry[this._statsProp] = this._isDirent ? dirent : await this._stat(fullPath);
     } catch (err) {
@@ -48648,16 +48649,16 @@ var delFromSet = (main, prop, item) => {
 };
 var isEmptySet = (val) => val instanceof Set ? val.size === 0 : !val;
 var FsWatchInstances = /* @__PURE__ */ new Map();
-function createFsWatchInstance(path15, options, listener, errHandler, emitRaw) {
+function createFsWatchInstance(path17, options, listener, errHandler, emitRaw) {
   const handleEvent = (rawEvent, evPath) => {
-    listener(path15);
-    emitRaw(rawEvent, evPath, { watchedPath: path15 });
-    if (evPath && path15 !== evPath) {
-      fsWatchBroadcast(sysPath.resolve(path15, evPath), KEY_LISTENERS, sysPath.join(path15, evPath));
+    listener(path17);
+    emitRaw(rawEvent, evPath, { watchedPath: path17 });
+    if (evPath && path17 !== evPath) {
+      fsWatchBroadcast(sysPath.resolve(path17, evPath), KEY_LISTENERS, sysPath.join(path17, evPath));
     }
   };
   try {
-    return fs_watch(path15, {
+    return fs_watch(path17, {
       persistent: options.persistent
     }, handleEvent);
   } catch (error) {
@@ -48673,12 +48674,12 @@ var fsWatchBroadcast = (fullPath, listenerType, val1, val2, val3) => {
     listener(val1, val2, val3);
   });
 };
-var setFsWatchListener = (path15, fullPath, options, handlers) => {
+var setFsWatchListener = (path17, fullPath, options, handlers) => {
   const { listener, errHandler, rawEmitter } = handlers;
   let cont = FsWatchInstances.get(fullPath);
   let watcher;
   if (!options.persistent) {
-    watcher = createFsWatchInstance(path15, options, listener, errHandler, rawEmitter);
+    watcher = createFsWatchInstance(path17, options, listener, errHandler, rawEmitter);
     if (!watcher)
       return;
     return watcher.close.bind(watcher);
@@ -48689,7 +48690,7 @@ var setFsWatchListener = (path15, fullPath, options, handlers) => {
     addAndConvert(cont, KEY_RAW, rawEmitter);
   } else {
     watcher = createFsWatchInstance(
-      path15,
+      path17,
       options,
       fsWatchBroadcast.bind(null, fullPath, KEY_LISTENERS),
       errHandler,
@@ -48704,7 +48705,7 @@ var setFsWatchListener = (path15, fullPath, options, handlers) => {
         cont.watcherUnusable = true;
       if (isWindows && error.code === "EPERM") {
         try {
-          const fd = await open(path15, "r");
+          const fd = await open(path17, "r");
           await fd.close();
           broadcastErr(error);
         } catch (err) {
@@ -48735,7 +48736,7 @@ var setFsWatchListener = (path15, fullPath, options, handlers) => {
   };
 };
 var FsWatchFileInstances = /* @__PURE__ */ new Map();
-var setFsWatchFileListener = (path15, fullPath, options, handlers) => {
+var setFsWatchFileListener = (path17, fullPath, options, handlers) => {
   const { listener, rawEmitter } = handlers;
   let cont = FsWatchFileInstances.get(fullPath);
   const copts = cont && cont.options;
@@ -48757,7 +48758,7 @@ var setFsWatchFileListener = (path15, fullPath, options, handlers) => {
         });
         const currmtime = curr.mtimeMs;
         if (curr.size !== prev.size || currmtime > prev.mtimeMs || currmtime === 0) {
-          foreach(cont.listeners, (listener2) => listener2(path15, curr));
+          foreach(cont.listeners, (listener2) => listener2(path17, curr));
         }
       })
     };
@@ -48785,13 +48786,13 @@ var NodeFsHandler = class {
    * @param listener on fs change
    * @returns closer for the watcher instance
    */
-  _watchWithNodeFs(path15, listener) {
+  _watchWithNodeFs(path17, listener) {
     const opts = this.fsw.options;
-    const directory = sysPath.dirname(path15);
-    const basename5 = sysPath.basename(path15);
+    const directory = sysPath.dirname(path17);
+    const basename5 = sysPath.basename(path17);
     const parent = this.fsw._getWatchedDir(directory);
     parent.add(basename5);
-    const absolutePath = sysPath.resolve(path15);
+    const absolutePath = sysPath.resolve(path17);
     const options = {
       persistent: opts.persistent
     };
@@ -48801,12 +48802,12 @@ var NodeFsHandler = class {
     if (opts.usePolling) {
       const enableBin = opts.interval !== opts.binaryInterval;
       options.interval = enableBin && isBinaryPath(basename5) ? opts.binaryInterval : opts.interval;
-      closer = setFsWatchFileListener(path15, absolutePath, options, {
+      closer = setFsWatchFileListener(path17, absolutePath, options, {
         listener,
         rawEmitter: this.fsw._emitRaw
       });
     } else {
-      closer = setFsWatchListener(path15, absolutePath, options, {
+      closer = setFsWatchListener(path17, absolutePath, options, {
         listener,
         errHandler: this._boundHandleError,
         rawEmitter: this.fsw._emitRaw
@@ -48828,7 +48829,7 @@ var NodeFsHandler = class {
     let prevStats = stats;
     if (parent.has(basename5))
       return;
-    const listener = async (path15, newStats) => {
+    const listener = async (path17, newStats) => {
       if (!this.fsw._throttle(THROTTLE_MODE_WATCH, file, 5))
         return;
       if (!newStats || newStats.mtimeMs === 0) {
@@ -48842,11 +48843,11 @@ var NodeFsHandler = class {
             this.fsw._emit(EV.CHANGE, file, newStats2);
           }
           if ((isMacos || isLinux || isFreeBSD) && prevStats.ino !== newStats2.ino) {
-            this.fsw._closeFile(path15);
+            this.fsw._closeFile(path17);
             prevStats = newStats2;
             const closer2 = this._watchWithNodeFs(file, listener);
             if (closer2)
-              this.fsw._addPathCloser(path15, closer2);
+              this.fsw._addPathCloser(path17, closer2);
           } else {
             prevStats = newStats2;
           }
@@ -48878,7 +48879,7 @@ var NodeFsHandler = class {
    * @param item basename of this item
    * @returns true if no more processing is needed for this entry.
    */
-  async _handleSymlink(entry, directory, path15, item) {
+  async _handleSymlink(entry, directory, path17, item) {
     if (this.fsw.closed) {
       return;
     }
@@ -48888,7 +48889,7 @@ var NodeFsHandler = class {
       this.fsw._incrReadyCount();
       let linkPath;
       try {
-        linkPath = await fsrealpath(path15);
+        linkPath = await fsrealpath(path17);
       } catch (e2) {
         this.fsw._emitReady();
         return true;
@@ -48898,12 +48899,12 @@ var NodeFsHandler = class {
       if (dir.has(item)) {
         if (this.fsw._symlinkPaths.get(full) !== linkPath) {
           this.fsw._symlinkPaths.set(full, linkPath);
-          this.fsw._emit(EV.CHANGE, path15, entry.stats);
+          this.fsw._emit(EV.CHANGE, path17, entry.stats);
         }
       } else {
         dir.add(item);
         this.fsw._symlinkPaths.set(full, linkPath);
-        this.fsw._emit(EV.ADD, path15, entry.stats);
+        this.fsw._emit(EV.ADD, path17, entry.stats);
       }
       this.fsw._emitReady();
       return true;
@@ -48932,9 +48933,9 @@ var NodeFsHandler = class {
         return;
       }
       const item = entry.path;
-      let path15 = sysPath.join(directory, item);
+      let path17 = sysPath.join(directory, item);
       current.add(item);
-      if (entry.stats.isSymbolicLink() && await this._handleSymlink(entry, directory, path15, item)) {
+      if (entry.stats.isSymbolicLink() && await this._handleSymlink(entry, directory, path17, item)) {
         return;
       }
       if (this.fsw.closed) {
@@ -48943,11 +48944,11 @@ var NodeFsHandler = class {
       }
       if (item === target || !target && !previous.has(item)) {
         this.fsw._incrReadyCount();
-        path15 = sysPath.join(dir, sysPath.relative(dir, path15));
-        this._addToNodeFs(path15, initialAdd, wh, depth + 1);
+        path17 = sysPath.join(dir, sysPath.relative(dir, path17));
+        this._addToNodeFs(path17, initialAdd, wh, depth + 1);
       }
     }).on(EV.ERROR, this._boundHandleError);
-    return new Promise((resolve5, reject) => {
+    return new Promise((resolve6, reject) => {
       if (!stream)
         return reject();
       stream.once(STR_END, () => {
@@ -48956,7 +48957,7 @@ var NodeFsHandler = class {
           return;
         }
         const wasThrottled = throttler ? throttler.clear() : false;
-        resolve5(void 0);
+        resolve6(void 0);
         previous.getChildren().filter((item) => {
           return item !== directory && !current.has(item);
         }).forEach((item) => {
@@ -49013,13 +49014,13 @@ var NodeFsHandler = class {
    * @param depth Child path actually targeted for watch
    * @param target Child path actually targeted for watch
    */
-  async _addToNodeFs(path15, initialAdd, priorWh, depth, target) {
+  async _addToNodeFs(path17, initialAdd, priorWh, depth, target) {
     const ready = this.fsw._emitReady;
-    if (this.fsw._isIgnored(path15) || this.fsw.closed) {
+    if (this.fsw._isIgnored(path17) || this.fsw.closed) {
       ready();
       return false;
     }
-    const wh = this.fsw._getWatchHelpers(path15);
+    const wh = this.fsw._getWatchHelpers(path17);
     if (priorWh) {
       wh.filterPath = (entry) => priorWh.filterPath(entry);
       wh.filterDir = (entry) => priorWh.filterDir(entry);
@@ -49035,8 +49036,8 @@ var NodeFsHandler = class {
       const follow = this.fsw.options.followSymlinks;
       let closer;
       if (stats.isDirectory()) {
-        const absPath = sysPath.resolve(path15);
-        const targetPath = follow ? await fsrealpath(path15) : path15;
+        const absPath = sysPath.resolve(path17);
+        const targetPath = follow ? await fsrealpath(path17) : path17;
         if (this.fsw.closed)
           return;
         closer = await this._handleDir(wh.watchPath, stats, initialAdd, depth, target, wh, targetPath);
@@ -49046,29 +49047,29 @@ var NodeFsHandler = class {
           this.fsw._symlinkPaths.set(absPath, targetPath);
         }
       } else if (stats.isSymbolicLink()) {
-        const targetPath = follow ? await fsrealpath(path15) : path15;
+        const targetPath = follow ? await fsrealpath(path17) : path17;
         if (this.fsw.closed)
           return;
         const parent = sysPath.dirname(wh.watchPath);
         this.fsw._getWatchedDir(parent).add(wh.watchPath);
         this.fsw._emit(EV.ADD, wh.watchPath, stats);
-        closer = await this._handleDir(parent, stats, initialAdd, depth, path15, wh, targetPath);
+        closer = await this._handleDir(parent, stats, initialAdd, depth, path17, wh, targetPath);
         if (this.fsw.closed)
           return;
         if (targetPath !== void 0) {
-          this.fsw._symlinkPaths.set(sysPath.resolve(path15), targetPath);
+          this.fsw._symlinkPaths.set(sysPath.resolve(path17), targetPath);
         }
       } else {
         closer = this._handleFile(wh.watchPath, stats, initialAdd);
       }
       ready();
       if (closer)
-        this.fsw._addPathCloser(path15, closer);
+        this.fsw._addPathCloser(path17, closer);
       return false;
     } catch (error) {
       if (this.fsw._handleError(error)) {
         ready();
-        return path15;
+        return path17;
       }
     }
   }
@@ -49100,37 +49101,37 @@ function createPattern(matcher) {
       if (matcher.path === string)
         return true;
       if (matcher.recursive) {
-        const relative3 = sysPath2.relative(matcher.path, string);
-        if (!relative3) {
+        const relative4 = sysPath2.relative(matcher.path, string);
+        if (!relative4) {
           return false;
         }
-        return !relative3.startsWith("..") && !sysPath2.isAbsolute(relative3);
+        return !relative4.startsWith("..") && !sysPath2.isAbsolute(relative4);
       }
       return false;
     };
   }
   return () => false;
 }
-function normalizePath(path15) {
-  if (typeof path15 !== "string")
+function normalizePath(path17) {
+  if (typeof path17 !== "string")
     throw new Error("string expected");
-  path15 = sysPath2.normalize(path15);
-  path15 = path15.replace(/\\/g, "/");
+  path17 = sysPath2.normalize(path17);
+  path17 = path17.replace(/\\/g, "/");
   let prepend = false;
-  if (path15.startsWith("//"))
+  if (path17.startsWith("//"))
     prepend = true;
   const DOUBLE_SLASH_RE2 = /\/\//;
-  while (path15.match(DOUBLE_SLASH_RE2))
-    path15 = path15.replace(DOUBLE_SLASH_RE2, "/");
+  while (path17.match(DOUBLE_SLASH_RE2))
+    path17 = path17.replace(DOUBLE_SLASH_RE2, "/");
   if (prepend)
-    path15 = "/" + path15;
-  return path15;
+    path17 = "/" + path17;
+  return path17;
 }
 function matchPatterns(patterns, testString, stats) {
-  const path15 = normalizePath(testString);
+  const path17 = normalizePath(testString);
   for (let index = 0; index < patterns.length; index++) {
     const pattern = patterns[index];
-    if (pattern(path15, stats)) {
+    if (pattern(path17, stats)) {
       return true;
     }
   }
@@ -49170,19 +49171,19 @@ var toUnix = (string) => {
   }
   return str;
 };
-var normalizePathToUnix = (path15) => toUnix(sysPath2.normalize(toUnix(path15)));
-var normalizeIgnored = (cwd = "") => (path15) => {
-  if (typeof path15 === "string") {
-    return normalizePathToUnix(sysPath2.isAbsolute(path15) ? path15 : sysPath2.join(cwd, path15));
+var normalizePathToUnix = (path17) => toUnix(sysPath2.normalize(toUnix(path17)));
+var normalizeIgnored = (cwd = "") => (path17) => {
+  if (typeof path17 === "string") {
+    return normalizePathToUnix(sysPath2.isAbsolute(path17) ? path17 : sysPath2.join(cwd, path17));
   } else {
-    return path15;
+    return path17;
   }
 };
-var getAbsolutePath = (path15, cwd) => {
-  if (sysPath2.isAbsolute(path15)) {
-    return path15;
+var getAbsolutePath = (path17, cwd) => {
+  if (sysPath2.isAbsolute(path17)) {
+    return path17;
   }
-  return sysPath2.join(cwd, path15);
+  return sysPath2.join(cwd, path17);
 };
 var EMPTY_SET = Object.freeze(/* @__PURE__ */ new Set());
 var DirEntry = class {
@@ -49237,10 +49238,10 @@ var DirEntry = class {
 var STAT_METHOD_F = "stat";
 var STAT_METHOD_L = "lstat";
 var WatchHelper = class {
-  constructor(path15, follow, fsw) {
+  constructor(path17, follow, fsw) {
     this.fsw = fsw;
-    const watchPath = path15;
-    this.path = path15 = path15.replace(REPLACER_RE, "");
+    const watchPath = path17;
+    this.path = path17 = path17.replace(REPLACER_RE, "");
     this.watchPath = watchPath;
     this.fullWatchPath = sysPath2.resolve(watchPath);
     this.dirParts = [];
@@ -49362,20 +49363,20 @@ var FSWatcher = class extends EventEmitter {
     this._closePromise = void 0;
     let paths = unifyPaths(paths_);
     if (cwd) {
-      paths = paths.map((path15) => {
-        const absPath = getAbsolutePath(path15, cwd);
+      paths = paths.map((path17) => {
+        const absPath = getAbsolutePath(path17, cwd);
         return absPath;
       });
     }
-    paths.forEach((path15) => {
-      this._removeIgnoredPath(path15);
+    paths.forEach((path17) => {
+      this._removeIgnoredPath(path17);
     });
     this._userIgnored = void 0;
     if (!this._readyCount)
       this._readyCount = 0;
     this._readyCount += paths.length;
-    Promise.all(paths.map(async (path15) => {
-      const res = await this._nodeFsHandler._addToNodeFs(path15, !_internal, void 0, 0, _origAdd);
+    Promise.all(paths.map(async (path17) => {
+      const res = await this._nodeFsHandler._addToNodeFs(path17, !_internal, void 0, 0, _origAdd);
       if (res)
         this._emitReady();
       return res;
@@ -49397,17 +49398,17 @@ var FSWatcher = class extends EventEmitter {
       return this;
     const paths = unifyPaths(paths_);
     const { cwd } = this.options;
-    paths.forEach((path15) => {
-      if (!sysPath2.isAbsolute(path15) && !this._closers.has(path15)) {
+    paths.forEach((path17) => {
+      if (!sysPath2.isAbsolute(path17) && !this._closers.has(path17)) {
         if (cwd)
-          path15 = sysPath2.join(cwd, path15);
-        path15 = sysPath2.resolve(path15);
+          path17 = sysPath2.join(cwd, path17);
+        path17 = sysPath2.resolve(path17);
       }
-      this._closePath(path15);
-      this._addIgnoredPath(path15);
-      if (this._watched.has(path15)) {
+      this._closePath(path17);
+      this._addIgnoredPath(path17);
+      if (this._watched.has(path17)) {
         this._addIgnoredPath({
-          path: path15,
+          path: path17,
           recursive: true
         });
       }
@@ -49471,38 +49472,38 @@ var FSWatcher = class extends EventEmitter {
    * @param stats arguments to be passed with event
    * @returns the error if defined, otherwise the value of the FSWatcher instance's `closed` flag
    */
-  async _emit(event, path15, stats) {
+  async _emit(event, path17, stats) {
     if (this.closed)
       return;
     const opts = this.options;
     if (isWindows)
-      path15 = sysPath2.normalize(path15);
+      path17 = sysPath2.normalize(path17);
     if (opts.cwd)
-      path15 = sysPath2.relative(opts.cwd, path15);
-    const args = [path15];
+      path17 = sysPath2.relative(opts.cwd, path17);
+    const args = [path17];
     if (stats != null)
       args.push(stats);
     const awf = opts.awaitWriteFinish;
     let pw;
-    if (awf && (pw = this._pendingWrites.get(path15))) {
+    if (awf && (pw = this._pendingWrites.get(path17))) {
       pw.lastChange = /* @__PURE__ */ new Date();
       return this;
     }
     if (opts.atomic) {
       if (event === EVENTS.UNLINK) {
-        this._pendingUnlinks.set(path15, [event, ...args]);
+        this._pendingUnlinks.set(path17, [event, ...args]);
         setTimeout(() => {
-          this._pendingUnlinks.forEach((entry, path16) => {
+          this._pendingUnlinks.forEach((entry, path18) => {
             this.emit(...entry);
             this.emit(EVENTS.ALL, ...entry);
-            this._pendingUnlinks.delete(path16);
+            this._pendingUnlinks.delete(path18);
           });
         }, typeof opts.atomic === "number" ? opts.atomic : 100);
         return this;
       }
-      if (event === EVENTS.ADD && this._pendingUnlinks.has(path15)) {
+      if (event === EVENTS.ADD && this._pendingUnlinks.has(path17)) {
         event = EVENTS.CHANGE;
-        this._pendingUnlinks.delete(path15);
+        this._pendingUnlinks.delete(path17);
       }
     }
     if (awf && (event === EVENTS.ADD || event === EVENTS.CHANGE) && this._readyEmitted) {
@@ -49520,16 +49521,16 @@ var FSWatcher = class extends EventEmitter {
           this.emitWithAll(event, args);
         }
       };
-      this._awaitWriteFinish(path15, awf.stabilityThreshold, event, awfEmit);
+      this._awaitWriteFinish(path17, awf.stabilityThreshold, event, awfEmit);
       return this;
     }
     if (event === EVENTS.CHANGE) {
-      const isThrottled = !this._throttle(EVENTS.CHANGE, path15, 50);
+      const isThrottled = !this._throttle(EVENTS.CHANGE, path17, 50);
       if (isThrottled)
         return this;
     }
     if (opts.alwaysStat && stats === void 0 && (event === EVENTS.ADD || event === EVENTS.ADD_DIR || event === EVENTS.CHANGE)) {
-      const fullPath = opts.cwd ? sysPath2.join(opts.cwd, path15) : path15;
+      const fullPath = opts.cwd ? sysPath2.join(opts.cwd, path17) : path17;
       let stats2;
       try {
         stats2 = await stat3(fullPath);
@@ -49560,23 +49561,23 @@ var FSWatcher = class extends EventEmitter {
    * @param timeout duration of time to suppress duplicate actions
    * @returns tracking object or false if action should be suppressed
    */
-  _throttle(actionType, path15, timeout) {
+  _throttle(actionType, path17, timeout) {
     if (!this._throttled.has(actionType)) {
       this._throttled.set(actionType, /* @__PURE__ */ new Map());
     }
     const action = this._throttled.get(actionType);
     if (!action)
       throw new Error("invalid throttle");
-    const actionPath = action.get(path15);
+    const actionPath = action.get(path17);
     if (actionPath) {
       actionPath.count++;
       return false;
     }
     let timeoutObject;
     const clear = () => {
-      const item = action.get(path15);
+      const item = action.get(path17);
       const count = item ? item.count : 0;
-      action.delete(path15);
+      action.delete(path17);
       clearTimeout(timeoutObject);
       if (item)
         clearTimeout(item.timeoutObject);
@@ -49584,7 +49585,7 @@ var FSWatcher = class extends EventEmitter {
     };
     timeoutObject = setTimeout(clear, timeout);
     const thr = { timeoutObject, clear, count: 0 };
-    action.set(path15, thr);
+    action.set(path17, thr);
     return thr;
   }
   _incrReadyCount() {
@@ -49598,44 +49599,44 @@ var FSWatcher = class extends EventEmitter {
    * @param event
    * @param awfEmit Callback to be called when ready for event to be emitted.
    */
-  _awaitWriteFinish(path15, threshold, event, awfEmit) {
+  _awaitWriteFinish(path17, threshold, event, awfEmit) {
     const awf = this.options.awaitWriteFinish;
     if (typeof awf !== "object")
       return;
     const pollInterval = awf.pollInterval;
     let timeoutHandler;
-    let fullPath = path15;
-    if (this.options.cwd && !sysPath2.isAbsolute(path15)) {
-      fullPath = sysPath2.join(this.options.cwd, path15);
+    let fullPath = path17;
+    if (this.options.cwd && !sysPath2.isAbsolute(path17)) {
+      fullPath = sysPath2.join(this.options.cwd, path17);
     }
     const now = /* @__PURE__ */ new Date();
     const writes = this._pendingWrites;
     function awaitWriteFinishFn(prevStat) {
       statcb(fullPath, (err, curStat) => {
-        if (err || !writes.has(path15)) {
+        if (err || !writes.has(path17)) {
           if (err && err.code !== "ENOENT")
             awfEmit(err);
           return;
         }
         const now2 = Number(/* @__PURE__ */ new Date());
         if (prevStat && curStat.size !== prevStat.size) {
-          writes.get(path15).lastChange = now2;
+          writes.get(path17).lastChange = now2;
         }
-        const pw = writes.get(path15);
+        const pw = writes.get(path17);
         const df = now2 - pw.lastChange;
         if (df >= threshold) {
-          writes.delete(path15);
+          writes.delete(path17);
           awfEmit(void 0, curStat);
         } else {
           timeoutHandler = setTimeout(awaitWriteFinishFn, pollInterval, curStat);
         }
       });
     }
-    if (!writes.has(path15)) {
-      writes.set(path15, {
+    if (!writes.has(path17)) {
+      writes.set(path17, {
         lastChange: now,
         cancelWait: () => {
-          writes.delete(path15);
+          writes.delete(path17);
           clearTimeout(timeoutHandler);
           return event;
         }
@@ -49646,8 +49647,8 @@ var FSWatcher = class extends EventEmitter {
   /**
    * Determines whether user has asked to ignore this path.
    */
-  _isIgnored(path15, stats) {
-    if (this.options.atomic && DOT_RE.test(path15))
+  _isIgnored(path17, stats) {
+    if (this.options.atomic && DOT_RE.test(path17))
       return true;
     if (!this._userIgnored) {
       const { cwd } = this.options;
@@ -49657,17 +49658,17 @@ var FSWatcher = class extends EventEmitter {
       const list = [...ignoredPaths.map(normalizeIgnored(cwd)), ...ignored];
       this._userIgnored = anymatch(list, void 0);
     }
-    return this._userIgnored(path15, stats);
+    return this._userIgnored(path17, stats);
   }
-  _isntIgnored(path15, stat4) {
-    return !this._isIgnored(path15, stat4);
+  _isntIgnored(path17, stat4) {
+    return !this._isIgnored(path17, stat4);
   }
   /**
    * Provides a set of common helpers and properties relating to symlink handling.
    * @param path file or directory pattern being watched
    */
-  _getWatchHelpers(path15) {
-    return new WatchHelper(path15, this.options.followSymlinks, this);
+  _getWatchHelpers(path17) {
+    return new WatchHelper(path17, this.options.followSymlinks, this);
   }
   // Directory helpers
   // -----------------
@@ -49699,63 +49700,63 @@ var FSWatcher = class extends EventEmitter {
    * @param item      base path of item/directory
    */
   _remove(directory, item, isDirectory) {
-    const path15 = sysPath2.join(directory, item);
-    const fullPath = sysPath2.resolve(path15);
-    isDirectory = isDirectory != null ? isDirectory : this._watched.has(path15) || this._watched.has(fullPath);
-    if (!this._throttle("remove", path15, 100))
+    const path17 = sysPath2.join(directory, item);
+    const fullPath = sysPath2.resolve(path17);
+    isDirectory = isDirectory != null ? isDirectory : this._watched.has(path17) || this._watched.has(fullPath);
+    if (!this._throttle("remove", path17, 100))
       return;
     if (!isDirectory && this._watched.size === 1) {
       this.add(directory, item, true);
     }
-    const wp = this._getWatchedDir(path15);
+    const wp = this._getWatchedDir(path17);
     const nestedDirectoryChildren = wp.getChildren();
-    nestedDirectoryChildren.forEach((nested) => this._remove(path15, nested));
+    nestedDirectoryChildren.forEach((nested) => this._remove(path17, nested));
     const parent = this._getWatchedDir(directory);
     const wasTracked = parent.has(item);
     parent.remove(item);
     if (this._symlinkPaths.has(fullPath)) {
       this._symlinkPaths.delete(fullPath);
     }
-    let relPath = path15;
+    let relPath = path17;
     if (this.options.cwd)
-      relPath = sysPath2.relative(this.options.cwd, path15);
+      relPath = sysPath2.relative(this.options.cwd, path17);
     if (this.options.awaitWriteFinish && this._pendingWrites.has(relPath)) {
       const event = this._pendingWrites.get(relPath).cancelWait();
       if (event === EVENTS.ADD)
         return;
     }
-    this._watched.delete(path15);
+    this._watched.delete(path17);
     this._watched.delete(fullPath);
     const eventName = isDirectory ? EVENTS.UNLINK_DIR : EVENTS.UNLINK;
-    if (wasTracked && !this._isIgnored(path15))
-      this._emit(eventName, path15);
-    this._closePath(path15);
+    if (wasTracked && !this._isIgnored(path17))
+      this._emit(eventName, path17);
+    this._closePath(path17);
   }
   /**
    * Closes all watchers for a path
    */
-  _closePath(path15) {
-    this._closeFile(path15);
-    const dir = sysPath2.dirname(path15);
-    this._getWatchedDir(dir).remove(sysPath2.basename(path15));
+  _closePath(path17) {
+    this._closeFile(path17);
+    const dir = sysPath2.dirname(path17);
+    this._getWatchedDir(dir).remove(sysPath2.basename(path17));
   }
   /**
    * Closes only file-specific watchers
    */
-  _closeFile(path15) {
-    const closers = this._closers.get(path15);
+  _closeFile(path17) {
+    const closers = this._closers.get(path17);
     if (!closers)
       return;
     closers.forEach((closer) => closer());
-    this._closers.delete(path15);
+    this._closers.delete(path17);
   }
-  _addPathCloser(path15, closer) {
+  _addPathCloser(path17, closer) {
     if (!closer)
       return;
-    let list = this._closers.get(path15);
+    let list = this._closers.get(path17);
     if (!list) {
       list = [];
-      this._closers.set(path15, list);
+      this._closers.set(path17, list);
     }
     list.push(closer);
   }
@@ -49961,6 +49962,9 @@ var HttpError = class extends Error {
 function notFound(message = "Not found") {
   return new HttpError(404, message);
 }
+function conflict(message, details) {
+  return new HttpError(409, message, details);
+}
 function errorHandler(err, _req, res, _next) {
   if (err instanceof HttpError) {
     res.status(err.status).json({
@@ -50092,6 +50096,88 @@ function policyRoutes(storage) {
   return router;
 }
 
+// ../server/dist/routes/criteria.js
+var import_express5 = __toESM(require_express2(), 1);
+import * as fs5 from "fs";
+import * as path6 from "path";
+function criteriaRoutes(storage) {
+  const router = (0, import_express5.Router)();
+  function criteriaDir() {
+    return path6.join(storage.projectDir, ".aros", "modules", "criteria");
+  }
+  router.get("/", async (_req, res, next) => {
+    try {
+      const dir = criteriaDir();
+      if (!fs5.existsSync(dir)) {
+        res.json([]);
+        return;
+      }
+      const entries = fs5.readdirSync(dir, { withFileTypes: true });
+      const criteria = [];
+      for (const entry of entries) {
+        if (!entry.isDirectory())
+          continue;
+        const manifestPath = path6.join(dir, entry.name, "manifest.json");
+        if (!fs5.existsSync(manifestPath))
+          continue;
+        try {
+          const manifest = JSON.parse(fs5.readFileSync(manifestPath, "utf-8"));
+          criteria.push(manifest);
+        } catch {
+        }
+      }
+      res.json(criteria);
+    } catch (err) {
+      next(err);
+    }
+  });
+  router.post("/", async (req, res, next) => {
+    try {
+      const body = req.body;
+      const parsed = criterionManifestSchema.parse(body);
+      const dir = path6.join(criteriaDir(), parsed.name);
+      if (fs5.existsSync(dir)) {
+        throw conflict(`Criterion '${parsed.name}' already exists`);
+      }
+      fs5.mkdirSync(dir, { recursive: true });
+      fs5.writeFileSync(path6.join(dir, "manifest.json"), JSON.stringify(parsed, null, 2));
+      res.status(201).json(parsed);
+    } catch (err) {
+      next(err);
+    }
+  });
+  router.put("/:name", async (req, res, next) => {
+    try {
+      const { name } = req.params;
+      const dir = path6.join(criteriaDir(), name);
+      const manifestPath = path6.join(dir, "manifest.json");
+      if (!fs5.existsSync(manifestPath)) {
+        throw notFound(`Criterion '${name}' not found`);
+      }
+      const body = req.body;
+      const parsed = criterionManifestSchema.parse(body);
+      fs5.writeFileSync(manifestPath, JSON.stringify(parsed, null, 2));
+      res.json(parsed);
+    } catch (err) {
+      next(err);
+    }
+  });
+  router.delete("/:name", async (req, res, next) => {
+    try {
+      const { name } = req.params;
+      const dir = path6.join(criteriaDir(), name);
+      if (!fs5.existsSync(dir)) {
+        throw notFound(`Criterion '${name}' not found`);
+      }
+      fs5.rmSync(dir, { recursive: true });
+      res.status(204).end();
+    } catch (err) {
+      next(err);
+    }
+  });
+  return router;
+}
+
 // ../server/dist/index.js
 function createServer(options) {
   const { projectDir, dashboardDir } = options;
@@ -50102,8 +50188,8 @@ function createServer(options) {
     sse.emit(event, data);
   };
   const engine = new PipelineEngine(storage, emitFn);
-  const app = (0, import_express5.default)();
-  app.use(import_express5.default.json({ limit: "50mb" }));
+  const app = (0, import_express6.default)();
+  app.use(import_express6.default.json({ limit: "50mb" }));
   app.use((_req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
@@ -50120,6 +50206,7 @@ function createServer(options) {
   app.use("/api/deliverables", fileRoutes(storage));
   app.use("/api/pipeline", pipelineRoutes(storage));
   app.use("/api/policies", policyRoutes(storage));
+  app.use("/api/criteria", criteriaRoutes(storage));
   app.get("/api/events", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
@@ -50134,9 +50221,9 @@ function createServer(options) {
     });
   });
   if (dashboardDir) {
-    app.use(import_express5.default.static(dashboardDir));
+    app.use(import_express6.default.static(dashboardDir));
     app.get("/{*splat}", (_req, res) => {
-      res.sendFile(path6.join(dashboardDir, "index.html"));
+      res.sendFile(path7.join(dashboardDir, "index.html"));
     });
   }
   app.use(errorHandler);
@@ -50153,25 +50240,25 @@ function createServer(options) {
         resolvedPort = options.port ?? 4100;
       }
     }
-    sse.startWatching(path6.join(options.projectDir, ".aros"));
-    return new Promise((resolve5, reject) => {
+    sse.startWatching(path7.join(options.projectDir, ".aros"));
+    return new Promise((resolve6, reject) => {
       server = app.listen(resolvedPort);
-      server.on("listening", () => resolve5());
+      server.on("listening", () => resolve6());
       server.on("error", reject);
     });
   };
   const stop = async () => {
     sse.stop();
-    return new Promise((resolve5, reject) => {
+    return new Promise((resolve6, reject) => {
       if (!server) {
-        resolve5();
+        resolve6();
         return;
       }
       server.close((err) => {
         if (err)
           reject(err);
         else
-          resolve5();
+          resolve6();
       });
     });
   };
@@ -50189,16 +50276,16 @@ function createServer(options) {
 }
 
 // src/serve.ts
-import * as fs5 from "fs";
+import * as fs6 from "fs";
 import * as net from "net";
-import * as path7 from "path";
+import * as path8 from "path";
 var import_picocolors2 = __toESM(require_picocolors(), 1);
 function isPortFree(port) {
-  return new Promise((resolve5) => {
+  return new Promise((resolve6) => {
     const srv = net.createServer();
-    srv.once("error", () => resolve5(false));
+    srv.once("error", () => resolve6(false));
     srv.once("listening", () => {
-      srv.close(() => resolve5(true));
+      srv.close(() => resolve6(true));
     });
     srv.listen(port);
   });
@@ -50256,15 +50343,15 @@ function findDashboardDist() {
   const here = new URL(".", import.meta.url).pathname;
   const candidates = [
     // Bundled npx install: cli/dist/ → dashboard/dist/
-    path7.resolve(here, "../../dashboard/dist"),
+    path8.resolve(here, "../../dashboard/dist"),
     // Development: cli/src/ or cli/dist/ → dashboard/dist/
-    path7.resolve(here, "../../../dashboard/dist"),
+    path8.resolve(here, "../../../dashboard/dist"),
     // Monorepo root: repo/dashboard/dist/
-    path7.resolve(here, "../../../../dashboard/dist")
+    path8.resolve(here, "../../../../dashboard/dist")
   ];
   for (const dir of candidates) {
     try {
-      if (fs5.existsSync(path7.join(dir, "index.html"))) return dir;
+      if (fs6.existsSync(path8.join(dir, "index.html"))) return dir;
     } catch {
     }
   }
@@ -50273,22 +50360,22 @@ function findDashboardDist() {
 
 // src/registry-cmd.ts
 init_registry();
-import * as path9 from "path";
+import * as path10 from "path";
 function registryCommands(program3) {
   const registry = program3.command("registry").description("Manage module source repos");
   registry.command("add <url>").description("Add a source repo").option("--name <name>", "Source name").option("--branch <branch>", "Branch name", "main").action((url, opts) => {
-    const arosDir = path9.join(process.cwd(), ".aros");
+    const arosDir = path10.join(process.cwd(), ".aros");
     const name = opts.name ?? url.split("/").pop()?.replace(".git", "") ?? "unnamed";
     addSource(arosDir, { name, url, branch: opts.branch });
     console.log(`Added source "${name}" \u2192 ${url} (${opts.branch})`);
   });
   registry.command("remove <name>").description("Remove a source repo").action((name) => {
-    const arosDir = path9.join(process.cwd(), ".aros");
+    const arosDir = path10.join(process.cwd(), ".aros");
     removeSource(arosDir, name);
     console.log(`Removed source "${name}"`);
   });
   registry.command("list").description("List configured sources").action(() => {
-    const arosDir = path9.join(process.cwd(), ".aros");
+    const arosDir = path10.join(process.cwd(), ".aros");
     const reg = readRegistry(arosDir);
     for (const s of reg.sources) {
       console.log(`  ${s.name}  ${s.url}  (${s.branch})`);
@@ -50297,34 +50384,34 @@ function registryCommands(program3) {
 }
 
 // src/module-cmd.ts
-import * as path13 from "path";
-import * as fs10 from "fs";
+import * as path14 from "path";
+import * as fs11 from "fs";
 import * as os2 from "os";
 import { execSync, execFileSync } from "child_process";
 
 // ../server/dist/modules/add.js
 init_registry();
-import * as fs9 from "fs";
-import * as path12 from "path";
+import * as fs10 from "fs";
+import * as path13 from "path";
 
 // ../server/dist/modules/git-fetch.js
 import { execFile } from "child_process";
 import { promisify } from "util";
-import * as fs7 from "fs";
-import * as path10 from "path";
+import * as fs8 from "fs";
+import * as path11 from "path";
 import * as os from "os";
 var exec = promisify(execFile);
-var CACHE_DIR = path10.join(os.homedir(), ".cache", "aros", "repos");
+var CACHE_DIR = path11.join(os.homedir(), ".cache", "aros", "repos");
 async function ensureLocalRepo(repoUrl, branch) {
-  if (fs7.existsSync(path10.join(repoUrl, ".git")) || fs7.existsSync(path10.join(repoUrl, "HEAD"))) {
+  if (fs8.existsSync(path11.join(repoUrl, ".git")) || fs8.existsSync(path11.join(repoUrl, "HEAD"))) {
     return repoUrl;
   }
   const hash = Buffer.from(repoUrl).toString("base64url").slice(0, 32);
-  const cacheDir = path10.join(CACHE_DIR, hash);
-  if (fs7.existsSync(path10.join(cacheDir, "HEAD"))) {
+  const cacheDir = path11.join(CACHE_DIR, hash);
+  if (fs8.existsSync(path11.join(cacheDir, "HEAD"))) {
     await exec("git", ["fetch", "origin", branch], { cwd: cacheDir });
   } else {
-    fs7.mkdirSync(CACHE_DIR, { recursive: true });
+    fs8.mkdirSync(CACHE_DIR, { recursive: true });
     await exec("git", [
       "clone",
       "--bare",
@@ -50357,8 +50444,8 @@ async function getLatestSha(repoUrl, branch, modulePath) {
 }
 async function fetchModuleFromGit(repoUrl, modulePath, sha, destDir) {
   const localRepo = await ensureLocalRepo(repoUrl, "main");
-  const tmpArchive = path10.join(os.tmpdir(), `aros-fetch-${Date.now()}.tar`);
-  fs7.mkdirSync(destDir, { recursive: true });
+  const tmpArchive = path11.join(os.tmpdir(), `aros-fetch-${Date.now()}.tar`);
+  fs8.mkdirSync(destDir, { recursive: true });
   try {
     await exec("git", ["archive", "--format=tar", "-o", tmpArchive, sha, "--", modulePath], { cwd: localRepo });
     const depth = modulePath.split("/").length;
@@ -50370,22 +50457,22 @@ async function fetchModuleFromGit(repoUrl, modulePath, sha, destDir) {
       `--strip-components=${depth}`
     ]);
   } finally {
-    if (fs7.existsSync(tmpArchive))
-      fs7.unlinkSync(tmpArchive);
+    if (fs8.existsSync(tmpArchive))
+      fs8.unlinkSync(tmpArchive);
   }
 }
 
 // ../server/dist/modules/compile.js
 var import_esbuild = __toESM(require_main(), 1);
-import * as fs8 from "fs";
-import * as path11 from "path";
+import * as fs9 from "fs";
+import * as path12 from "path";
 function compileCheckModule(modulePath) {
-  const entrypoint = path11.join(modulePath, "check.ts");
-  if (!fs8.existsSync(entrypoint))
+  const entrypoint = path12.join(modulePath, "check.ts");
+  if (!fs9.existsSync(entrypoint))
     return;
   (0, import_esbuild.buildSync)({
     entryPoints: [entrypoint],
-    outfile: path11.join(modulePath, "check.js"),
+    outfile: path12.join(modulePath, "check.js"),
     bundle: true,
     platform: "node",
     format: "esm",
@@ -50396,7 +50483,7 @@ function compileCheckModule(modulePath) {
 
 // ../server/dist/modules/add.js
 async function addModule(projectDir, moduleName, options) {
-  const arosDir = path12.join(projectDir, ".aros");
+  const arosDir = path13.join(projectDir, ".aros");
   const registry = readRegistry(arosDir);
   const lockfile = readLockfile(arosDir);
   if (lockfile.locked[moduleName]) {
@@ -50408,18 +50495,18 @@ async function addModule(projectDir, moduleName, options) {
   for (const source of sourcesToSearch) {
     try {
       const sha = await getLatestSha(source.url, source.branch, moduleName);
-      const destDir = path12.join(arosDir, "modules", moduleName);
+      const destDir = path13.join(arosDir, "modules", moduleName);
       await fetchModuleFromGit(source.url, moduleName, sha, destDir);
-      const manifestPath = path12.join(destDir, "manifest.json");
-      if (!fs9.existsSync(manifestPath)) {
+      const manifestPath = path13.join(destDir, "manifest.json");
+      if (!fs10.existsSync(manifestPath)) {
         throw new Error(`No manifest.json found in ${moduleName}`);
       }
-      const raw = JSON.parse(fs9.readFileSync(manifestPath, "utf-8"));
+      const raw = JSON.parse(fs10.readFileSync(manifestPath, "utf-8"));
       if (type === "checks") {
         checkManifestSchema.parse(raw);
-        const entrypointPath = path12.join(destDir, raw.entrypoint);
-        if (!fs9.existsSync(entrypointPath)) {
-          fs9.rmSync(destDir, { recursive: true, force: true });
+        const entrypointPath = path13.join(destDir, raw.entrypoint);
+        if (!fs10.existsSync(entrypointPath)) {
+          fs10.rmSync(destDir, { recursive: true, force: true });
           throw new Error(`Check module "${moduleName}" declares entrypoint "${raw.entrypoint}" but file not found`);
         }
       } else if (type === "criteria") {
@@ -50482,13 +50569,13 @@ function moduleCommands(program3) {
     console.log(`\u2713 ${name} installed and locked`);
   });
   mod.command("remove <name>").description("Remove an installed module").action((name) => {
-    const arosDir = path13.join(process.cwd(), ".aros");
+    const arosDir = path14.join(process.cwd(), ".aros");
     const lock = readLockfile(arosDir);
     for (const [key, _entry] of Object.entries(lock.locked)) {
       if (!key.startsWith("policies/")) continue;
-      const policyManifestPath = path13.join(arosDir, "modules", key, "manifest.json");
-      if (!fs10.existsSync(policyManifestPath)) continue;
-      const policyManifest = JSON.parse(fs10.readFileSync(policyManifestPath, "utf-8"));
+      const policyManifestPath = path14.join(arosDir, "modules", key, "manifest.json");
+      if (!fs11.existsSync(policyManifestPath)) continue;
+      const policyManifest = JSON.parse(fs11.readFileSync(policyManifestPath, "utf-8"));
       const allDeps = [
         ...(policyManifest.requires?.checks ?? []).map((c) => `checks/${c}`),
         ...(policyManifest.requires?.criteria ?? []).map((c) => `criteria/${c}`)
@@ -50497,15 +50584,15 @@ function moduleCommands(program3) {
         console.warn(`\u26A0 Warning: policy "${key}" depends on "${name}"`);
       }
     }
-    const modDir = path13.join(arosDir, "modules", name);
-    if (fs10.existsSync(modDir)) {
-      fs10.rmSync(modDir, { recursive: true, force: true });
+    const modDir = path14.join(arosDir, "modules", name);
+    if (fs11.existsSync(modDir)) {
+      fs11.rmSync(modDir, { recursive: true, force: true });
     }
     unlockModule(arosDir, name);
     console.log(`\u2713 ${name} removed`);
   });
   mod.command("list").description("List installed modules").action(() => {
-    const arosDir = path13.join(process.cwd(), ".aros");
+    const arosDir = path14.join(process.cwd(), ".aros");
     const lock = readLockfile(arosDir);
     const entries = Object.entries(lock.locked);
     if (entries.length === 0) {
@@ -50518,7 +50605,7 @@ function moduleCommands(program3) {
   });
   mod.command("sync").description("Fetch all modules from lockfile").action(async () => {
     const projectDir = process.cwd();
-    const arosDir = path13.join(projectDir, ".aros");
+    const arosDir = path14.join(projectDir, ".aros");
     const lock = readLockfile(arosDir);
     const registry = readRegistry(arosDir);
     const entries = Object.entries(lock.locked);
@@ -50529,9 +50616,9 @@ function moduleCommands(program3) {
         console.log(`  \u2717 ${key} \u2014 source "${entry.source}" not configured`);
         continue;
       }
-      const destDir = path13.join(arosDir, "modules", key);
-      if (fs10.existsSync(destDir)) {
-        fs10.rmSync(destDir, { recursive: true, force: true });
+      const destDir = path14.join(arosDir, "modules", key);
+      if (fs11.existsSync(destDir)) {
+        fs11.rmSync(destDir, { recursive: true, force: true });
       }
       await fetchModuleFromGit(source.url, entry.path, entry.sha, destDir);
       if (key.startsWith("checks/")) {
@@ -50542,17 +50629,17 @@ function moduleCommands(program3) {
     console.log("Done.");
   });
   mod.command("check").description("Validate module dependencies").action(() => {
-    const arosDir = path13.join(process.cwd(), ".aros");
-    const modulesDir = path13.join(arosDir, "modules");
-    const checksDir = path13.join(modulesDir, "checks");
-    if (!fs10.existsSync(checksDir)) {
+    const arosDir = path14.join(process.cwd(), ".aros");
+    const modulesDir = path14.join(arosDir, "modules");
+    const checksDir = path14.join(modulesDir, "checks");
+    if (!fs11.existsSync(checksDir)) {
       console.log("No check modules installed.");
       return;
     }
-    for (const name of fs10.readdirSync(checksDir)) {
-      const manifestPath = path13.join(checksDir, name, "manifest.json");
-      if (!fs10.existsSync(manifestPath)) continue;
-      const manifest = JSON.parse(fs10.readFileSync(manifestPath, "utf-8"));
+    for (const name of fs11.readdirSync(checksDir)) {
+      const manifestPath = path14.join(checksDir, name, "manifest.json");
+      if (!fs11.existsSync(manifestPath)) continue;
+      const manifest = JSON.parse(fs11.readFileSync(manifestPath, "utf-8"));
       const deps = manifest.dependencies ?? {};
       let allGood = true;
       for (const bin of deps.binaries ?? []) {
@@ -50590,7 +50677,7 @@ function moduleCommands(program3) {
   });
   mod.command("update [name]").description("Check for and apply module updates").option("--all", "Update all modules without prompting").option("--yes", "Auto-confirm (for CI)").action(async (name, opts) => {
     const projectDir = process.cwd();
-    const arosDir = path13.join(projectDir, ".aros");
+    const arosDir = path14.join(projectDir, ".aros");
     const lock = readLockfile(arosDir);
     const registry = readRegistry(arosDir);
     const entries = name ? [[name, lock.locked[name]]].filter(([, e2]) => e2) : Object.entries(lock.locked);
@@ -50605,10 +50692,10 @@ function moduleCommands(program3) {
       try {
         const latestSha = await getLatestSha(source.url, source.branch, entry.path);
         if (latestSha !== entry.sha) {
-          const tmpDir = fs10.mkdtempSync(path13.join(os2.tmpdir(), "aros-update-"));
+          const tmpDir = fs11.mkdtempSync(path14.join(os2.tmpdir(), "aros-update-"));
           await fetchModuleFromGit(source.url, entry.path, latestSha, tmpDir);
-          const manifest = JSON.parse(fs10.readFileSync(path13.join(tmpDir, "manifest.json"), "utf-8"));
-          fs10.rmSync(tmpDir, { recursive: true, force: true });
+          const manifest = JSON.parse(fs11.readFileSync(path14.join(tmpDir, "manifest.json"), "utf-8"));
+          fs11.rmSync(tmpDir, { recursive: true, force: true });
           updates.push({ key, oldSha: entry.sha, newSha: latestSha, oldVersion: entry.version, newVersion: manifest.version ?? entry.version });
         }
       } catch {
@@ -50629,9 +50716,9 @@ Updates available:`);
       return;
     }
     for (const u2 of updates) {
-      const destDir = path13.join(arosDir, "modules", u2.key);
+      const destDir = path14.join(arosDir, "modules", u2.key);
       const source = registry.sources.find((s) => s.name === lock.locked[u2.key].source);
-      if (fs10.existsSync(destDir)) fs10.rmSync(destDir, { recursive: true, force: true });
+      if (fs11.existsSync(destDir)) fs11.rmSync(destDir, { recursive: true, force: true });
       await fetchModuleFromGit(source.url, lock.locked[u2.key].path, u2.newSha, destDir);
       if (u2.key.startsWith("checks/")) compileCheckModule(destDir);
       lock.locked[u2.key] = { ...lock.locked[u2.key], sha: u2.newSha, version: u2.newVersion, lockedAt: (/* @__PURE__ */ new Date()).toISOString() };
@@ -50643,14 +50730,14 @@ Updates available:`);
   });
   mod.command("rollback <name>").description("Restore a module to its previous version from lockfile git history").action(async (name) => {
     const projectDir = process.cwd();
-    const arosDir = path13.join(projectDir, ".aros");
+    const arosDir = path14.join(projectDir, ".aros");
     const lock = readLockfile(arosDir);
     if (!lock.locked[name]) {
       console.error(`Module "${name}" is not installed.`);
       process.exit(1);
     }
     try {
-      const lockPath = path13.join(arosDir, "lock.json");
+      const lockPath = path14.join(arosDir, "lock.json");
       const logOutput = execSync(
         `git log --oneline -10 -- "${lockPath}"`,
         { cwd: projectDir, encoding: "utf-8" }
@@ -50678,8 +50765,8 @@ Updates available:`);
         console.error(`Source "${prevEntry.source}" not configured.`);
         process.exit(1);
       }
-      const destDir = path13.join(arosDir, "modules", name);
-      if (fs10.existsSync(destDir)) fs10.rmSync(destDir, { recursive: true, force: true });
+      const destDir = path14.join(arosDir, "modules", name);
+      if (fs11.existsSync(destDir)) fs11.rmSync(destDir, { recursive: true, force: true });
       await fetchModuleFromGit(source.url, prevEntry.path, prevEntry.sha, destDir);
       if (name.startsWith("checks/")) compileCheckModule(destDir);
       const { lockModule: lockMod } = await Promise.resolve().then(() => (init_registry(), registry_exports));
@@ -50692,9 +50779,123 @@ Updates available:`);
   });
 }
 
+// src/onboard.ts
+import * as fs12 from "fs";
+import * as path15 from "path";
+import * as cp from "child_process";
+import { fileURLToPath } from "url";
+function loadRegistryPolicies(registryDir) {
+  const policiesDir = path15.join(registryDir, "policies");
+  if (!fs12.existsSync(policiesDir)) {
+    return [];
+  }
+  let entries;
+  try {
+    entries = fs12.readdirSync(policiesDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const results = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const manifestPath = path15.join(policiesDir, entry.name, "manifest.json");
+    if (!fs12.existsSync(manifestPath)) continue;
+    try {
+      const raw = fs12.readFileSync(manifestPath, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.name !== "string" || typeof parsed.description !== "string" || typeof parsed.policy !== "object" || parsed.policy === null) {
+        continue;
+      }
+      results.push({
+        name: parsed.name,
+        description: parsed.description,
+        usageHint: typeof parsed.usage_hint === "string" ? parsed.usage_hint : parsed.description,
+        policy: parsed.policy
+      });
+    } catch {
+    }
+  }
+  return results;
+}
+async function installPolicies(storage, selectedNames, registryPolicies) {
+  const policyMap = new Map(registryPolicies.map((r) => [r.name, r]));
+  const installed = [];
+  for (const name of selectedNames) {
+    const reg = policyMap.get(name);
+    if (!reg) continue;
+    await storage.writePolicy(name, reg.policy);
+    installed.push(name);
+  }
+  return installed;
+}
+function resolveRegistryDir() {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  const candidates = [
+    path15.resolve(here, "registry"),
+    // bundled: cli/dist/registry/
+    path15.resolve(here, "../../registry"),
+    // dev: cli/src/ → registry/
+    path15.resolve(here, "../registry"),
+    // alt bundled layout
+    path15.resolve(here, "../../../registry")
+    // monorepo root
+  ];
+  for (const candidate of candidates) {
+    if (fs12.existsSync(path15.join(candidate, "policies"))) {
+      return candidate;
+    }
+  }
+  return null;
+}
+function installDemoFiles(projectDir) {
+  const demoDir = path15.join(projectDir, ".aros", "demo");
+  if (!fs12.existsSync(demoDir)) {
+    fs12.mkdirSync(demoDir, { recursive: true });
+  }
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  const bundledDemo = path15.resolve(here, "demo");
+  if (fs12.existsSync(bundledDemo)) {
+    for (const name of ["image-one.svg", "image-two.svg"]) {
+      const src = path15.join(bundledDemo, name);
+      const dest = path15.join(demoDir, name);
+      if (fs12.existsSync(src) && !fs12.existsSync(dest)) {
+        fs12.copyFileSync(src, dest);
+      }
+    }
+  }
+}
+async function onboard(projectDir, storage, opts = {}) {
+  const result = {
+    installedPolicies: [],
+    suggestedPrompt: null,
+    suggestedExplanation: null
+  };
+  const registryDir = resolveRegistryDir();
+  if (registryDir) {
+    let registryPolicies;
+    try {
+      registryPolicies = loadRegistryPolicies(registryDir);
+    } catch {
+      registryPolicies = [];
+    }
+    if (registryPolicies.length > 0) {
+      const allNames = registryPolicies.map((p2) => p2.name);
+      try {
+        result.installedPolicies = await installPolicies(storage, allNames, registryPolicies);
+      } catch {
+        result.installedPolicies = [];
+      }
+    }
+  }
+  if (!opts.skipDemo) {
+    installDemoFiles(projectDir);
+  }
+  return result;
+}
+
 // src/index.ts
 var VERSION2 = "0.1.0";
-var mcpEntryPath = fileURLToPath(new URL("./mcp-entry.js", import.meta.url));
+var mcpEntryPath = fileURLToPath2(new URL("./mcp-entry.js", import.meta.url));
 function hasClaudeCli() {
   try {
     execSync2("claude --version", { stdio: "ignore" });
@@ -50714,30 +50915,30 @@ function configureMcp(projectDir) {
     } catch {
     }
   }
-  const mcpConfigPath = path14.join(projectDir, ".mcp.json");
+  const mcpConfigPath = path16.join(projectDir, ".mcp.json");
   const arosServer = {
     command: "node",
     args: [mcpEntryPath, "--project", projectDir]
   };
   let config = {};
-  if (fs11.existsSync(mcpConfigPath)) {
+  if (fs13.existsSync(mcpConfigPath)) {
     try {
-      config = JSON.parse(fs11.readFileSync(mcpConfigPath, "utf-8"));
+      config = JSON.parse(fs13.readFileSync(mcpConfigPath, "utf-8"));
     } catch {
     }
   }
   const servers = config.mcpServers ?? {};
   servers["aros"] = arosServer;
   config.mcpServers = servers;
-  fs11.writeFileSync(mcpConfigPath, JSON.stringify(config, null, 2) + "\n");
+  fs13.writeFileSync(mcpConfigPath, JSON.stringify(config, null, 2) + "\n");
 }
 function whitelistMcpTools(projectDir) {
-  const settingsDir = path14.join(projectDir, ".claude");
-  const settingsPath = path14.join(settingsDir, "settings.json");
+  const settingsDir = path16.join(projectDir, ".claude");
+  const settingsPath = path16.join(settingsDir, "settings.json");
   let settings = {};
-  if (fs11.existsSync(settingsPath)) {
+  if (fs13.existsSync(settingsPath)) {
     try {
-      settings = JSON.parse(fs11.readFileSync(settingsPath, "utf-8"));
+      settings = JSON.parse(fs13.readFileSync(settingsPath, "utf-8"));
     } catch {
     }
   }
@@ -50749,10 +50950,10 @@ function whitelistMcpTools(projectDir) {
   }
   permissions.allow = allow;
   settings.permissions = permissions;
-  if (!fs11.existsSync(settingsDir)) {
-    fs11.mkdirSync(settingsDir, { recursive: true });
+  if (!fs13.existsSync(settingsDir)) {
+    fs13.mkdirSync(settingsDir, { recursive: true });
   }
-  fs11.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+  fs13.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
 }
 var CLAUDE_MD_SECTION = `
 ## AROS Review Pipeline
@@ -50766,41 +50967,38 @@ This project uses AROS for AI deliverable review. When you produce work products
 The AROS server must be running for the MCP tools to work.
 `;
 function configureClaudeMd(projectDir) {
-  const claudeMdPath = path14.join(projectDir, "CLAUDE.md");
+  const claudeMdPath = path16.join(projectDir, "CLAUDE.md");
   let content = "";
-  if (fs11.existsSync(claudeMdPath)) {
-    content = fs11.readFileSync(claudeMdPath, "utf-8");
+  if (fs13.existsSync(claudeMdPath)) {
+    content = fs13.readFileSync(claudeMdPath, "utf-8");
     if (content.includes("AROS Review Pipeline")) return;
     content = content.trimEnd() + "\n";
   }
   content += CLAUDE_MD_SECTION;
-  fs11.writeFileSync(claudeMdPath, content);
+  fs13.writeFileSync(claudeMdPath, content);
 }
-async function firstRunSetup(projectDir) {
+async function firstRunSetup(projectDir, storage) {
   const result = { configured: false, whitelisted: false };
   console.log();
   console.log(
-    `  ${import_picocolors3.default.cyan(import_picocolors3.default.bold("First-time setup"))} ${import_picocolors3.default.dim("for")} ${import_picocolors3.default.bold(path14.basename(projectDir))}`
+    `  ${import_picocolors3.default.cyan(import_picocolors3.default.bold("Install AROS"))} ${import_picocolors3.default.dim("for")} ${import_picocolors3.default.bold(path16.basename(projectDir))}`
   );
   console.log();
-  const setupMcp = await ye({
-    message: "Register AROS MCP tools with Claude Code?",
+  console.log(import_picocolors3.default.dim("  This will:"));
+  console.log(import_picocolors3.default.dim("  \u2022 Register MCP tools with Claude Code"));
+  console.log(import_picocolors3.default.dim("  \u2022 Auto-approve AROS tool calls (skip permission prompts)"));
+  console.log();
+  const confirm = await ye({
+    message: "Install AROS into Claude Code?",
     initialValue: true
   });
-  if (pD(setupMcp)) return result;
-  if (setupMcp) {
-    configureMcp(projectDir);
-    configureClaudeMd(projectDir);
-    result.configured = true;
-    const whitelist = await ye({
-      message: "Auto-approve AROS tool calls? (skip permission prompts)",
-      initialValue: true
-    });
-    if (!pD(whitelist) && whitelist) {
-      whitelistMcpTools(projectDir);
-      result.whitelisted = true;
-    }
-  }
+  if (pD(confirm) || !confirm) return result;
+  configureMcp(projectDir);
+  configureClaudeMd(projectDir);
+  result.configured = true;
+  whitelistMcpTools(projectDir);
+  result.whitelisted = true;
+  await onboard(projectDir, storage);
   return result;
 }
 function openBrowser(url) {
@@ -50840,7 +51038,7 @@ function printBanner(port, projectDir, startMs, firstRun) {
   }
   console.log();
   if (firstRun) {
-    openBrowser(url);
+    openBrowser(url + "review?onboard");
   }
 }
 var program2 = new Command();
@@ -50848,27 +51046,23 @@ program2.name("aros").description("AROS \u2014 Agent Review Orchestration Servic
 program2.argument("[project]", "Project directory").action(async (projectArg) => {
   const startMs = performance.now();
   let projectDir;
-  projectDir = path14.resolve(projectArg ?? process.cwd());
+  projectDir = path16.resolve(projectArg ?? process.cwd());
   const storage = new Storage(projectDir);
   const wasInitialized = await storage.isInitialized();
   if (!wasInitialized) {
     await storage.init();
   }
   let firstRun = null;
-  const mcpConfigPath = path14.join(projectDir, ".mcp.json");
-  const hasClaudeSettings = fs11.existsSync(
-    path14.join(projectDir, ".claude", "settings.json")
-  );
-  if (!fs11.existsSync(mcpConfigPath) && !hasClaudeSettings) {
-    firstRun = await firstRunSetup(projectDir);
+  if (!wasInitialized) {
+    firstRun = await firstRunSetup(projectDir, storage);
   }
   await serve(projectDir, (port) => {
     printBanner(port, projectDir, startMs, firstRun);
   });
 });
 program2.command("mcp").description("Start MCP server (STDIO transport)").requiredOption("--project <dir>", "Project directory").action(async (opts) => {
-  const { spawn } = await import("child_process");
-  const child = spawn("node", [mcpEntryPath, "--project", opts.project], {
+  const { spawn: spawn2 } = await import("child_process");
+  const child = spawn2("node", [mcpEntryPath, "--project", opts.project], {
     stdio: "inherit"
     // Pass stdin/stdout through for JSON-RPC
   });

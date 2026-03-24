@@ -28,12 +28,14 @@ function isRichHumanConfig(
 
 interface PolicyEditorProps {
   policy: Policy;
+  onDeleted?: () => void;
 }
 
-export function PolicyEditor({ policy }: PolicyEditorProps) {
+export function PolicyEditor({ policy, onDeleted }: PolicyEditorProps) {
   const [showJson, setShowJson] = useState(false);
   const [rawJson, setRawJson] = useState(policy.raw_json ?? "");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +51,20 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
       setJsonError(null);
     } catch (e) {
       setJsonError(e instanceof Error ? e.message : "Invalid JSON");
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("Delete this policy? This cannot be undone if not committed to git.")) return;
+    setDeleting(true);
+    try {
+      await api.deletePolicy(policy.name);
+      toast.success("Policy deleted");
+      onDeleted?.();
+    } catch {
+      toast.error("Failed to delete policy");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -84,6 +100,15 @@ export function PolicyEditor({ policy }: PolicyEditorProps) {
             className="text-[10px] cursor-pointer"
           >
             {showJson ? "Visual" : "JSON"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="text-[10px] text-stage-rejected hover:text-stage-rejected cursor-pointer"
+          >
+            Delete
           </Button>
           <Button
             size="sm"

@@ -129,4 +129,5 @@ export const api = {
   async deleteCriterion(name: string): Promise<void> {
     await fetchJson(`/criteria/${encodeURIComponent(name)}`, { method: "DELETE" });
   },
+
 };

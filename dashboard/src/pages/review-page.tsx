@@ -30,6 +30,13 @@ export function ReviewPage() {
     }
   }, [routeId]);
 
+  // Auto-select first queue item when nothing is selected
+  useEffect(() => {
+    if (!state.selectedId && state.queue.length > 0) {
+      selectDeliverable(state.queue[0].id);
+    }
+  }, [state.queue, state.selectedId, selectDeliverable]);
+
   // Reset state when switching deliverables
   useEffect(() => {
     setInspectedFile(null);
@@ -179,7 +186,7 @@ export function ReviewPage() {
       </header>
 
       {/* ── Main content area ── */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 flex flex-col">
         {deliverable ? (
           <MediaViewer
             deliverable={deliverable}

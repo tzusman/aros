@@ -3232,8 +3232,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path6) {
-      let input = path6;
+    function removeDotSegments(path7) {
+      let input = path7;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -3432,8 +3432,8 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path6, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
+        const [path7, query] = wsComponent.resourceName.split("?");
+        wsComponent.path = path7 && path7 !== "/" ? path7 : void 0;
         wsComponent.query = query;
         wsComponent.resourceName = void 0;
       }
@@ -15396,11 +15396,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path6) {
-      if (!path6 || typeof path6 !== "string") {
+    function lookup(path7) {
+      if (!path7 || typeof path7 !== "string") {
         return false;
       }
-      var extension2 = extname2("x." + path6).toLowerCase().substr(1);
+      var extension2 = extname2("x." + path7).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -16843,17 +16843,17 @@ var init_path = __esm({
   "../node_modules/@anthropic-ai/sdk/internal/utils/path.mjs"() {
     "use strict";
     init_error();
-    createPathTagFunction = (pathEncoder = encodeURIPath) => function path6(statics, ...params) {
+    createPathTagFunction = (pathEncoder = encodeURIPath) => function path7(statics, ...params) {
       if (statics.length === 1)
         return statics[0];
       let postPath = false;
-      const path7 = statics.reduce((previousValue, currentValue, index) => {
+      const path8 = statics.reduce((previousValue, currentValue, index) => {
         if (/[?#]/.test(currentValue)) {
           postPath = true;
         }
         return previousValue + currentValue + (index === params.length ? "" : (postPath ? encodeURIComponent : pathEncoder)(String(params[index])));
       }, "");
-      const pathOnly = path7.split(/[?#]/, 1)[0];
+      const pathOnly = path8.split(/[?#]/, 1)[0];
       const invalidSegments = [];
       const invalidSegmentPattern = /(?<=^|\/)(?:\.|%2e){1,2}(?=\/|$)/gi;
       let match;
@@ -16872,10 +16872,10 @@ var init_path = __esm({
           return acc + spaces + arrows;
         }, "");
         throw new AnthropicError(`Path parameters result in path with invalid segments:
-${path7}
+${path8}
 ${underline}`);
       }
-      return path7;
+      return path8;
     };
     path2 = createPathTagFunction(encodeURIPath);
   }
@@ -19230,8 +19230,8 @@ var init_client = __esm({
       makeStatusError(status, error2, message, headers) {
         return APIError.generate(status, error2, message, headers);
       }
-      buildURL(path6, query) {
-        const url = isAbsoluteURL(path6) ? new URL(path6) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path6.startsWith("/") ? path6.slice(1) : path6));
+      buildURL(path7, query) {
+        const url = isAbsoluteURL(path7) ? new URL(path7) : new URL(this.baseURL + (this.baseURL.endsWith("/") && path7.startsWith("/") ? path7.slice(1) : path7));
         const defaultQuery = this.defaultQuery();
         if (!isEmptyObj(defaultQuery)) {
           query = { ...defaultQuery, ...query };
@@ -19262,24 +19262,24 @@ var init_client = __esm({
        */
       async prepareRequest(request, { url, options }) {
       }
-      get(path6, opts) {
-        return this.methodRequest("get", path6, opts);
+      get(path7, opts) {
+        return this.methodRequest("get", path7, opts);
       }
-      post(path6, opts) {
-        return this.methodRequest("post", path6, opts);
+      post(path7, opts) {
+        return this.methodRequest("post", path7, opts);
       }
-      patch(path6, opts) {
-        return this.methodRequest("patch", path6, opts);
+      patch(path7, opts) {
+        return this.methodRequest("patch", path7, opts);
       }
-      put(path6, opts) {
-        return this.methodRequest("put", path6, opts);
+      put(path7, opts) {
+        return this.methodRequest("put", path7, opts);
       }
-      delete(path6, opts) {
-        return this.methodRequest("delete", path6, opts);
+      delete(path7, opts) {
+        return this.methodRequest("delete", path7, opts);
       }
-      methodRequest(method, path6, opts) {
+      methodRequest(method, path7, opts) {
         return this.request(Promise.resolve(opts).then((opts2) => {
-          return { method, path: path6, ...opts2 };
+          return { method, path: path7, ...opts2 };
         }));
       }
       request(options, remainingRetries = null) {
@@ -19381,8 +19381,8 @@ var init_client = __esm({
         }));
         return { response, options, controller, requestLogID, retryOfRequestLogID, startTime };
       }
-      getAPIList(path6, Page2, opts) {
-        return this.requestAPIList(Page2, { method: "get", path: path6, ...opts });
+      getAPIList(path7, Page2, opts) {
+        return this.requestAPIList(Page2, { method: "get", path: path7, ...opts });
       }
       requestAPIList(Page2, options) {
         const request = this.makeRequest(options, null, void 0);
@@ -19469,8 +19469,8 @@ var init_client = __esm({
       }
       buildRequest(inputOptions, { retryCount = 0 } = {}) {
         const options = { ...inputOptions };
-        const { method, path: path6, query } = options;
-        const url = this.buildURL(path6, query);
+        const { method, path: path7, query } = options;
+        const url = this.buildURL(path7, query);
         if ("timeout" in options)
           validatePositiveInteger("timeout", options.timeout);
         options.timeout = options.timeout ?? this.timeout;
@@ -20086,8 +20086,8 @@ function getErrorMap() {
 
 // ../node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path6, errorMaps, issueData } = params;
-  const fullPath = [...path6, ...issueData.path || []];
+  const { data, path: path7, errorMaps, issueData } = params;
+  const fullPath = [...path7, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -20203,11 +20203,11 @@ var errorUtil;
 
 // ../node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path6, key) {
+  constructor(parent, value, path7, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path6;
+    this._path = path7;
     this._key = key;
   }
   get path() {
@@ -23844,10 +23844,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path6) {
-  if (!path6)
+function getElementAtPath(obj, path7) {
+  if (!path7)
     return obj;
-  return path6.reduce((acc, key) => acc?.[key], obj);
+  return path7.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -24167,11 +24167,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path6, issues) {
+function prefixIssues(path7, issues) {
   return issues.map((iss) => {
     var _a2;
     (_a2 = iss).path ?? (_a2.path = []);
-    iss.path.unshift(path6);
+    iss.path.unshift(path7);
     return iss;
   });
 }
@@ -34669,6 +34669,7 @@ var policyBody = external_exports.object({
 });
 var policyManifestSchema = baseManifest.extend({
   type: external_exports.literal("policy"),
+  usage_hint: external_exports.string().optional(),
   requires: external_exports.object({
     checks: external_exports.array(external_exports.string()).default([]),
     criteria: external_exports.array(external_exports.string()).default([])
@@ -35734,16 +35735,32 @@ function registerCompleteRevision(server, engine, reviewUrl) {
 }
 
 // ../mcp/dist/tools/list-policies.js
+import { readFile } from "fs/promises";
+import * as path6 from "path";
 function registerListPolicies(server, storage2) {
-  server.tool("list_policies", "List all available review policies. Policy names can be used when creating a review.", {}, async () => {
+  server.tool("list_policies", "List all installed review policies. Returns policy names, stages, and configuration. Call this before submit_deliverable to choose the right policy for your content.", {}, async () => {
     try {
       const names = await storage2.listPolicies();
       const policies = await Promise.all(names.map(async (name) => {
         const config2 = await storage2.readPolicy(name);
+        let usage_hint;
+        try {
+          if (/[/\\]|\.\./.test(name)) {
+            throw new Error(`Unsafe policy name: ${name}`);
+          }
+          const manifestPath = path6.join(storage2.projectDir, ".aros", "modules", "policies", name, "manifest.json");
+          const manifest = JSON.parse(await readFile(manifestPath, "utf-8"));
+          usage_hint = manifest.usage_hint;
+        } catch {
+        }
         return {
           name: config2.name,
+          usage_hint,
           stages: config2.stages,
-          max_revisions: config2.max_revisions
+          max_revisions: config2.max_revisions,
+          objective_checks: config2.objective?.checks?.map((c) => c.name) ?? [],
+          subjective_criteria: config2.subjective?.criteria?.map((c) => c.name) ?? [],
+          pass_threshold: config2.subjective?.pass_threshold ?? null
         };
       }));
       return {

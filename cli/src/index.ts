@@ -120,37 +120,39 @@ interface FirstRunResult {
   whitelisted: boolean;
 }
 
-async function firstRunSetup(projectDir: string): Promise<FirstRunResult> {
+async function firstRunSetup(
+  projectDir: string,
+  storage: Storage,
+): Promise<FirstRunResult> {
   const result: FirstRunResult = { configured: false, whitelisted: false };
 
   console.log();
   console.log(
-    `  ${pc.cyan(pc.bold("First-time setup"))} ${pc.dim("for")} ${pc.bold(path.basename(projectDir))}`
+    `  ${pc.cyan(pc.bold("Install AROS"))} ${pc.dim("for")} ${pc.bold(path.basename(projectDir))}`
   );
   console.log();
 
-  const setupMcp = await prompts.confirm({
-    message: "Register AROS MCP tools with Claude Code?",
+  console.log(pc.dim("  This will:"));
+  console.log(pc.dim("  • Register MCP tools with Claude Code"));
+  console.log(pc.dim("  • Auto-approve AROS tool calls (skip permission prompts)"));
+  console.log();
+
+  const confirm = await prompts.confirm({
+    message: "Install AROS into Claude Code?",
     initialValue: true,
   });
 
-  if (prompts.isCancel(setupMcp)) return result;
+  if (prompts.isCancel(confirm) || !confirm) return result;
 
-  if (setupMcp) {
-    configureMcp(projectDir);
-    configureClaudeMd(projectDir);
-    result.configured = true;
+  configureMcp(projectDir);
+  configureClaudeMd(projectDir);
+  result.configured = true;
 
-    const whitelist = await prompts.confirm({
-      message: "Auto-approve AROS tool calls? (skip permission prompts)",
-      initialValue: true,
-    });
+  whitelistMcpTools(projectDir);
+  result.whitelisted = true;
 
-    if (!prompts.isCancel(whitelist) && whitelist) {
-      whitelistMcpTools(projectDir);
-      result.whitelisted = true;
-    }
-  }
+  // Install policies and demo files
+  await onboard(projectDir, storage);
 
   return result;
 }
@@ -203,7 +205,7 @@ function printBanner(
   console.log();
 
   if (firstRun) {
-    openBrowser(url);
+    openBrowser(url + "review?onboard");
   }
 }
 
@@ -217,8 +219,7 @@ program
 // Default command: init (if needed) + serve
 program
   .argument("[project]", "Project directory")
-  .option("--no-onboard", "Skip smart policy onboarding on first run")
-  .action(async (projectArg: string | undefined, opts: { onboard: boolean }) => {
+  .action(async (projectArg: string | undefined) => {
     const startMs = performance.now();
     let projectDir: string;
 
@@ -231,20 +232,10 @@ program
       await storage.init();
     }
 
-    // Smart onboarding: recommend policies on first run
-    if (!wasInitialized && opts.onboard) {
-      await onboard(projectDir, storage);
-    }
-
-    // First-run setup: ask about MCP + whitelisting
+    // First-run setup: unified install prompt
     let firstRun: FirstRunResult | null = null;
-    const mcpConfigPath = path.join(projectDir, ".mcp.json");
-    const hasClaudeSettings = fs.existsSync(
-      path.join(projectDir, ".claude", "settings.json")
-    );
-
-    if (!fs.existsSync(mcpConfigPath) && !hasClaudeSettings) {
-      firstRun = await firstRunSetup(projectDir);
+    if (!wasInitialized) {
+      firstRun = await firstRunSetup(projectDir, storage);
     }
 
     await serve(projectDir, (port) => {

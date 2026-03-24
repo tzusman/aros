@@ -35,6 +35,11 @@ export default defineConfig([
       const dest = resolve(__dirname, "dist/registry/policies");
       mkdirSync(dest, { recursive: true });
       cpSync(src, dest, { recursive: true });
+
+      const demoSrc = resolve(__dirname, "../.aros/demo");
+      const demoDest = resolve(__dirname, "dist/demo");
+      mkdirSync(demoDest, { recursive: true });
+      cpSync(demoSrc, demoDest, { recursive: true });
     },
   },
   {
