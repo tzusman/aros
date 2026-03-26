@@ -153,6 +153,7 @@ export interface Deliverable extends DeliverableSummary {
   history: RevisionEntry[];
   files: DeliverableFile[] | null;
   folder_strategy: import("./constants.js").FolderStrategy | null;
+  feedback_chips?: FeedbackChip[];
 }
 
 // ---- Notification ----

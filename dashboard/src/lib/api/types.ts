@@ -26,6 +26,12 @@ export interface SubjectiveCriterion {
   rationale: string;
 }
 
+export interface FeedbackChip {
+  label: string;
+  category: string;
+  severity: "critical" | "major" | "minor";
+}
+
 export interface FeedbackIssue {
   category: string;
   description: string;
@@ -86,6 +92,7 @@ export interface Deliverable extends DeliverableSummary {
   history: RevisionEntry[];
   files: DeliverableFile[] | null;
   folder_strategy: "all_pass" | "select" | "rank" | "categorize" | null;
+  feedback_chips?: FeedbackChip[];
 }
 
 export interface DecisionPayload {

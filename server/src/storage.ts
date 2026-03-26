@@ -10,6 +10,7 @@ import type {
   ObjectiveCheck,
   SubjectiveCriterion,
   Feedback,
+  FeedbackChip,
   PolicyConfig,
   Stage,
   RevisionEntry,
@@ -539,6 +540,7 @@ export class Storage {
     const subjectiveResults = await this.readSubjectiveResults(id);
     const feedback = await this.readFeedback(id);
     const files = await this.listFiles(id);
+    const feedbackChips = await this.readFeedbackChips(meta.policy);
 
     // Attach preview URLs if base URL provided
     if (apiBaseUrl) {
@@ -588,6 +590,7 @@ export class Storage {
       history,
       files: files.length > 0 ? files : null,
       folder_strategy: meta.folder_strategy ?? null,
+      feedback_chips: feedbackChips.length > 0 ? feedbackChips : undefined,
     };
   }
 
@@ -605,6 +608,30 @@ export class Storage {
   async readPolicy(name: string): Promise<PolicyConfig> {
     const p = path.join(this.arosDir, "policies", `${name}.json`);
     return this.readJson<PolicyConfig>(p);
+  }
+
+  /**
+   * Read feedback_chips from the installed policy manifest.
+   * The full manifest (including feedback_chips) lives in
+   * .aros/modules/policies/{name}/manifest.json, while the
+   * stripped policy config lives in .aros/policies/{name}.json.
+   */
+  async readFeedbackChips(policyName: string): Promise<FeedbackChip[]> {
+    const manifestPath = path.join(
+      this.arosDir,
+      "modules",
+      "policies",
+      policyName,
+      "manifest.json"
+    );
+    if (!fs.existsSync(manifestPath)) return [];
+    try {
+      const manifest = this.readJson<Record<string, unknown>>(manifestPath);
+      const chips = manifest.feedback_chips;
+      return Array.isArray(chips) ? (chips as FeedbackChip[]) : [];
+    } catch {
+      return [];
+    }
   }
 
   async writePolicy(name: string, policy: PolicyConfig): Promise<void> {
