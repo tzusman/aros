@@ -28,6 +28,7 @@ export type {
 
 export {
   createReviewSchema,
+  feedbackIssueSchema,
   decisionPayloadSchema,
   policyObjectiveCheckSchema,
   policySubjectiveCriterionSchema,

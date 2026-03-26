@@ -29,9 +29,19 @@ export type CreateReview = z.infer<typeof createReviewSchema>;
 
 // ---- Decision ----
 
+export const feedbackIssueSchema = z.object({
+  category: z.string().min(1),
+  description: z.string().min(1),
+  severity: z.enum(FEEDBACK_SEVERITIES),
+  file: z.string().nullable().default(null),
+  location: z.string().default(""),
+  suggestion: z.string().default(""),
+});
+
 export const decisionPayloadSchema = z.object({
   decision: z.enum(DECISIONS),
   reason: z.string().optional(),
+  issues: z.array(feedbackIssueSchema).optional(),
 });
 export type DecisionPayload = z.infer<typeof decisionPayloadSchema>;
 

@@ -91,6 +91,14 @@ export interface Deliverable extends DeliverableSummary {
 export interface DecisionPayload {
   decision: Decision;
   reason?: string;
+  issues?: Array<{
+    category: string;
+    description: string;
+    severity: "critical" | "major" | "minor";
+    file?: string | null;
+    location?: string;
+    suggestion?: string;
+  }>;
 }
 
 // --- Pipeline ---

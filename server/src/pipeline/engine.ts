@@ -62,13 +62,22 @@ export class PipelineEngine {
     const status = await this.storage.readStatus(id);
     const now = new Date().toISOString();
 
+    const hasFeedback = payload.reason || (payload.issues && payload.issues.length > 0);
+
     if (payload.decision === "approved") {
-      if (payload.reason) {
+      if (hasFeedback) {
         const feedback: Feedback = {
           stage: "human",
           decision: "approved",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? "",
+          })),
           reviewer: "human",
           timestamp: now,
         };
@@ -87,13 +96,20 @@ export class PipelineEngine {
       });
       await this.notify(id, "approved");
     } else if (payload.decision === "rejected") {
-      // Write feedback if reason provided
-      if (payload.reason) {
+      // Write feedback if reason or issues provided
+      if (hasFeedback) {
         const feedback: Feedback = {
           stage: "human",
           decision: "rejected",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? "",
+          })),
           reviewer: "human",
           timestamp: now,
         };
@@ -112,13 +128,20 @@ export class PipelineEngine {
       await this.notify(id, "rejected");
       await this.storage.moveToTerminal(id, "rejected");
     } else if (payload.decision === "revision_requested") {
-      // Write feedback if reason provided
-      if (payload.reason) {
+      // Write feedback if reason or issues provided
+      if (hasFeedback) {
         const feedback: Feedback = {
           stage: "human",
           decision: "revision_requested",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? "",
+          })),
           reviewer: "human",
           timestamp: now,
         };
