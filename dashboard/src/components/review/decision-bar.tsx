@@ -5,7 +5,8 @@ import { useApp } from "@/context/app-context";
 import { toast } from "sonner";
 import { Check, RotateCcw, X, MousePointer, CheckCircle2, XCircle, RotateCcw as Revise } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Decision } from "@/lib/api/types";
+import { FeedbackChips, type SelectedChip } from "./feedback-chips";
+import type { Decision, DecisionPayload, FeedbackChip } from "@/lib/api/types";
 import type { FileAnnotations } from "@/pages/review-page";
 
 interface DecisionBarProps {
@@ -14,6 +15,7 @@ interface DecisionBarProps {
   annotations: FileAnnotations;
   folderStrategy?: string | null;
   selectedFile?: string | null;
+  feedbackChips?: FeedbackChip[];
 }
 
 interface SubmittedState {
@@ -44,20 +46,32 @@ export function DecisionBar({
   annotations,
   folderStrategy,
   selectedFile,
+  feedbackChips = [],
 }: DecisionBarProps) {
   const { dispatch } = useApp();
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<SubmittedState | null>(null);
+  const [selectedChips, setSelectedChips] = useState<SelectedChip[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isSelectMode = folderStrategy === "select";
   const hasReason = reason.trim().length > 0;
+  const canSubmitNegative = hasReason || selectedChips.length > 0;
+
+  function toggleChip(chip: FeedbackChip) {
+    setSelectedChips((prev) => {
+      const exists = prev.find((c) => c.category === chip.category);
+      if (exists) return prev.filter((c) => c.category !== chip.category);
+      return [...prev, { category: chip.category, label: chip.label, severity: chip.severity }];
+    });
+  }
 
   // Reset submitted state when deliverable changes
   useEffect(() => {
     setSubmitted(null);
     setReason("");
+    setSelectedChips([]);
   }, [deliverableId]);
 
   // Auto-resize textarea
@@ -69,7 +83,7 @@ export function DecisionBar({
   }, [reason]);
 
   async function submit(decision: Decision) {
-    if (decision !== "approved" && !hasReason) return;
+    if (decision !== "approved" && !canSubmitNegative) return;
     setSubmitting(true);
 
     let fullReason: string | undefined;
@@ -85,10 +99,20 @@ export function DecisionBar({
       fullReason = parts.join("\n\n") || undefined;
     }
 
+    let issues: DecisionPayload["issues"] | undefined;
+    if (selectedChips.length > 0) {
+      issues = selectedChips.map((chip) => ({
+        category: chip.category,
+        description: chip.label,
+        severity: chip.severity,
+      }));
+    }
+
     try {
       await api.submitDecision(deliverableId, {
         decision,
         reason: fullReason,
+        issues,
       });
 
       // Show read-only state
@@ -146,10 +170,13 @@ export function DecisionBar({
   return <ReviewModeBar
     reason={reason}
     onReasonChange={setReason}
-    hasReason={hasReason}
+    canSubmitNegative={canSubmitNegative}
     submitting={submitting}
     textareaRef={textareaRef}
     onSubmit={submit}
+    chips={feedbackChips}
+    selectedChips={selectedChips}
+    onToggleChip={toggleChip}
   />;
 }
 
@@ -213,17 +240,23 @@ function SubmittedBar({
 function ReviewModeBar({
   reason,
   onReasonChange,
-  hasReason,
+  canSubmitNegative,
   submitting,
   textareaRef,
   onSubmit,
+  chips,
+  selectedChips,
+  onToggleChip,
 }: {
   reason: string;
   onReasonChange: (v: string) => void;
-  hasReason: boolean;
+  canSubmitNegative: boolean;
   submitting: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit: (d: Decision) => void;
+  chips: FeedbackChip[];
+  selectedChips: SelectedChip[];
+  onToggleChip: (chip: FeedbackChip) => void;
 }) {
   return (
     <div className="border-t border-border bg-background shrink-0">
@@ -245,16 +278,27 @@ function ReviewModeBar({
         />
       </div>
 
+      {chips.length > 0 && (
+        <div className="px-3 pb-1.5">
+          <FeedbackChips
+            chips={chips}
+            selected={selectedChips}
+            onToggle={onToggleChip}
+            disabled={submitting}
+          />
+        </div>
+      )}
+
       <div className="flex items-center justify-between px-3 pb-2.5">
         <div className="flex gap-1.5">
           <Button
             size="sm"
             variant="ghost"
             onClick={() => onSubmit("rejected")}
-            disabled={submitting || !hasReason}
+            disabled={submitting || !canSubmitNegative}
             className={cn(
               "h-7 px-2.5 text-xs cursor-pointer gap-1 transition-colors",
-              hasReason
+              canSubmitNegative
                 ? "text-stage-rejected hover:bg-stage-rejected/10"
                 : "text-text-muted"
             )}
@@ -266,10 +310,10 @@ function ReviewModeBar({
             size="sm"
             variant="ghost"
             onClick={() => onSubmit("revision_requested")}
-            disabled={submitting || !hasReason}
+            disabled={submitting || !canSubmitNegative}
             className={cn(
               "h-7 px-2.5 text-xs cursor-pointer gap-1 transition-colors",
-              hasReason
+              canSubmitNegative
                 ? "text-stage-revising hover:bg-stage-revising/10"
                 : "text-text-muted"
             )}
@@ -277,7 +321,7 @@ function ReviewModeBar({
             <RotateCcw className="w-3 h-3" />
             Request revision
           </Button>
-          {!hasReason && (
+          {!canSubmitNegative && (
             <span className="text-[10px] text-text-muted self-center ml-1">
               Requires feedback
             </span>

@@ -4,6 +4,7 @@ import { useApp } from "@/context/app-context";
 import { useKeyboard } from "@/lib/hooks/use-keyboard";
 import { useTheme } from "@/lib/hooks/use-theme";
 import { DecisionBar } from "@/components/review/decision-bar";
+import { DecisionSummary } from "@/components/review/decision-summary";
 import { MediaViewer } from "@/components/review/media-viewer";
 import { ScoreBadge } from "@/components/review/score-badge";
 import { ChevronLeft, ChevronRight, Moon, Sun, Monitor } from "lucide-react";
@@ -190,16 +191,19 @@ export function ReviewPage() {
       {/* ── Main content area ── */}
       <div className="flex-1 min-h-0 flex flex-col">
         {deliverable ? (
-          <MediaViewer
-            deliverable={deliverable}
-            inspectedFile={inspectedFile}
-            onInspect={setInspectedFile}
-            annotations={annotations}
-            onSetVerdict={setFileVerdict}
-            onSetNote={setFileNote}
-            selectedFile={selectedFile}
-            onSelectFile={deliverable.folder_strategy === "select" ? setSelectedFile : undefined}
-          />
+          <>
+            <DecisionSummary deliverable={deliverable} />
+            <MediaViewer
+              deliverable={deliverable}
+              inspectedFile={inspectedFile}
+              onInspect={setInspectedFile}
+              annotations={annotations}
+              onSetVerdict={setFileVerdict}
+              onSetNote={setFileNote}
+              selectedFile={selectedFile}
+              onSelectFile={deliverable.folder_strategy === "select" ? setSelectedFile : undefined}
+            />
+          </>
         ) : (
           <div className="h-full flex items-center justify-center">
             <p className="text-sm text-text-muted">
@@ -217,6 +221,7 @@ export function ReviewPage() {
           annotations={annotations}
           folderStrategy={deliverable.folder_strategy}
           selectedFile={selectedFile}
+          feedbackChips={deliverable.feedback_chips ?? []}
         />
       )}
     </div>
