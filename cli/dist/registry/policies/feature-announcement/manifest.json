@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Changelog entries, release notes, what's new posts, product updates",
   "usage_hint": "Use for changelog entries, release notes, \"what's new\" posts, and product update communications. The audience already uses the product — this tells them what changed and why it matters.",
+  "feedback_chips": [
+    { "label": "Inaccurate details", "category": "technical-accuracy", "severity": "critical" },
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "major" },
+    { "label": "Hard to read", "category": "readability", "severity": "major" },
+    { "label": "Poor structure", "category": "information-architecture", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "major" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "major" },
+    { "label": "Too generic", "category": "originality", "severity": "minor" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

@@ -1,6 +1,6 @@
 export { STAGES, FOLDER_STRATEGIES, DECISIONS, SEVERITIES, FEEDBACK_SEVERITIES, FILE_STATUSES, SSE_EVENT_TYPES, CONNECTION_STATUSES, NOTIFICATION_EVENTS, } from "./constants.js";
 export type { Stage, FolderStrategy, Decision, Severity, FeedbackSeverity, FileStatus, SSEEventType, ConnectionStatus, NotificationEvent, } from "./constants.js";
-export { createReviewSchema, decisionPayloadSchema, policyObjectiveCheckSchema, policySubjectiveCriterionSchema, policyConfigSchema, addFileSchema, listReviewsFilterSchema, } from "./validators.js";
+export { createReviewSchema, feedbackIssueSchema, decisionPayloadSchema, policyObjectiveCheckSchema, policySubjectiveCriterionSchema, policyConfigSchema, addFileSchema, listReviewsFilterSchema, } from "./validators.js";
 export type { CreateReview, DecisionPayload, PolicyConfigInput, AddFileInput, ListReviewsFilter, } from "./validators.js";
 export interface ObjectiveCheck {
     name: string;
@@ -16,6 +16,11 @@ export interface SubjectiveCriterion {
     weight: number;
     scale: number;
     rationale: string;
+}
+export interface FeedbackChip {
+    label: string;
+    category: string;
+    severity: "critical" | "major" | "minor";
 }
 export interface FeedbackIssue {
     file: string | null;

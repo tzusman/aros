@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Marketing emails, newsletters, promotional drip sequences",
   "usage_hint": "Use for promotional emails, newsletters, drip sequences, and any marketing email designed to drive clicks or purchases. Not for transactional emails or onboarding sequences.",
+  "feedback_chips": [
+    { "label": "Poor email craft", "category": "email-craft", "severity": "major" },
+    { "label": "Won't convert", "category": "conversion-potential", "severity": "major" },
+    { "label": "Weak CTA", "category": "call-to-action", "severity": "major" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "major" },
+    { "label": "Hard to read", "category": "readability", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "major" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" },
+    { "label": "Fake urgency", "category": "urgency-authenticity", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

@@ -4,6 +4,15 @@
   "version": "1.0.0",
   "description": "Customer support replies via email, chat, or ticket system",
   "usage_hint": "Use for customer support replies — email, chat, or ticket responses to a customer who has a question or problem. Speed and resolution matter more than polish.",
+  "feedback_chips": [
+    { "label": "Doesn't resolve issue", "category": "response-resolution", "severity": "critical" },
+    { "label": "Not empathetic", "category": "emotional-intelligence", "severity": "major" },
+    { "label": "Inaccurate info", "category": "technical-accuracy", "severity": "critical" },
+    { "label": "Hard to follow", "category": "readability", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "major" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "major" },
+    { "label": "Not accessible", "category": "accessibility-inclusivity", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

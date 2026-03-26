@@ -102,6 +102,82 @@ describe("policyManifestSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts feedback_chips", () => {
+    const result = policyManifestSchema.safeParse({
+      name: "blog-post",
+      type: "policy",
+      version: "1.0.0",
+      description: "Blog post review",
+      feedback_chips: [
+        { label: "Improve tone", category: "tone", severity: "major" },
+        { label: "Fix accuracy", category: "accuracy", severity: "critical" },
+        { label: "Too long", category: "length", severity: "minor" },
+      ],
+      requires: { checks: ["word-count"], criteria: ["tone-alignment"] },
+      policy: {
+        name: "blog-post",
+        stages: ["objective", "subjective", "human"],
+        max_revisions: 3,
+        objective: {
+          checks: [{ name: "word-count", config: { min: 800 }, severity: "blocking" }],
+          fail_threshold: 1,
+        },
+        subjective: {
+          criteria: [{ name: "tone-alignment", weight: 3, scale: 10 }],
+          pass_threshold: 7.0,
+        },
+        human: { required: true },
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.feedback_chips).toHaveLength(3);
+      expect(result.data.feedback_chips![0]).toEqual({
+        label: "Improve tone",
+        category: "tone",
+        severity: "major",
+      });
+    }
+  });
+
+  it("rejects feedback_chips with invalid severity", () => {
+    const result = policyManifestSchema.safeParse({
+      name: "blog-post",
+      type: "policy",
+      version: "1.0.0",
+      description: "Blog post review",
+      feedback_chips: [
+        { label: "Bad", category: "bad", severity: "invalid" },
+      ],
+      requires: { checks: [], criteria: [] },
+      policy: {
+        name: "blog-post",
+        stages: ["objective"],
+        max_revisions: 3,
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("allows omitting feedback_chips", () => {
+    const result = policyManifestSchema.safeParse({
+      name: "blog-post",
+      type: "policy",
+      version: "1.0.0",
+      description: "Blog post review",
+      requires: { checks: ["word-count"], criteria: ["tone-alignment"] },
+      policy: {
+        name: "blog-post",
+        stages: ["objective"],
+        max_revisions: 3,
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.feedback_chips).toBeUndefined();
+    }
+  });
+
   it("rejects policy name mismatch", () => {
     const result = policyManifestSchema.safeParse({
       name: "blog-post",

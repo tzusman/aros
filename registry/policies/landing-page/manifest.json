@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Website landing pages, product pages, feature pages",
   "usage_hint": "Use for any web page designed to convert visitors — product pages, pricing pages, signup pages, feature pages, and campaign landing pages. Not for blog posts or help docs.",
+  "feedback_chips": [
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "major" },
+    { "label": "Won't convert", "category": "conversion-potential", "severity": "major" },
+    { "label": "Weak CTA", "category": "call-to-action", "severity": "major" },
+    { "label": "Hard to read", "category": "readability", "severity": "major" },
+    { "label": "Poor structure", "category": "information-architecture", "severity": "major" },
+    { "label": "Weak SEO", "category": "seo-effectiveness", "severity": "major" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" },
+    { "label": "Fake urgency", "category": "urgency-authenticity", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

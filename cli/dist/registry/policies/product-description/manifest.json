@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Product listings for own site, Amazon, Shopify, and other marketplaces",
   "usage_hint": "Use for product listings on your own site or marketplaces (Amazon, Shopify, Etsy). Covers the title, description, bullet points, and specs. Not for feature announcements or changelogs.",
+  "feedback_chips": [
+    { "label": "Poor marketplace fit", "category": "marketplace-optimization", "severity": "major" },
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "major" },
+    { "label": "Inaccurate specs", "category": "technical-accuracy", "severity": "critical" },
+    { "label": "Won't convert", "category": "conversion-potential", "severity": "major" },
+    { "label": "Hard to scan", "category": "readability", "severity": "major" },
+    { "label": "Weak SEO", "category": "seo-effectiveness", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "minor" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

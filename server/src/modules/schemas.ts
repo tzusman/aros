@@ -90,9 +90,16 @@ const policyBody = z.object({
   human: z.object({ required: z.boolean() }).optional(),
 });
 
+const feedbackChip = z.object({
+  label: z.string().min(1),
+  category: z.string().min(1),
+  severity: z.enum(["critical", "major", "minor"]),
+});
+
 export const policyManifestSchema = baseManifest.extend({
   type: z.literal("policy"),
   usage_hint: z.string().optional(),
+  feedback_chips: z.array(feedbackChip).optional(),
   requires: z.object({
     checks: z.array(z.string()).default([]),
     criteria: z.array(z.string()).default([]),

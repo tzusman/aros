@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "SEO blog posts, thought leadership, editorial content, guides, tutorials",
   "usage_hint": "Use for blog posts, SEO articles, thought leadership, guides, and editorial content. The goal is organic discovery and audience building, not direct conversion or support.",
+  "feedback_chips": [
+    { "label": "Not original enough", "category": "originality", "severity": "major" },
+    { "label": "Hard to read", "category": "readability", "severity": "major" },
+    { "label": "Weak SEO", "category": "seo-effectiveness", "severity": "major" },
+    { "label": "Poor structure", "category": "information-architecture", "severity": "major" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "major" },
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "minor" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

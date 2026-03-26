@@ -4,6 +4,12 @@
   "version": "1.0.0",
   "description": "Logos, banners, icons, design system elements, brand collateral",
   "usage_hint": "Use for core brand materials — logos, icons, banners, design system elements, brand collateral. These are foundational assets that other content is built on. Not for social graphics or ad creatives.",
+  "feedback_chips": [
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "critical" },
+    { "label": "Poor hierarchy", "category": "visual-hierarchy", "severity": "major" },
+    { "label": "Weak visual", "category": "visual-impact", "severity": "major" },
+    { "label": "Not accessible", "category": "accessibility-inclusivity", "severity": "major" }
+  ],
   "requires": {
     "checks": [
       "format-check",

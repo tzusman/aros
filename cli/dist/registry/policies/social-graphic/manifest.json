@@ -4,6 +4,14 @@
   "version": "1.0.0",
   "description": "Organic social images, story graphics, cover photos, event banners",
   "usage_hint": "Use for social media images, story graphics, cover photos, and event banners. These are visual assets designed for social feeds. If there's accompanying ad copy and it's a paid placement, use social-ad instead.",
+  "feedback_chips": [
+    { "label": "Weak visual", "category": "visual-impact", "severity": "major" },
+    { "label": "Poor hierarchy", "category": "visual-hierarchy", "severity": "major" },
+    { "label": "Not platform native", "category": "platform-native-craft", "severity": "major" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" },
+    { "label": "Wrong platform fit", "category": "platform-fit", "severity": "critical" },
+    { "label": "No clear CTA", "category": "call-to-action", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "format-check",

@@ -4,6 +4,14 @@
   "version": "1.0.0",
   "description": "Organic social media content — text posts, carousels, stories (non-paid)",
   "usage_hint": "Use for organic (non-paid) social media content — text posts, carousels, stories, threads. If the post is a paid ad, use social-ad. If you're submitting just the graphic with no caption, use social-graphic.",
+  "feedback_chips": [
+    { "label": "Not platform native", "category": "platform-native-craft", "severity": "major" },
+    { "label": "Not original", "category": "originality", "severity": "major" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "major" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" },
+    { "label": "Weak visual", "category": "visual-impact", "severity": "major" },
+    { "label": "No clear CTA", "category": "call-to-action", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

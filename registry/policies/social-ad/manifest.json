@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Paid ad creatives across Instagram, Facebook, LinkedIn, Twitter/X",
   "usage_hint": "Use for paid ad creatives across any social platform (Instagram, Facebook, LinkedIn, Twitter/X). Covers both the visual asset and accompanying ad copy. If the content is organic (not paid), use social-post instead.",
+  "feedback_chips": [
+    { "label": "Weak visual", "category": "visual-impact", "severity": "major" },
+    { "label": "Won't convert", "category": "conversion-potential", "severity": "major" },
+    { "label": "Non-compliant", "category": "ad-compliance", "severity": "critical" },
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "major" },
+    { "label": "Weak CTA", "category": "call-to-action", "severity": "major" },
+    { "label": "Not platform native", "category": "platform-native-craft", "severity": "major" },
+    { "label": "Wrong platform fit", "category": "platform-fit", "severity": "critical" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" }
+  ],
   "requires": {
     "checks": [
       "format-check",

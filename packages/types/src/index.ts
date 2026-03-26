@@ -66,6 +66,12 @@ export interface SubjectiveCriterion {
 
 // ---- Feedback ----
 
+export interface FeedbackChip {
+  label: string;
+  category: string;
+  severity: "critical" | "major" | "minor";
+}
+
 export interface FeedbackIssue {
   file: string | null;
   location: string;

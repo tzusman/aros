@@ -4,6 +4,15 @@
   "version": "1.0.0",
   "description": "Help center documentation, FAQs, knowledge base articles, how-to guides",
   "usage_hint": "Use for help center docs, FAQs, knowledge base articles, troubleshooting guides, and how-to content. The reader has a specific problem to solve. Not for blog posts or marketing tutorials.",
+  "feedback_chips": [
+    { "label": "Doesn't resolve issue", "category": "response-resolution", "severity": "critical" },
+    { "label": "Hard to follow", "category": "readability", "severity": "major" },
+    { "label": "Inaccurate info", "category": "technical-accuracy", "severity": "critical" },
+    { "label": "Poor structure", "category": "information-architecture", "severity": "major" },
+    { "label": "Not accessible", "category": "accessibility-inclusivity", "severity": "major" },
+    { "label": "Weak SEO", "category": "seo-effectiveness", "severity": "minor" },
+    { "label": "Tone mismatch", "category": "tone-alignment", "severity": "minor" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",

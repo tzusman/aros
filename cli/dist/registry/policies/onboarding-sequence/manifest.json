@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "Welcome emails, activation sequences, getting-started guides, first-run experiences",
   "usage_hint": "Use for welcome emails, activation sequences, getting-started guides, and first-run in-app messages. The audience just signed up and needs to reach their first value moment.",
+  "feedback_chips": [
+    { "label": "Not welcoming", "category": "emotional-intelligence", "severity": "major" },
+    { "label": "Lacks empathy", "category": "customer-empathy", "severity": "major" },
+    { "label": "Unclear next step", "category": "call-to-action", "severity": "major" },
+    { "label": "Poor email craft", "category": "email-craft", "severity": "major" },
+    { "label": "Hard to read", "category": "readability", "severity": "major" },
+    { "label": "Unclear value prop", "category": "value-proposition-clarity", "severity": "major" },
+    { "label": "Poor sequence flow", "category": "information-architecture", "severity": "major" },
+    { "label": "Off-brand", "category": "brand-consistency", "severity": "major" }
+  ],
   "requires": {
     "checks": [
       "placeholder-detection",
