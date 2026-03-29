@@ -95,7 +95,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         case "deliverable:decided": {
-          dispatch({ type: "REMOVE_FROM_QUEUE", id: data.id as string });
+          const decidedId = data.id as string;
+          // If we decided this item, keep it in queue for navigation
+          // (it's already in decidedMap). Otherwise remove it.
+          if (selectedIdRef.current !== decidedId) {
+            dispatch({ type: "REMOVE_FROM_QUEUE", id: decidedId });
+          }
           refreshCounts();
           break;
         }

@@ -24,6 +24,7 @@ interface MediaViewerProps {
   onSetNote: (filename: string, note: string) => void;
   selectedFile?: string | null;
   onSelectFile?: (filename: string | null) => void;
+  readonly?: boolean;
 }
 
 export function MediaViewer({
@@ -35,6 +36,7 @@ export function MediaViewer({
   onSetNote,
   selectedFile,
   onSelectFile,
+  readonly,
 }: MediaViewerProps) {
   const isMediaFolder =
     deliverable.is_folder &&
@@ -60,6 +62,7 @@ export function MediaViewer({
         onSetNote={onSetNote}
         selectedFile={selectedFile}
         onSelectFile={onSelectFile}
+        readonly={readonly}
       />
     );
   }
@@ -242,6 +245,7 @@ function MediaFolderViewer({
   onSetNote,
   selectedFile,
   onSelectFile,
+  readonly,
 }: {
   files: DeliverableFile[];
   inspectedFile: string | null;
@@ -251,6 +255,7 @@ function MediaFolderViewer({
   onSetNote: (filename: string, note: string) => void;
   selectedFile?: string | null;
   onSelectFile?: (filename: string | null) => void;
+  readonly?: boolean;
 }) {
   const [mode, setMode] = useState<"default" | "single">(
     inspectedFile ? "single" : "default"
@@ -318,14 +323,18 @@ function MediaFolderViewer({
           </div>
 
           <div className="flex items-center gap-2">
-            <FileActions
-              filename={file.filename}
-              annotations={annotations}
-              onSetVerdict={onSetVerdict}
-              onSetNote={onSetNote}
-              layout="inline"
-            />
-            <div className="w-px h-4 bg-border" />
+            {!readonly && (
+              <>
+                <FileActions
+                  filename={file.filename}
+                  annotations={annotations}
+                  onSetVerdict={onSetVerdict}
+                  onSetNote={onSetNote}
+                  layout="inline"
+                />
+                <div className="w-px h-4 bg-border" />
+              </>
+            )}
             <div className="flex gap-0.5">
               <button
                 disabled={idx <= 0}
@@ -404,15 +413,17 @@ function MediaFolderViewer({
           <div className="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
             {file.filename}
           </div>
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <FileActions
-              filename={file.filename}
-              annotations={annotations}
-              onSetVerdict={onSetVerdict}
-              onSetNote={onSetNote}
-              layout="overlay"
-            />
-          </div>
+          {!readonly && (
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <FileActions
+                filename={file.filename}
+                annotations={annotations}
+                onSetVerdict={onSetVerdict}
+                onSetNote={onSetNote}
+                layout="overlay"
+              />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -576,8 +587,8 @@ function MediaFolderViewer({
                 </span>
               </div>
 
-              {/* Action buttons on hover (review mode only) */}
-              {!isSelectMode && (
+              {/* Action buttons on hover (review mode only, not readonly) */}
+              {!isSelectMode && !readonly && (
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <FileActions
                     filename={file.filename}

@@ -1,14 +1,24 @@
 import type {
   DeliverableSummary,
   Deliverable,
+  Decision,
   PipelineCounts,
   ConnectionStatus,
 } from "@/lib/api/types";
+import type { FileAnnotations } from "@/pages/review-page";
+
+export interface DecidedInfo {
+  decision: Decision;
+  selectedFile: string | null;
+  reason: string;
+  annotations: FileAnnotations;
+}
 
 export interface AppState {
   queue: DeliverableSummary[];
   selectedId: string | null;
   selectedDeliverable: Deliverable | null;
+  decidedMap: Record<string, DecidedInfo>;
   pipelineCounts: PipelineCounts;
   connectionStatus: ConnectionStatus;
   loading: boolean;
@@ -18,6 +28,7 @@ export const initialState: AppState = {
   queue: [],
   selectedId: null,
   selectedDeliverable: null,
+  decidedMap: {},
   pipelineCounts: {
     in_progress: 0,
     pending_human: 0,
@@ -35,6 +46,7 @@ export type AppAction =
   | { type: "SET_SELECTED_DETAIL"; deliverable: Deliverable }
   | { type: "REMOVE_FROM_QUEUE"; id: string }
   | { type: "ADD_TO_QUEUE"; item: DeliverableSummary }
+  | { type: "MARK_DECIDED"; id: string; info: DecidedInfo }
   | { type: "SET_PIPELINE_COUNTS"; counts: PipelineCounts }
   | { type: "SET_CONNECTION_STATUS"; status: ConnectionStatus }
   | { type: "SET_LOADING"; loading: boolean };
@@ -65,9 +77,23 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case "ADD_TO_QUEUE":
+    case "ADD_TO_QUEUE": {
       if (state.queue.some((d) => d.id === action.item.id)) return state;
-      return { ...state, queue: [...state.queue, action.item] };
+      const newQueue = [...state.queue, action.item];
+      // Auto-select new arrival if current item is decided
+      const autoSelect = state.selectedId && state.decidedMap[state.selectedId];
+      return {
+        ...state,
+        queue: newQueue,
+        ...(autoSelect ? { selectedId: action.item.id, selectedDeliverable: null } : {}),
+      };
+    }
+
+    case "MARK_DECIDED":
+      return {
+        ...state,
+        decidedMap: { ...state.decidedMap, [action.id]: action.info },
+      };
 
     case "SET_PIPELINE_COUNTS":
       return { ...state, pipelineCounts: action.counts };

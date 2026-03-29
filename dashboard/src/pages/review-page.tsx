@@ -39,11 +39,17 @@ export function ReviewPage() {
     }
   }, [state.queue, state.selectedId, selectDeliverable]);
 
-  // Reset state when switching deliverables
+  // Reset state when switching deliverables; restore decided state if navigating back
+  const decidedInfo = state.selectedId ? state.decidedMap[state.selectedId] ?? null : null;
   useEffect(() => {
     setInspectedFile(null);
-    setSelectedFile(null);
-    setAnnotations({});
+    if (decidedInfo) {
+      setSelectedFile(decidedInfo.selectedFile);
+      setAnnotations(decidedInfo.annotations);
+    } else {
+      setSelectedFile(null);
+      setAnnotations({});
+    }
   }, [state.selectedId]);
 
   const queueIndex = state.queue.findIndex((d) => d.id === state.selectedId);
@@ -201,7 +207,8 @@ export function ReviewPage() {
               onSetVerdict={setFileVerdict}
               onSetNote={setFileNote}
               selectedFile={selectedFile}
-              onSelectFile={deliverable.folder_strategy === "select" ? setSelectedFile : undefined}
+              onSelectFile={!decidedInfo && deliverable.folder_strategy === "select" ? setSelectedFile : undefined}
+              readonly={!!decidedInfo}
             />
           </>
         ) : (
@@ -222,6 +229,7 @@ export function ReviewPage() {
           folderStrategy={deliverable.folder_strategy}
           selectedFile={selectedFile}
           feedbackChips={deliverable.feedback_chips ?? []}
+          decidedInfo={decidedInfo}
         />
       )}
     </div>

@@ -4,7 +4,7 @@ import { useApp } from "@/context/app-context";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 
-const STARTER_PROMPT = `Submit the two SVGs from @.aros/demo to AROS for review`;
+const STARTER_PROMPT = `Submit the two SVGs from @.aros/demo to AROS for selection`;
 
 export function OnboardingModal() {
   const { state, selectDeliverable } = useApp();

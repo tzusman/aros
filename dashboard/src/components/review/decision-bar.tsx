@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { FeedbackChips, type SelectedChip } from "./feedback-chips";
 import type { Decision, DecisionPayload, FeedbackChip } from "@/lib/api/types";
 import type { FileAnnotations } from "@/pages/review-page";
+import type { DecidedInfo } from "@/context/app-reducer";
 
 interface DecisionBarProps {
   deliverableId: string;
@@ -16,6 +17,7 @@ interface DecisionBarProps {
   folderStrategy?: string | null;
   selectedFile?: string | null;
   feedbackChips?: FeedbackChip[];
+  decidedInfo?: DecidedInfo | null;
 }
 
 interface SubmittedState {
@@ -47,6 +49,7 @@ export function DecisionBar({
   folderStrategy,
   selectedFile,
   feedbackChips = [],
+  decidedInfo,
 }: DecisionBarProps) {
   const { dispatch } = useApp();
   const [reason, setReason] = useState("");
@@ -67,9 +70,17 @@ export function DecisionBar({
     });
   }
 
-  // Reset submitted state when deliverable changes
+  // Reset form state when deliverable changes; restore decided state if navigating back
   useEffect(() => {
-    setSubmitted(null);
+    if (decidedInfo) {
+      setSubmitted({
+        decision: decidedInfo.decision,
+        selectedFile: decidedInfo.selectedFile,
+        reason: decidedInfo.reason,
+      });
+    } else {
+      setSubmitted(null);
+    }
     setReason("");
     setSelectedChips([]);
   }, [deliverableId]);
@@ -115,17 +126,19 @@ export function DecisionBar({
         issues,
       });
 
-      // Show read-only state
-      setSubmitted({
+      const submittedState = {
         decision,
         selectedFile: selectedFile ?? null,
         reason: reason.trim(),
-      });
+      };
+      setSubmitted(submittedState);
 
-      // Remove from queue after a brief pause so user sees the result
-      setTimeout(() => {
-        dispatch({ type: "REMOVE_FROM_QUEUE", id: deliverableId });
-      }, 2000);
+      // Keep in queue for navigation — mark as decided
+      dispatch({
+        type: "MARK_DECIDED",
+        id: deliverableId,
+        info: { ...submittedState, annotations },
+      });
 
       toast.success(
         decision === "approved"
