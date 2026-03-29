@@ -50271,7 +50271,7 @@ function createServer(options) {
   if (dashboardDir) {
     app.use(import_express6.default.static(dashboardDir));
     app.get("/{*splat}", (_req, res) => {
-      res.sendFile(path7.join(dashboardDir, "index.html"));
+      res.sendFile("index.html", { root: dashboardDir });
     });
   }
   app.use(errorHandler);

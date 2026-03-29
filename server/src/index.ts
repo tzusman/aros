@@ -85,7 +85,7 @@ export function createServer(options: ServerOptions) {
     app.use(express.static(dashboardDir));
     // Fallback for SPA routing (Express 5 requires named param)
     app.get("/{*splat}", (_req, res) => {
-      res.sendFile(path.join(dashboardDir, "index.html"));
+      res.sendFile("index.html", { root: dashboardDir });
     });
   }
 
