@@ -54,7 +54,7 @@ export function OnboardingModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background border border-border rounded-lg w-[560px] max-h-[90vh] flex flex-col shadow-lg mx-4">
+      <div className="bg-background border border-border rounded-lg w-[680px] max-h-[90vh] flex flex-col shadow-lg mx-4">
         <div className="px-6 pt-6 pb-2">
           <h3 className="text-base font-semibold">Paste this into Claude Code</h3>
         </div>
