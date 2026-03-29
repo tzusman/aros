@@ -429,15 +429,17 @@ function MediaFolderViewer({
     );
   }
 
-  // ── 2 images: comparison slider (only in review mode, not select) ──
-  if (mediaFiles.length === 2 && !onSelectFile) {
+  // Select mode: active picking OR readonly with a selection made
+  const isSelectMode = !!onSelectFile || (readonly && selectedFile != null);
+
+  // ── 2 images: comparison slider (review mode only, never for select) ──
+  if (mediaFiles.length === 2 && !isSelectMode) {
     return (
       <CompareView files={[mediaFiles[0], mediaFiles[1]]} />
     );
   }
 
-  // ── Grid view (2+ in select mode, 3+ in review mode) ──
-  const isSelectMode = !!onSelectFile;
+  // ── Grid view ──
 
   // Adaptive columns: fewer items = larger cards
   const gridCols = isSelectMode
@@ -466,6 +468,7 @@ function MediaFolderViewer({
           const verdict = ann?.verdict ?? null;
           const note = ann?.note ?? "";
           const isSelected = isSelectMode && selectedFile === file.filename;
+          const isRejected = isSelectMode && readonly && selectedFile != null && !isSelected;
 
           return (
             <div
@@ -473,28 +476,35 @@ function MediaFolderViewer({
               className={cn(
                 "group relative rounded-lg overflow-hidden bg-surface transition-all flex flex-col",
                 isSelectMode && "min-h-0",
-                isSelected
-                  ? "ring-2 ring-active shadow-lg shadow-active/15"
-                  : verdict === "approved"
-                    ? "ring-2 ring-stage-approved shadow-md shadow-stage-approved/10"
-                    : verdict === "disqualified"
-                      ? "ring-2 ring-stage-rejected"
-                      : "ring-1 ring-border hover:ring-text-muted"
+                // Selected: bold green ring + glow
+                isSelected && readonly
+                  ? "ring-3 ring-stage-approved shadow-xl shadow-stage-approved/20"
+                  : isSelected
+                    ? "ring-2 ring-active shadow-lg shadow-active/15"
+                    // Rejected (readonly, not selected): dim border
+                    : isRejected
+                      ? "ring-1 ring-border opacity-40 grayscale-[40%]"
+                      : verdict === "approved"
+                        ? "ring-2 ring-stage-approved shadow-md shadow-stage-approved/10"
+                        : verdict === "disqualified"
+                          ? "ring-2 ring-stage-rejected"
+                          : "ring-1 ring-border hover:ring-text-muted"
               )}
             >
               {/* Clickable image area */}
               <button
                 onClick={() => {
-                  if (isSelectMode) {
+                  if (onSelectFile) {
                     onSelectFile(isSelected ? null : file.filename);
-                  } else {
+                  } else if (!readonly) {
                     onInspect(file.filename);
                     setMode("single");
                   }
                 }}
                 className={cn(
-                  "w-full cursor-pointer transition-opacity flex items-center justify-center",
+                  "w-full transition-opacity flex items-center justify-center",
                   isSelectMode ? "flex-1 min-h-0 p-3" : "p-2",
+                  readonly ? "cursor-default" : "cursor-pointer",
                   verdict === "disqualified" && "opacity-25"
                 )}
               >
@@ -525,19 +535,34 @@ function MediaFolderViewer({
                 )}
               </button>
 
-              {/* Select-mode radio indicator */}
-              {isSelectMode && (
+              {/* Select-mode indicator */}
+              {isSelectMode && (isSelected || !readonly) && (
                 <div
                   className={cn(
-                    "absolute top-3 right-3 w-6 h-6 rounded-full border-2 flex items-center justify-center z-10 transition-all",
-                    isSelected
-                      ? "bg-active border-active"
-                      : "bg-black/20 border-white/50"
+                    "absolute top-3 right-3 rounded-full border-2 flex items-center justify-center z-10 transition-all",
+                    isSelected && readonly
+                      ? "w-8 h-8 bg-stage-approved border-stage-approved"
+                      : isSelected
+                        ? "w-6 h-6 bg-active border-active"
+                        : "w-6 h-6 bg-black/20 border-white/50"
                   )}
                 >
                   {isSelected && (
-                    <Check className="w-3.5 h-3.5 text-white" />
+                    <Check className={cn(
+                      "text-white",
+                      readonly ? "w-5 h-5" : "w-3.5 h-3.5"
+                    )} />
                   )}
+                </div>
+              )}
+
+              {/* "Selected" badge — readonly only */}
+              {isSelected && readonly && (
+                <div className="absolute top-3 left-3 z-10">
+                  <div className="bg-stage-approved text-white text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-md flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    Selected
+                  </div>
                 </div>
               )}
 
@@ -581,8 +606,16 @@ function MediaFolderViewer({
               )}
 
               {/* Filename label */}
-              <div className="px-2 py-1.5 border-t border-border shrink-0">
-                <span className="text-[10px] text-text-secondary truncate block">
+              <div className={cn(
+                "px-2 py-1.5 border-t border-border shrink-0",
+                isSelected && readonly && "bg-stage-approved/5"
+              )}>
+                <span className={cn(
+                  "text-[10px] truncate block",
+                  isSelected && readonly
+                    ? "text-stage-approved font-semibold"
+                    : "text-text-secondary"
+                )}>
                   {file.filename}
                 </span>
               </div>
