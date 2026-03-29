@@ -1,9 +1,19 @@
 {
   "name": "aros",
+  "version": "0.1.0",
+  "description": "AROS — Agent Review Orchestration Service",
   "private": true,
   "type": "module",
   "bin": {
     "aros": "cli/dist/index.js"
+  },
+  "files": [
+    "cli/dist",
+    "dashboard/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tzusman/aros.git"
   },
   "scripts": {
     "build": "pnpm -r build",
