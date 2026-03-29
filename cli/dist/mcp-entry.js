@@ -34193,6 +34193,7 @@ var Storage = class {
     const subjectiveResults = await this.readSubjectiveResults(id);
     const feedback = await this.readFeedback(id);
     const files = await this.listFiles(id);
+    const feedbackChips = await this.readFeedbackChips(meta.policy);
     if (apiBaseUrl) {
       for (const f of files) {
         f.preview_url = `${apiBaseUrl}/api/deliverables/${id}/files/${encodeURIComponent(f.filename)}`;
@@ -34235,7 +34236,8 @@ var Storage = class {
       feedback,
       history,
       files: files.length > 0 ? files : null,
-      folder_strategy: meta.folder_strategy ?? null
+      folder_strategy: meta.folder_strategy ?? null,
+      feedback_chips: feedbackChips.length > 0 ? feedbackChips : void 0
     };
   }
   // ---- Policies ----
@@ -34249,6 +34251,24 @@ var Storage = class {
   async readPolicy(name) {
     const p = path.join(this.arosDir, "policies", `${name}.json`);
     return this.readJson(p);
+  }
+  /**
+   * Read feedback_chips from the installed policy manifest.
+   * The full manifest (including feedback_chips) lives in
+   * .aros/modules/policies/{name}/manifest.json, while the
+   * stripped policy config lives in .aros/policies/{name}.json.
+   */
+  async readFeedbackChips(policyName) {
+    const manifestPath = path.join(this.arosDir, "modules", "policies", policyName, "manifest.json");
+    if (!fs.existsSync(manifestPath))
+      return [];
+    try {
+      const manifest = this.readJson(manifestPath);
+      const chips = manifest.feedback_chips;
+      return Array.isArray(chips) ? chips : [];
+    } catch {
+      return [];
+    }
   }
   async writePolicy(name, policy) {
     const policiesDir = path.join(this.arosDir, "policies");
@@ -34667,9 +34687,15 @@ var policyBody = external_exports.object({
   }).optional(),
   human: external_exports.object({ required: external_exports.boolean() }).optional()
 });
+var feedbackChip = external_exports.object({
+  label: external_exports.string().min(1),
+  category: external_exports.string().min(1),
+  severity: external_exports.enum(["critical", "major", "minor"])
+});
 var policyManifestSchema = baseManifest.extend({
   type: external_exports.literal("policy"),
   usage_hint: external_exports.string().optional(),
+  feedback_chips: external_exports.array(feedbackChip).optional(),
   requires: external_exports.object({
     checks: external_exports.array(external_exports.string()).default([]),
     criteria: external_exports.array(external_exports.string()).default([])
@@ -34780,13 +34806,21 @@ var PipelineEngine = class {
     const meta = await this.storage.readMeta(id);
     const status = await this.storage.readStatus(id);
     const now = (/* @__PURE__ */ new Date()).toISOString();
+    const hasFeedback = payload.reason || payload.issues && payload.issues.length > 0;
     if (payload.decision === "approved") {
-      if (payload.reason) {
+      if (hasFeedback) {
         const feedback = {
           stage: "human",
           decision: "approved",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? ""
+          })),
           reviewer: "human",
           timestamp: now
         };
@@ -34805,12 +34839,19 @@ var PipelineEngine = class {
       });
       await this.notify(id, "approved");
     } else if (payload.decision === "rejected") {
-      if (payload.reason) {
+      if (hasFeedback) {
         const feedback = {
           stage: "human",
           decision: "rejected",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? ""
+          })),
           reviewer: "human",
           timestamp: now
         };
@@ -34829,12 +34870,19 @@ var PipelineEngine = class {
       await this.notify(id, "rejected");
       await this.storage.moveToTerminal(id, "rejected");
     } else if (payload.decision === "revision_requested") {
-      if (payload.reason) {
+      if (hasFeedback) {
         const feedback = {
           stage: "human",
           decision: "revision_requested",
-          summary: payload.reason,
-          issues: [],
+          summary: payload.reason ?? "",
+          issues: (payload.issues ?? []).map((i) => ({
+            file: i.file ?? null,
+            location: i.location ?? "",
+            category: i.category,
+            severity: i.severity,
+            description: i.description,
+            suggestion: i.suggestion ?? ""
+          })),
           reviewer: "human",
           timestamp: now
         };

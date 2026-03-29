@@ -105,6 +105,10 @@ export async function fetchModuleFromGit(
   );
   fs.mkdirSync(destDir, { recursive: true });
 
+  const tmpExtract = path.join(
+    os.tmpdir(),
+    `aros-extract-${Date.now()}`
+  );
   try {
     await exec(
       "git",
@@ -112,15 +116,11 @@ export async function fetchModuleFromGit(
       { cwd: localRepo }
     );
 
-    const depth = modulePath.split("/").length;
-    await exec("tar", [
-      "-xf",
-      tmpArchive,
-      "-C",
-      destDir,
-      `--strip-components=${depth}`,
-    ]);
+    fs.mkdirSync(tmpExtract, { recursive: true });
+    await exec("tar", ["-xf", tmpArchive, "-C", tmpExtract]);
+    fs.cpSync(path.join(tmpExtract, modulePath), destDir, { recursive: true });
   } finally {
     if (fs.existsSync(tmpArchive)) fs.unlinkSync(tmpArchive);
+    fs.rmSync(tmpExtract, { recursive: true, force: true });
   }
 }
